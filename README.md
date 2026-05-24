@@ -56,18 +56,23 @@ cp site/.env.example site/.env
 
 ## Deploy
 
-- **Site** — `.github/workflows/deploy-site.yml` runs `wrangler deploy` on
-  push to `main` when `site/**` or `nyuchi-docs-search/**` changes. Ships as a
-  Cloudflare Worker with [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/);
-  no Pages, no Vercel. Live at `https://nyuchi-docs.nyuchi.workers.dev`.
-  Custom domain `docs.nyuchi.com` is attached via the Workers custom-domain
-  API in a separate cutover step (apex still points at the legacy
-  Mintlify-on-Vercel deployment until then).
-- **Worker** — `.github/workflows/deploy-shamwari-docs-ai.yml` runs
-  `wrangler deploy` on push to `main` whenever `shamwari-docs-ai/**` changes.
-  Crawl, chunk, embed, retrieve, and generate are handled by Cloudflare
-  **AI Search**. See [`shamwari-docs-ai/README.md`](./shamwari-docs-ai/README.md)
-  for the per-corpus AI Search instance setup (managed via REST API).
+Both workers in this repo deploy via **Cloudflare Workers Builds** — the
+[Cloudflare GitHub App](https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/github-integration/)
+is connected to `nyuchi/nyuchi-docs` with one trigger per worker (root
+directory points at the worker package). No GitHub Actions deploy workflow,
+no `CLOUDFLARE_API_TOKEN` repo secret.
+
+- **`nyuchi-docs` (site)** — root `site/`, ships as a Cloudflare Worker with
+  [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/).
+  Live at `https://nyuchi-docs.nyuchi.workers.dev`. Custom domain
+  `docs.nyuchi.com` is attached via the Workers custom-domain API in a
+  separate cutover step (apex still points at the legacy Mintlify-on-Vercel
+  deployment until then).
+- **`shamwari-docs-ai`** — root `shamwari-docs-ai/`, thin proxy in front of
+  Cloudflare **AI Search**. Live at
+  `https://shamwari-docs-ai.nyuchi.workers.dev`. See
+  [`shamwari-docs-ai/README.md`](./shamwari-docs-ai/README.md) for the
+  per-corpus AI Search instance setup (managed via REST API).
 
 ## Why pnpm workspace
 
