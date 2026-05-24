@@ -8,7 +8,7 @@ This repo is a **pnpm workspace** with three packages:
 
 | Package                | Path                  | What it does                                                                              |
 | ---------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
-| `site`                 | `site/`               | The Astro + [Starlight](https://starlight.astro.build) docs site itself.                  |
+| `site`                 | `site/`               | The Astro + [Starlight](https://starlight.astro.build) docs site itself. Ships as a Cloudflare Worker with Static Assets. |
 | `nyuchi-docs-search`   | `nyuchi-docs-search/` | Publishable npm package: cmdk-style search modal + Ask-AI tab for Starlight sites.        |
 | `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker — thin proxy in front of Cloudflare AI Search instances.                |
 
@@ -56,8 +56,13 @@ cp site/.env.example site/.env
 
 ## Deploy
 
-- **Site** — built by the existing CI workflow (`.github/workflows/build.yml`)
-  and shipped by the docs-site host (Cloudflare Pages / Vercel).
+- **Site** — `.github/workflows/deploy-site.yml` runs `wrangler deploy` on
+  push to `main` when `site/**` or `nyuchi-docs-search/**` changes. Ships as a
+  Cloudflare Worker with [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/);
+  no Pages, no Vercel. Live at `https://nyuchi-docs.nyuchi.workers.dev`.
+  Custom domain `docs.nyuchi.com` is attached via the Workers custom-domain
+  API in a separate cutover step (apex still points at the legacy
+  Mintlify-on-Vercel deployment until then).
 - **Worker** — `.github/workflows/deploy-shamwari-docs-ai.yml` runs
   `wrangler deploy` on push to `main` whenever `shamwari-docs-ai/**` changes.
   Crawl, chunk, embed, retrieve, and generate are handled by Cloudflare
