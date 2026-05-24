@@ -57,9 +57,10 @@ That's it. Press `⌘K` / `Ctrl+K` to open the modal.
 - **Search tab** (default) — instant fuzzy results from the built-in Pagefind
   index that Starlight already produces. Title, breadcrumb, snippet, full
   keyboard navigation (`↑` `↓` `Enter` `Esc`).
-- **Ask AI tab** — streamed chat answers grounded in your docs, with numbered
-  inline citations linking back to the page. Powered by Cloudflare Workers AI
-  through an AI Gateway, with retrieval from a Vectorize index.
+- **Ask AI tab** — chat answers grounded in your docs, with numbered inline
+  citations linking back to the page. Powered by Cloudflare AI Search
+  (managed crawl + chunk + embed + retrieve + generate, routed through the
+  shared `shamwari` AI Gateway for observability).
 
 ## Manual component usage
 
