@@ -1,0 +1,35 @@
+---
+title: Weather API
+description: Reserved namespace for the upcoming weather and forecast surface.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `/v1/weather` namespace is reserved for the climate and forecast surface—per-location nowcast, alerts, and seasonal outlooks. The upstream provider has not yet been selected, so only a status endpoint is live today.
+
+**Base path:** `/v1/weather`
+
+## Endpoints
+
+| Method | Path | Auth | Status today |
+|--------|------|------|---------------|
+| `GET` | `/v1/weather/status` | Public | Always live. Reports `configured: false`. |
+| `GET` | `/v1/weather/forecast` | Public | Returns **HTTP 501** until the backend is provisioned. |
+
+## Check namespace status
+
+```bash
+curl https://api.nyuchi.com/v1/weather/status
+```
+
+```json
+{
+  "configured": false,
+  "namespace": "/v1/weather",
+  "detail": "weather backend not yet provisioned"
+}
+```
+
+<Aside type="note">
+  Build clients against `/v1/weather/forecast` today and they will start returning data when the backend is wired up. No route changes are planned.
+</Aside>

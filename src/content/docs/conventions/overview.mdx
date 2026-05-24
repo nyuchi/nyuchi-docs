@@ -1,0 +1,52 @@
+---
+title: Conventions overview
+description: PR doctrine, commit doctrine, and repo-naming rules for Nyuchi.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+  This section is a stub. Treat it as a TODO list, not a reference.
+</Aside>
+
+Every Nyuchi repo follows the same rules for how change is proposed, named,
+landed, and named. This section is the canonical write-up — when a PR template
+or a `CONTRIBUTING.md` is unclear, this is the tiebreaker.
+
+## What needs to land here
+
+### Pull-request doctrine
+
+- One PR = one reviewable idea. No drive-by changes.
+- The required PR-description shape (Summary / Test plan / Risk).
+- When to request review, when to land on green, when to wait for a human.
+- Stacked PRs: the model and the tooling we use.
+- Never squash on merge — the per-commit history is the audit trail.
+
+### Commit doctrine
+
+- Imperative subject, ≤ 72 chars.
+- Conventional-style prefixes we honour (`feat:`, `fix:`, `chore:`, `docs:`,
+  `refactor:`, `test:`, `ci:`, `build:`).
+- Body explains *why*, not *what*.
+- Signed-off (`Signed-off-by:`) on contributions from outside the org.
+- No co-author trailer for tool runs — call out tooling in the body instead.
+
+### Repo-naming rules
+
+- Nyuchi-owned repos live under `github.com/nyuchi`.
+- Bundu Foundation projects live under `github.com/bundu-labs`.
+- Suffixes are reserved:
+  - `-platform` — a customer-facing application.
+  - `-tools` — internal CLIs and SDKs.
+  - `-docs` — the Starlight-published documentation surface.
+  - `-skills` — Claude Code skill libraries.
+  - `-portal` — an org-internal admin surface.
+- Public repos are `kebab-case`; private internal repos can use `snake_case`
+  if they're scripts only.
+
+## Cross-links (once content lands)
+
+- [`bundu-labs/bundu-docs`](https://github.com/bundu-labs/bundu-docs) — the
+  Bundu side of the same doctrine.
+- The org-wide `.github/` repo — PR / issue templates.

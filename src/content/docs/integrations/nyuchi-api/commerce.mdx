@@ -1,0 +1,83 @@
+---
+title: Commerce API
+description: Endpoints for BushTrade products, businesses, offers, inquiries, and scam reports.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The commerce namespace exposes the BushTrade product surface—local businesses, products and offers, buyer inquiries, and scam reports. It is backed by the `mukoko_bushtrade_db` Supabase project.
+
+Use these endpoints when building consumer or partner experiences that browse listings, accept inquiries, or surface trust signals.
+
+**Base path:** `/v1/commerce`
+
+## Endpoints
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| `GET` | `/v1/commerce/products` | Optional | List products. Supports `business_id`, `limit`, `offset`. |
+| `GET` | `/v1/commerce/products/{product_id}` | Optional | Fetch a single product. |
+| `POST` | `/v1/commerce/products` | Required | Create a product owned by the caller. |
+| `GET` | `/v1/commerce/businesses` | Optional | List local businesses. |
+| `GET` | `/v1/commerce/businesses/{business_id}` | Optional | Fetch a single business. |
+| `GET` | `/v1/commerce/offers` | Optional | List offers. Supports `product_id`. |
+| `POST` | `/v1/commerce/inquiries` | Required | Send an inquiry against a product or business. |
+| `POST` | `/v1/commerce/scam-reports` | Required | Report a product, business, or offer for review. |
+
+## List products
+
+```bash
+curl "https://api.nyuchi.com/v1/commerce/products?limit=20"
+```
+
+```json
+{
+  "data": [
+    { "id": "p_01", "name": "Honey 500g", "price": 4.5, "currency": "USD", "business_id": "b_42" }
+  ],
+  "count": 1
+}
+```
+
+## Create a product
+
+```bash
+curl -X POST https://api.nyuchi.com/v1/commerce/products \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Honey 500g",
+    "description": "Wild forest honey, harvested in Mashonaland.",
+    "price": 4.5,
+    "currency": "USD",
+    "business_id": "b_42"
+  }'
+```
+
+The caller's identity is recorded as `created_by` automatically.
+
+## Submit an inquiry
+
+Inquiries always belong to the authenticated person.
+
+```bash
+curl -X POST https://api.nyuchi.com/v1/commerce/inquiries \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "product_id": "p_01", "message": "Do you ship to Bulawayo?" }'
+```
+
+## Report a scam
+
+`target_type` must be `product`, `business`, or `offer`. The reporter is recorded automatically.
+
+```bash
+curl -X POST https://api.nyuchi.com/v1/commerce/scam-reports \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "target_type": "product", "target_id": "p_01", "reason": "Listed at impossible price." }'
+```
+
+<Aside type="caution">
+  Row-level security is currently disabled on `commerce.*` tables. The router enforces auth in code today; database policies will replace that enforcement before public release. Treat write endpoints as authenticated-only and do not expose service keys to clients.
+</Aside>

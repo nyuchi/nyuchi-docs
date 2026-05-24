@@ -1,0 +1,74 @@
+---
+title: API overview
+description: The versioned /v1 gateway, product namespaces, and how to call the Nyuchi API from your own code.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Nyuchi API is a single versioned HTTP gateway that fans out across multiple Supabase-backed product databases. Every endpoint lives under a `/v1/<product>/*` namespace, so you can scale, isolate, and meter each product independently while keeping one base URL and one access token.
+
+## Base URL
+
+| Environment | URL |
+|-------------|-----|
+| Production  | `https://api.nyuchi.com` |
+| Legacy host | `https://api.mukoko.com` |
+
+<Aside type="note">
+  The legacy `/api/*` prefix no longer resolves. If you are upgrading from an earlier client, repoint every request from `/api/...` to `/v1/...`.
+</Aside>
+
+## Product namespaces
+
+Each namespace is backed by its own database. Endpoints in a namespace return `503 Service Unavailable` when the underlying database is not configured for the current deployment, so you can detect availability with a single health check.
+
+| Namespace | Purpose |
+|-----------|---------|
+| `/v1/auth`, `/v1/identity` | Sign-in, session, and person records |
+| `/v1/family`, `/v1/organization` | Household and org membership |
+| `/v1/places`, `/v1/events`, `/v1/directory` | Locations, calendar, and listings |
+| `/v1/content`, `/v1/media`, `/v1/search` | Articles, uploads, and search |
+| `/v1/travel`, `/v1/applications`, `/v1/ubuntu` | Travel bookings, applications, community |
+| `/v1/pipeline`, `/v1/dashboard`, `/v1/api-keys` | Internal tooling, dashboards, developer keys |
+| `/v1/commerce` | Products, offers, reviews, and inquiries |
+| `/v1/pay/wallet`, `/v1/pay/tokens`, `/v1/pay/gateway` | Wallets, tokens, and gateway transactions |
+| `/v1/logistics` | Booking drafts and shipments |
+| `/v1/lingo` | Translation and language tooling |
+| `/v1/news` | News articles and feeds |
+| `/v1/weather` | Weather forecasts (reserved) |
+
+## Authentication
+
+Every authenticated request must send a platform JWT in the `Authorization` header:
+
+```bash
+curl https://api.nyuchi.com/v1/auth/me \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+The JWT is minted by `/v1/auth/workos/*` (primary) or `/v1/auth/otp/*` (transitional Stytch fallback). Both flows produce the same HS256 token, so downstream code does not need to know which method the user signed in with. See [Authentication](/platform/api/authentication) for the full sign-in flow.
+
+Some namespaces are gated by an additional shared secret:
+
+- `/v1/admin/*` and `/v1/pay/*` require an `X-Internal-Key` header that matches the backend's `INTERNAL_API_KEY`. These endpoints are intended for first-party staff tooling and never reach the public browser. If you need a customer-facing wallet or admin surface, call the console's same-origin proxy routes instead—they inject the key on the server side.
+
+## Detecting unconfigured products
+
+A `503` response from a product namespace means the database for that product is not configured in the current environment. The error body has a stable shape so you can branch on it without parsing prose:
+
+```json
+{
+  "detail": "commerce database is not configured"
+}
+```
+
+Treat `503` as "feature flag off" rather than as a transient outage—retrying will not help until the operator wires up the database.
+
+## Health and discovery
+
+`GET /` returns a manifest of every configured product database, the API version, and the public release name (`Nyuchi API`, currently `v4.1.0`). Use it as a lightweight readiness probe and as a way to discover which namespaces are live in the environment you are targeting.
+
+## Next steps
+
+- Sign in with [WorkOS AuthKit](/platform/api/authentication) and exchange the result for a platform JWT.
+- Review [security and rate limits](/platform/api/security) before you go to production.

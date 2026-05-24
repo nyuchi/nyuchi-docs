@@ -1,0 +1,62 @@
+---
+title: Logistics API
+description: Vehicle, booking, driver, and location endpoints backed by nyuchi_logistics_db.
+---
+The logistics namespace serves the Nyuchi vehicle bookings backend. It exposes vehicles, bookings, drivers, and pickup or drop-off locations from the `nyuchi_logistics_db` Supabase project.
+
+Use these endpoints to power booking flows in consumer apps and partner integrations.
+
+**Base path:** `/v1/logistics`
+
+## Endpoints
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| `GET` | `/v1/logistics/vehicles` | Optional | List vehicles. Supports `available`, `limit`, `offset`. |
+| `GET` | `/v1/logistics/vehicles/{vehicle_id}` | Optional | Fetch a single vehicle. |
+| `POST` | `/v1/logistics/bookings` | Required | Create a booking for the calling customer. |
+| `GET` | `/v1/logistics/bookings` | Required | List bookings owned by the caller. |
+| `GET` | `/v1/logistics/bookings/{booking_id}` | Required | Fetch a booking owned by the caller. |
+| `GET` | `/v1/logistics/locations` | Optional | List pickup and drop-off locations. |
+
+## Find an available vehicle
+
+```bash
+curl "https://api.nyuchi.com/v1/logistics/vehicles?available=true&limit=10"
+```
+
+```json
+{
+  "data": [
+    { "id": "v_01", "make": "Toyota", "model": "Hilux", "is_available": true }
+  ],
+  "count": 1
+}
+```
+
+## Create a booking
+
+The booking is automatically scoped to the authenticated caller via `customer_id`.
+
+```bash
+curl -X POST https://api.nyuchi.com/v1/logistics/bookings \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vehicle_id": "v_01",
+    "pickup_location_id": "loc_jhb",
+    "dropoff_location_id": "loc_hre",
+    "pickup_at": "2026-06-01T08:00:00Z",
+    "return_at": "2026-06-05T18:00:00Z",
+    "notes": "Long-haul rental, second driver included."
+  }'
+```
+
+## List my bookings
+
+`GET /v1/logistics/bookings` only returns rows owned by the caller. Use `limit` and `offset` for pagination.
+
+```bash
+curl "https://api.nyuchi.com/v1/logistics/bookings?limit=20" \
+  -H "Authorization: Bearer $TOKEN"
+```

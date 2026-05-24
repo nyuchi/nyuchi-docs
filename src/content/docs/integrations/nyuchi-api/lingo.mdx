@@ -1,0 +1,75 @@
+---
+title: Lingo API
+description: Languages, phrases, study sessions, and learner progress for Mukoko Lingo.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The lingo namespace serves the Mukoko Lingo learning surface—languages, phrases and translations, learner progress, XP, and study session logging. It is backed by the `mukoko_lingo_db` Supabase project.
+
+Use these endpoints when building learner-facing experiences or analytics tools that read learner progress.
+
+**Base path:** `/v1/lingo`
+
+## Endpoints
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| `GET` | `/v1/lingo/languages` | Optional | List supported languages. |
+| `GET` | `/v1/lingo/phrases` | Optional | List phrases. Supports `language`, `limit`, `offset`. |
+| `GET` | `/v1/lingo/phrases/{phrase_id}` | Optional | Fetch a phrase with its translations. |
+| `GET` | `/v1/lingo/me/progress` | Required | Return phrase progress for the caller. |
+| `GET` | `/v1/lingo/me/xp` | Required | Return XP and level for the caller. |
+| `POST` | `/v1/lingo/me/study-sessions` | Required | Log a study session for the caller. |
+
+## Browse languages
+
+```bash
+curl https://api.nyuchi.com/v1/lingo/languages
+```
+
+```json
+{
+  "data": [
+    { "code": "sn", "name": "Shona" },
+    { "code": "nd", "name": "Ndebele" }
+  ],
+  "count": 2
+}
+```
+
+## Read a phrase with translations
+
+```bash
+curl https://api.nyuchi.com/v1/lingo/phrases/phr_01
+```
+
+```json
+{
+  "id": "phr_01",
+  "text": "Mangwanani",
+  "translation": [
+    { "language_code": "en", "text": "Good morning" }
+  ]
+}
+```
+
+## Log a study session
+
+The session is recorded against the authenticated learner.
+
+```bash
+curl -X POST https://api.nyuchi.com/v1/lingo/me/study-sessions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "duration_seconds": 600,
+    "phrases_seen": 24,
+    "phrases_correct": 18,
+    "language_code": "sn"
+  }'
+```
+
+<Aside type="note">
+  Phrase analytics tables (views, engagement, recommendations, stats caches) are populated by the upstream streaming pipeline. The lingo router is read-only for those tables; submit study sessions through `POST /v1/lingo/me/study-sessions` instead of writing to analytics tables directly.
+</Aside>

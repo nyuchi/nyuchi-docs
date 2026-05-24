@@ -1,0 +1,66 @@
+/* Mzizi typography doctrine — Noto Sans body, Noto Serif display,
+   JetBrains Mono code. Loaded from Google Fonts (no shipped binaries). */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Serif:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Nyuchi Docs theme.
+   Accent: Mzizi green — the engineering palette of the Nyuchi platform,
+   carried over from the previous Mintlify "almond / green" guide.
+   Primary #26BD6C, deep #166E3F. Warm almond paper for light mode. */
+
+:root {
+  /* Green accent scale */
+  --sl-color-accent-low: #0e3a22;
+  --sl-color-accent: #26bd6c;
+  --sl-color-accent-high: #b4ebca;
+
+  /* Cool, almost-neutral dark surface */
+  --sl-color-white: #fafaf7;
+  --sl-color-gray-1: #ededea;
+  --sl-color-gray-2: #c4c4c1;
+  --sl-color-gray-3: #8c8c89;
+  --sl-color-gray-4: #585855;
+  --sl-color-gray-5: #383835;
+  --sl-color-gray-6: #27272a;
+  --sl-color-black: #18181b;
+
+  /* Nyuchi engineering palette — exposed for use in content */
+  --nyuchi-green: #26bd6c;
+  --nyuchi-green-deep: #166e3f;
+  --nyuchi-almond: #f5efe2;
+  --nyuchi-honey: #d4a017;
+}
+
+/* Light mode — almond paper with the deeper green for legibility */
+:root[data-theme='light'] {
+  --sl-color-accent-low: #c8ecd6;
+  --sl-color-accent: #166e3f;
+  --sl-color-accent-high: #08361d;
+
+  --sl-color-white: #18181b;
+  --sl-color-gray-1: #27272a;
+  --sl-color-gray-2: #383835;
+  --sl-color-gray-3: #585855;
+  --sl-color-gray-4: #8c8c89;
+  --sl-color-gray-5: #c4c4c1;
+  --sl-color-gray-6: #ededea;
+  --sl-color-gray-7: #f5efe2;
+  --sl-color-black: #fafaf7;
+}
+
+:root {
+  --sl-font: 'Noto Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, monospace;
+}
+
+h1,
+h2,
+h3,
+.site-title {
+  font-family: 'Noto Serif', Georgia, serif;
+}
+
+/* Wordmarks stay lowercase. */
+.site-title {
+  font-variant-caps: normal;
+}

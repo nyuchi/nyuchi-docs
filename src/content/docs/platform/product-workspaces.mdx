@@ -1,0 +1,38 @@
+---
+title: Product workspaces
+description: Manage commerce, pay, logistics, lingo, news, and weather data from dedicated dashboard pages.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Each product surface—commerce, pay, logistics, lingo, news, and weather—has its own dashboard page and is backed by a dedicated database. Workspaces are isolated, so you can configure, scale, and meter each one independently.
+
+## Available workspaces
+
+| Workspace | Path | What you manage |
+|-----------|------|-----------------|
+| **Commerce** | `/dashboard/commerce` | Products, offers, local businesses, inquiries, reviews, and watch actions. |
+| **Pay** | `/dashboard/pay` | Wallets, tokens, and payment gateway status. |
+| **Logistics** | `/dashboard/logistics` | Booking drafts and fulfillment status. |
+| **Lingo** | `/dashboard/lingo` | Translation jobs, glossaries, and language pairs. |
+| **News** | `/dashboard/news` | Articles, feeds, and editorial queues. |
+| **Weather** | `/dashboard/weather` | Weather data sources and forecast snapshots. |
+
+Select **Products** in the sidebar to jump between them, or use the console search palette and type the workspace name.
+
+## When a workspace isn't configured
+
+Each workspace requires its own database credentials. If credentials haven't been set for an environment, the page renders a configuration notice instead of the data UI. The rest of the console continues to work—only the unconfigured workspace shows the notice.
+
+<Aside type="note">
+  If you see "This workspace isn't configured yet," ask your admin to set the corresponding environment variables for that product database. The notice goes away once credentials are saved and the service restarts.
+</Aside>
+
+## Access
+
+Product workspaces are staff-only by default. The pages live under `/dashboard/*` and require an authenticated session. Admin-only actions (such as gateway operations on the **Pay** workspace) are gated behind an additional internal-key check, which the console handles for you—no manual header configuration is required from the browser.
+
+## Next steps
+
+- Review [roles and permissions](/platform/administration/roles-permissions) to grant teammates access.
+- See [Sign in](/platform/configuration/sign-in) if you need to switch authentication methods first.

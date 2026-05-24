@@ -1,0 +1,59 @@
+---
+title: Pay API
+description: Wallet, token, and gateway sub-namespaces for the Nyuchi pay backend.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The pay namespace covers three sub-surfaces under `/v1/pay`. Each one is wired to the `nyuchi_pay_db` Supabase project, but the database schema is not yet provisioned—data endpoints currently return **HTTP 501**. Use the status endpoint to discover readiness without triggering a 501.
+
+| Sub-namespace | Purpose |
+|---------------|---------|
+| `/v1/pay/wallet` | User wallets, balances, and transaction history. |
+| `/v1/pay/tokens` | Token types and lifecycle stage (MIT, MXT, NST). |
+| `/v1/pay/gateway` | Fiat on/off-ramps, deposits, withdrawals, third-party processors. |
+
+## Check readiness
+
+`GET /v1/pay/status` is always available. It tells the caller whether the gateway has credentials for the pay database and whether the schema is ready.
+
+```bash
+curl https://api.nyuchi.com/v1/pay/status
+```
+
+```json
+{
+  "configured": true,
+  "schema_ready": false,
+  "sections": ["wallet", "tokens", "gateway"]
+}
+```
+
+When `configured` is `false`, the gateway has no pay-DB credentials in this environment. When `configured` is `true` but `schema_ready` is `false`, data endpoints return 501 until the schema lands.
+
+## Endpoints
+
+| Method | Path | Auth | Status today |
+|--------|------|------|---------------|
+| `GET` | `/v1/pay/status` | Public | Always live. |
+| `GET` | `/v1/pay/wallet/` | Required | 501 — schema pending. |
+| `GET` | `/v1/pay/wallet/transactions` | Required | 501 — schema pending. |
+| `GET` | `/v1/pay/tokens/` | Required | 501 — schema pending. |
+| `GET` | `/v1/pay/tokens/{token_symbol}` | Required | 501 — schema pending. |
+| `GET` | `/v1/pay/gateway/providers` | Required | 501 — schema pending. |
+| `POST` | `/v1/pay/gateway/deposit` | Required | 501 — schema pending. |
+| `POST` | `/v1/pay/gateway/withdraw` | Required | 501 — schema pending. |
+
+<Aside type="note">
+  Build clients against the documented shapes today. When the schema is provisioned, endpoints will switch from 501 to live responses without route changes.
+</Aside>
+
+## Configuring the pay database
+
+```bash
+PAY_SUPABASE_URL=https://<project>.supabase.co
+PAY_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+PAY_SUPABASE_SECRET_KEY=sb_secret_...
+```
+
+If these variables are unset, every pay endpoint—including `status`—reports `configured: false`.

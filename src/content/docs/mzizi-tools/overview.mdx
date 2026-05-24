@@ -1,0 +1,49 @@
+---
+title: Mzizi tools overview
+description: Using mzizi-mcp, mzizi-sdk, and mzizi-skills from inside a Nyuchi project.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+  This section is a stub. Treat it as a TODO list, not a reference.
+</Aside>
+
+The Mzizi tooling — `mzizi-mcp`, `mzizi-sdk`, and `mzizi-skills` — is built by
+Bundu Labs as the open Mzizi project, and consumed by every Nyuchi codebase.
+This section documents *how Nyuchi uses them*; the upstream reference lives in
+[bundu-docs](https://docs.bundu.org).
+
+## What needs to land here
+
+### `mzizi-mcp`
+
+- The MCP server we run locally and in CI, the tools it exposes, and how to
+  configure Claude Code / other MCP clients to talk to it.
+- Token handling, registry lookups, and the offline cache.
+- Common workflows: scaffolding a new mini-app, validating component
+  back-links, running the registry health check.
+
+### `mzizi-sdk`
+
+- Install + minimum-viable usage from a Nyuchi project.
+- The auth helpers (Nyuchi JWT verification, org-scoped clients).
+- The data helpers (typed resource clients, pagination, error envelopes).
+- The UI helpers (Mzizi-aware fetch hooks, error-boundary glue).
+- Versioning policy — when we pin, when we float.
+
+### `mzizi-skills`
+
+- The skill library shape, where Nyuchi-specific skills live, how they're
+  registered.
+- The contribution flow: from a one-off prompt to a versioned skill.
+- Testing skills locally before publishing.
+
+## Cross-links
+
+- [`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools) — the
+  monorepo.
+- [bundu-docs › Mzizi architecture](https://docs.bundu.org/mzizi/architecture/overview/)
+  — the upstream architecture reference.
+- [bundu-docs › Mzizi registry](https://docs.bundu.org/mzizi/architecture/registry/)
+  — the self-healing component registry the tools talk to.

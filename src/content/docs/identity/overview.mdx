@@ -1,0 +1,38 @@
+---
+title: Identity overview
+description: How Nyuchi handles identity — WorkOS, identity.nyuchi.com, organisations, SSO, and the shape of Nyuchi-issued JWTs.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+  This section is a stub. Treat it as a TODO list, not a reference.
+</Aside>
+
+The Nyuchi identity layer is built on **WorkOS**, fronted by
+`identity.nyuchi.com`. Every Nyuchi product, every Mzizi mini-app, and every
+mzizi-tools API call ultimately authenticates against the same JWT shape.
+
+## What needs to land here
+
+- **WorkOS setup** — project layout, environments, the directory sync model.
+- **`identity.nyuchi.com`** — the hosted sign-in surface, allowed redirect
+  origins, branded login, and the `/.well-known/` endpoints we expose.
+- **Organisations** — the org model, org-scoped roles, how orgs map to billing
+  and to Console plans.
+- **SSO** — connecting customer IdPs (SAML / OIDC), domain claiming, the
+  JIT-provisioning rules.
+- **JWT shape** — the canonical Nyuchi JWT: claims, audience, issuer,
+  short-lived access tokens vs. refresh, and the verification pattern every
+  Nyuchi service implements.
+- **Service-to-service** — machine identities, scoped tokens, and how
+  background workers authenticate.
+
+## Cross-links (once content lands)
+
+- [`nyuchi/mukoko-platform`](https://github.com/nyuchi/mukoko-platform) — the
+  Console implementation that consumes these tokens.
+- [`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools) — `mzizi-sdk`
+  helpers for verifying Nyuchi JWTs.
+- [`bundu-labs/bundu-docs`](https://github.com/bundu-labs/bundu-docs) — the
+  Mzizi authentication pattern, for client-side UX.

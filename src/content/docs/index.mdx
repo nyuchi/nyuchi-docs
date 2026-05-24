@@ -1,0 +1,74 @@
+---
+title: nyuchi-docs
+description: How things are done at Nyuchi — the product guide for the Nyuchi platform, plus engineering doctrine and the Mzizi tooling we use to build it.
+template: splash
+hero:
+  tagline: How things are done at Nyuchi — product guides, engineering doctrine, and the Mzizi tooling we build with.
+  actions:
+    - text: Platform quickstart
+      link: /platform/quickstart/
+      icon: right-arrow
+    - text: Engineering conventions
+      link: /conventions/overview/
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Product guide
+
+<CardGrid>
+  <LinkCard
+    title="Platform"
+    href="/platform/quickstart/"
+    description="Set up your workspace, configure SSO, manage users, and use the public API."
+  />
+  <LinkCard
+    title="Analytics"
+    href="/analytics/quickstart/"
+    description="Connect data sources, build dashboards, and schedule reports."
+  />
+  <LinkCard
+    title="Integrations"
+    href="/integrations/quickstart/"
+    description="Native connectors, webhooks, the API gateway, and the public Nyuchi API surface."
+  />
+</CardGrid>
+
+## Engineering
+
+<CardGrid>
+  <LinkCard
+    title="Identity"
+    href="/identity/overview/"
+    description="WorkOS, identity.nyuchi.com, organisations, SSO, and the JWT shape."
+  />
+  <LinkCard
+    title="Console"
+    href="/console/overview/"
+    description="The Nyuchi Console at platform.nyuchi.com — mini-apps, API extensions, plans, billing."
+  />
+  <LinkCard
+    title="Mzizi tools"
+    href="/mzizi-tools/overview/"
+    description="Using mzizi-mcp, mzizi-sdk, and mzizi-skills from inside a Nyuchi project."
+  />
+  <LinkCard
+    title="Deployment"
+    href="/deployment/overview/"
+    description="Cloudflare, Vercel, and Supabase patterns we standardise on."
+  />
+  <LinkCard
+    title="Conventions"
+    href="/conventions/overview/"
+    description="PR doctrine, commit doctrine, repo-naming rules."
+  />
+</CardGrid>
+
+## Companion site
+
+The Bundu Foundation's outward-facing docs — the Mzizi design system itself,
+the Ubuntu doctrine, the Bundu brand — live at
+[docs.bundu.org](https://docs.bundu.org). This site is the inward-facing
+engineering counterpart: how Nyuchi builds and operates, and how to consume
+those Bundu projects from a Nyuchi codebase.

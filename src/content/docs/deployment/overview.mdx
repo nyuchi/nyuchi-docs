@@ -1,0 +1,47 @@
+---
+title: Deployment overview
+description: Cloudflare, Vercel, and Supabase patterns we standardise on at Nyuchi.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+  This section is a stub. Treat it as a TODO list, not a reference.
+</Aside>
+
+Nyuchi runs production workloads on three substrates: **Cloudflare** (edge,
+Workers, R2, D1, KV, Hyperdrive), **Vercel** (Next.js apps and the public
+marketing surface), and **Supabase** (Postgres, Auth-adjacent storage, edge
+functions where Cloudflare isn't the right fit). This section captures the
+patterns we've already paid for so a new project doesn't reinvent them.
+
+## What needs to land here
+
+### Cloudflare
+
+- The Workers project layout we use and the `wrangler.toml` conventions.
+- D1 migrations: where they live, how we apply them, branch safety.
+- R2 bucket naming and lifecycle rules.
+- KV namespace partitioning per env.
+- Hyperdrive in front of Supabase Postgres — when, why, the failure modes.
+- Edge / origin routing rules at the zone level.
+
+### Vercel
+
+- Project naming, env-var doctrine, preview-deployment hygiene.
+- The Next.js version we standardise on and the App Router conventions.
+- Image / asset handling, edge runtime choices.
+- How we wire `docs.nyuchi.com` and `platform.nyuchi.com` once DNS is set up.
+
+### Supabase
+
+- Project-per-environment layout, the migration workflow, branch databases.
+- RLS doctrine: what we allow, what we forbid, how we audit it.
+- Edge functions: when to reach for them vs. a Cloudflare Worker.
+- Realtime: opt-in only, with explicit channels.
+
+## Cross-links (once content lands)
+
+- [`nyuchi/mukoko-platform`](https://github.com/nyuchi/mukoko-platform) —
+  reference deployment for the Console.
+- The internal `infra/` repo — Terraform / `wrangler` configs (not public).

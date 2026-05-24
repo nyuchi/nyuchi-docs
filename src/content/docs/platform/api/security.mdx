@@ -1,0 +1,70 @@
+---
+title: Security and rate limits
+description: Trusted hosts, response headers, per-IP rate limits, and the internal API key gate that protects /v1/admin and /v1/pay.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `/v1` gateway ships with four protection layers that apply to every request, independent of any Cloudflare or WAF rules in front of it. Plan your client code—especially retries, hostnames, and admin tooling—around the limits below.
+
+## Trusted hosts
+
+The gateway only accepts traffic whose `Host` header matches an allowed entry. Unknown hosts get a `400 Invalid host header` before any router runs.
+
+| Allowed by default | Used for |
+|--------------------|----------|
+| `api.nyuchi.com` | Production traffic |
+| `api.mukoko.com` | Legacy production host |
+| `*.fly.dev` | Fly.io preview deployments |
+| `localhost`, `testserver` | Local development and CI |
+
+Override the list with the `TRUSTED_HOSTS` environment variable (comma-separated) when you stand up a new edge or staging host.
+
+## Security headers
+
+Every response carries a standard hardening header set:
+
+- `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` (camera, microphone, geolocation, payment off by default)
+- `X-Permitted-Cross-Domain-Policies: none`
+- `Server: nyuchi-api` (the upstream FastAPI banner is rewritten)
+
+You do not need to send any of these from your client. Browsers and crawlers will pick them up on the response.
+
+## Rate limits
+
+Limits are enforced per client IP. When you exceed a limit you get `429 Too Many Requests` with a `Retry-After` header. Back off and retry; do not loop tightly.
+
+| Scope | Limit |
+|-------|-------|
+| Default for any endpoint | 60 requests / minute |
+| `POST /v1/auth/otp/email/send` and `…/verify` | 10 requests / minute |
+| `POST /v1/auth/otp/sms/send` and `…/verify` | 5 requests / minute |
+| `POST /v1/auth/exchange` and `/v1/auth/refresh` | 30 requests / minute |
+
+<Aside type="tip">
+  Server-side jobs that fan out across many users should batch through a single internal worker so they hit the per-IP bucket once, not once per user.
+</Aside>
+
+## Internal API key gate
+
+`/v1/admin/*` and `/v1/pay/*` accept requests only when the `X-Internal-Key` header matches the `INTERNAL_API_KEY` environment variable on the backend. Missing or mismatched values return `401 Unauthorized`.
+
+```bash
+curl https://api.nyuchi.com/v1/admin/stats \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-Internal-Key: $INTERNAL_API_KEY"
+```
+
+**Never put this key in browser code.** The console exposes admin and pay surfaces through same-origin proxy routes—`/api/admin/...` and `/api/pay/...`—which inject the header on the server. Build any first-party UI against those proxies and keep `INTERNAL_API_KEY` in server-only environment variables (for example, Vercel project environment variables marked "Server").
+
+When `INTERNAL_API_KEY` is unset on the backend (common in local development), the gate is a no-op so the endpoints stay reachable without the header.
+
+## Where to enforce what
+
+- **Per-user authorisation** belongs in the platform JWT and Supabase RLS. Every `/v1` request that touches user data carries the JWT, and Supabase resolves `auth.uid()` from it.
+- **Per-IP abuse protection** is the rate limiter above. Combine it with your edge WAF if you expose `api.nyuchi.com` directly to the public internet.
+- **Operator-only endpoints** are the `X-Internal-Key` gate. Treat the key as a deploy secret, rotate it with the rest of your platform secrets, and revoke it immediately if it leaks.

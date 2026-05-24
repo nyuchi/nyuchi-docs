@@ -1,0 +1,97 @@
+---
+title: Authentication
+description: Sign users in with WorkOS AuthKit, exchange the result for a platform JWT, and call the /v1 API on their behalf.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Nyuchi API accepts a single bearer token—an HS256 platform JWT signed with the Supabase JWT secret—on every authenticated request. You can mint that token through two flows. **WorkOS AuthKit is the primary path.** Stytch email OTP is supported as a transitional fallback during the WorkOS cutover.
+
+Both flows write to the same `identity.person` table, both return the same JWT shape, and both let `auth.uid()` resolve to `identity.person.id` for Supabase row-level security. Downstream code does not need to know which method the user chose.
+
+## WorkOS AuthKit (primary)
+
+WorkOS AuthKit hosts the sign-in UI, handles passwordless email, social logins, and enterprise SSO, and hands you a one-time code your backend can exchange for a session. The Nyuchi backend wraps that exchange so your client only has to follow a redirect and read a URL fragment.
+
+### Flow
+
+1. **Send the user to /v1/auth/workos/login**
+
+   Pass a `return_to` query parameter so the backend knows where to drop the user after sign-in. The endpoint responds with the hosted AuthKit URL.
+
+   ```bash
+   GET /v1/auth/workos/login?return_to=/auth/workos/callback
+   ```
+
+
+2. **WorkOS posts back to the backend**
+
+   AuthKit redirects to `WORKOS_REDIRECT_URI` with a short-lived `code`. The backend exchanges it for WorkOS user details, upserts an `identity.person` row keyed on `workos_user_id` (falling back to email so users who started on Stytch are recognised), and mints a platform JWT.
+
+
+3. **The backend redirects the browser with the token in the fragment**
+
+   The token never appears in server logs because it sits in the URL fragment, which browsers strip from `Referer` and which the backend never sees.
+
+   ```
+   302 /auth/workos/callback#access_token=…&person_id=…
+   ```
+
+
+4. **Your client consumes the fragment**
+
+   Parse `window.location.hash`, store the token, and clean the fragment from the URL so a refresh does not re-process it. The console exposes this as `consumeWorkOSCallback()` on the auth context.
+
+
+### Configure
+
+Set four environment variables on the backend. Until all four are populated, `/v1/auth/workos/*` returns `503 Service Unavailable`, so you can deploy the code path before turning the feature on.
+
+| Variable | Purpose |
+|----------|---------|
+| `WORKOS_API_KEY` | Server-side secret from the WorkOS dashboard. |
+| `WORKOS_CLIENT_ID` | Identifies the AuthKit application. |
+| `WORKOS_REDIRECT_URI` | Where AuthKit returns the user. Must point at `/v1/auth/workos/callback`. |
+| `WORKOS_COOKIE_PASSWORD` | 32+ character secret used to seal session cookies. |
+
+<Aside type="caution">
+  Apply the `20260510_add_workos_user_id.sql` migration on the platform database before you set `WORKOS_API_KEY` in production. Without the `identity.person.workos_user_id` column, the person upsert step fails and sign-in returns `500`.
+</Aside>
+
+### Sign out
+
+`POST /v1/auth/workos/logout` revokes the WorkOS session. Clear the local token afterwards so subsequent requests are unauthenticated.
+
+## Stytch email OTP (transitional)
+
+Stytch remains available for users who have not migrated to WorkOS. The endpoints moved from `/auth/*` to `/v1/auth/otp/*` as part of the gateway cutover.
+
+```bash
+# 1. Request a one-time code
+curl -X POST https://api.nyuchi.com/v1/auth/otp/email/send \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+
+# 2. Verify the code and receive a platform JWT
+curl -X POST https://api.nyuchi.com/v1/auth/otp/email/verify \
+  -H "Content-Type: application/json" \
+  -d '{"method_id": "…", "code": "123456"}'
+```
+
+The verify response includes `access_token`, the `person` record, and an `is_new_user` flag.
+
+## Using the platform JWT
+
+Send the token as a bearer credential. The same token works for every `/v1/*` namespace and for direct Supabase requests, because it carries the person id in `sub` and is signed with the Supabase JWT secret.
+
+```bash
+curl https://api.nyuchi.com/v1/identity/me \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+Call `POST /v1/auth/refresh` before the token expires to obtain a new one without forcing the user back through AuthKit.
+
+## Next steps
+
+- Review the [API overview](/platform/api/overview) for the full list of namespaces.
+- Read [security and rate limits](/platform/api/security) before going live—`/v1/auth/exchange` and `/v1/auth/refresh` are rate limited per IP.

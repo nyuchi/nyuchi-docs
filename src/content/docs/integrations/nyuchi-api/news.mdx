@@ -1,0 +1,62 @@
+---
+title: News API
+description: Articles, journalists, organisations, and engagement actions for the Mukoko news surface.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The news namespace exposes the Mukoko news read surface—articles, journalists, and media organisations—plus a small write surface for engagement actions (like, bookmark, comment, follow). It is backed by the `mukoko_news_db` Supabase project.
+
+Articles and metadata are scored and curated upstream. The router serves the curated read surface to consumer apps and accepts engagement events from authenticated readers.
+
+**Base path:** `/v1/news`
+
+## Endpoints
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| `GET` | `/v1/news/articles` | Optional | List articles. Supports `organization_id`, `journalist_id`, `limit`, `offset`. |
+| `GET` | `/v1/news/articles/{article_id}` | Optional | Fetch a single article. |
+| `GET` | `/v1/news/organizations` | Optional | List media organisations. |
+| `GET` | `/v1/news/journalists` | Optional | List journalists. Supports `organization_id`. |
+| `POST` | `/v1/news/articles/{article_id}/like` | Required | Like an article (idempotent upsert). |
+| `POST` | `/v1/news/articles/{article_id}/bookmark` | Required | Bookmark an article (idempotent upsert). |
+| `POST` | `/v1/news/comments` | Required | Post a comment on an article. Supports threaded replies via `parent_id`. |
+| `POST` | `/v1/news/journalists/{journalist_id}/follow` | Required | Follow a journalist. |
+| `POST` | `/v1/news/organizations/{organization_id}/follow` | Required | Follow a media organisation. |
+
+## List recent articles
+
+Articles are ordered by `published_at` descending.
+
+```bash
+curl "https://api.nyuchi.com/v1/news/articles?limit=10"
+```
+
+## Like an article
+
+Like, bookmark, and follow endpoints are idempotent—calling them twice is safe. The caller's identity is recorded automatically.
+
+```bash
+curl -X POST https://api.nyuchi.com/v1/news/articles/art_01/like \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## Post a comment
+
+```bash
+curl -X POST https://api.nyuchi.com/v1/news/comments \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "article_id": "art_01",
+    "text": "Great reporting on this story.",
+    "parent_id": null
+  }'
+```
+
+Set `parent_id` to a comment ID to post a threaded reply.
+
+<Aside type="caution">
+  Several `news.*` tables have row-level security disabled. The router enforces auth in code on engagement endpoints; database policies will replace that enforcement before public release.
+</Aside>

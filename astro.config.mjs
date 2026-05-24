@@ -1,0 +1,155 @@
+// @ts-check
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+
+// https://astro.build/config
+export default defineConfig({
+  site: 'https://docs.nyuchi.com',
+  integrations: [
+    starlight({
+      title: 'nyuchi-docs',
+      description:
+        'Nyuchi engineering documentation — how things are done at Nyuchi, the product guide for the Nyuchi platform, and how to use the Mzizi tools.',
+      customCss: ['./src/styles/theme.css'],
+      logo: {
+        light: './src/assets/logo-light.svg',
+        dark: './src/assets/logo-dark.svg',
+        replacesTitle: false,
+      },
+      social: [
+        {
+          icon: 'github',
+          label: 'GitHub',
+          href: 'https://github.com/nyuchi',
+        },
+      ],
+      sidebar: [
+        {
+          label: 'Platform',
+          collapsed: true,
+          items: [
+            {
+              label: 'Getting started',
+              items: [
+                'platform/quickstart',
+                'platform/key-concepts',
+                'platform/support-chat',
+                'platform/product-workspaces',
+              ],
+            },
+            {
+              label: 'Configuration',
+              items: [
+                'platform/configuration/settings',
+                'platform/configuration/sign-in',
+                'platform/configuration/user-management',
+              ],
+            },
+            {
+              label: 'Administration',
+              items: [
+                'platform/administration/roles-permissions',
+                'platform/administration/audit-logs',
+              ],
+            },
+            {
+              label: 'API',
+              items: [
+                'platform/api/overview',
+                'platform/api/authentication',
+                'platform/api/security',
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Analytics',
+          collapsed: true,
+          items: [
+            {
+              label: 'Getting started',
+              items: ['analytics/quickstart', 'analytics/connect-data'],
+            },
+            {
+              label: 'Dashboards',
+              items: [
+                'analytics/dashboards/create-dashboard',
+                'analytics/dashboards/charts-visualizations',
+                'analytics/dashboards/sharing-exports',
+              ],
+            },
+            {
+              label: 'Reports',
+              items: [
+                'analytics/reports/build-report',
+                'analytics/reports/scheduled-reports',
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Integrations',
+          collapsed: true,
+          items: [
+            {
+              label: 'Getting started',
+              items: [
+                'integrations/quickstart',
+                'integrations/authentication',
+                'integrations/api-gateway',
+              ],
+            },
+            {
+              label: 'Connectors',
+              items: [
+                'integrations/connectors/crm',
+                'integrations/connectors/data-warehouse',
+                'integrations/connectors/messaging',
+              ],
+            },
+            {
+              label: 'Webhooks & events',
+              items: [
+                'integrations/webhooks/configure',
+                'integrations/webhooks/event-types',
+                'integrations/webhooks/retry-policies',
+              ],
+            },
+            {
+              label: 'Nyuchi API',
+              items: [
+                'integrations/nyuchi-api/overview',
+                'integrations/nyuchi-api/commerce',
+                'integrations/nyuchi-api/pay',
+                'integrations/nyuchi-api/logistics',
+                'integrations/nyuchi-api/lingo',
+                'integrations/nyuchi-api/news',
+                'integrations/nyuchi-api/weather',
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Identity',
+          items: ['identity/overview'],
+        },
+        {
+          label: 'Console',
+          items: ['console/overview'],
+        },
+        {
+          label: 'Mzizi Tools',
+          items: ['mzizi-tools/overview'],
+        },
+        {
+          label: 'Deployment',
+          items: ['deployment/overview'],
+        },
+        {
+          label: 'Conventions',
+          items: ['conventions/overview'],
+        },
+      ],
+    }),
+  ],
+});
