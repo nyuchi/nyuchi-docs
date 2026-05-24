@@ -1,15 +1,24 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import svelte from '@astrojs/svelte';
+import { starlightDocsSearch } from 'nyuchi-docs-search/plugin';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://docs.nyuchi.com',
   integrations: [
+    svelte(),
     starlight({
       title: 'nyuchi-docs',
       description:
         'Nyuchi engineering documentation — how things are done at Nyuchi, the product guide for the Nyuchi platform, and how to use the Mzizi tools.',
+      plugins: [
+        starlightDocsSearch({
+          aiUrl: import.meta.env.PUBLIC_SHAMWARI_AI_URL,
+          source: 'nyuchi',
+        }),
+      ],
       customCss: ['./src/styles/theme.css'],
       logo: {
         light: './src/assets/logo-light.svg',

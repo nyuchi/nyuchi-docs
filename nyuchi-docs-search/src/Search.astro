@@ -1,0 +1,12 @@
+---
+// Starlight component override wrapper. Mounts the cmdk-style SearchModal
+// from nyuchi-docs-search. Read configuration from PUBLIC_ env vars (so the
+// site that consumes the package can set it).
+import SearchModal from './SearchModal.svelte';
+
+const aiUrl = (import.meta.env.PUBLIC_SHAMWARI_AI_URL as string | undefined) ?? '';
+const sourceRaw = (import.meta.env.PUBLIC_DOCS_SOURCE as string | undefined) ?? '';
+const source = sourceRaw === 'bundu' || sourceRaw === 'nyuchi' ? sourceRaw : undefined;
+---
+
+<SearchModal client:load aiUrl={aiUrl || undefined} source={source} />
