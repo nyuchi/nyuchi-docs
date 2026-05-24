@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build:deps": "pnpm --filter nyuchi-docs-search build",
+    "build": "pnpm run build:deps && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
