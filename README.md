@@ -10,7 +10,7 @@ This repo is a **pnpm workspace** with three packages:
 | ---------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
 | `site`                 | `site/`               | The Astro + [Starlight](https://starlight.astro.build) docs site itself.                  |
 | `nyuchi-docs-search`   | `nyuchi-docs-search/` | Publishable npm package: cmdk-style search modal + Ask-AI tab for Starlight sites.        |
-| `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker (Workers AI + Vectorize + AI Gateway) that powers the Ask-AI tab.       |
+| `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker — thin proxy in front of Cloudflare AI Search instances.                |
 
 ## Companion site
 
@@ -60,8 +60,9 @@ cp site/.env.example site/.env
   and shipped by the docs-site host (Cloudflare Pages / Vercel).
 - **Worker** — `.github/workflows/deploy-shamwari-docs-ai.yml` runs
   `wrangler deploy` on push to `main` whenever `shamwari-docs-ai/**` changes.
-  See [`shamwari-docs-ai/README.md`](./shamwari-docs-ai/README.md) for the
-  one-time Vectorize + AI Gateway setup.
+  Crawl, chunk, embed, retrieve, and generate are handled by Cloudflare
+  **AI Search**. See [`shamwari-docs-ai/README.md`](./shamwari-docs-ai/README.md)
+  for the per-corpus AI Search instance setup (managed via REST API).
 
 ## Why pnpm workspace
 
