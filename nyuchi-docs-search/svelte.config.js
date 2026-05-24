@@ -1,16 +1,11 @@
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-
+// Minimal svelte.config.js for @sveltejs/package. Preprocess is left empty to
+// keep the package free of postcss / typescript-in-style requirements.
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-  preprocess: vitePreprocess(),
-  package: {
-    exports: (filepath) => {
-      // Only expose top-level files (.svelte, .ts, .js) from src/
-      return /^(index\.(ts|js)|plugin\.(ts|js)|.*\.svelte|style\.css|lib\/.*\.(ts|js))$/.test(
-        filepath
-      );
-    },
-  },
+  preprocess: [],
+  // Also publish .astro files alongside .svelte / .ts so the Starlight
+  // component override can reference nyuchi-docs-search/Search.astro.
+  kit: undefined,
 };
 
 export default config;

@@ -1,8 +1,9 @@
 # nyuchi-docs-search
 
-Mintlify-style command-palette search modal (cmdk + Pagefind) with an **Ask AI**
-tab that streams answers from the [`shamwari-docs-ai`][worker] Cloudflare
-Worker. Designed to drop into any [Astro Starlight][starlight] site.
+Mintlify-style command-palette search modal (`⌘K` + Pagefind) with an
+**Ask AI** tab that streams answers from the [`shamwari-docs-ai`][worker]
+Cloudflare Worker. Pure Svelte 5, no runtime deps. Designed to drop into any
+[Astro Starlight][starlight] site.
 
 Used in production by:
 

@@ -35,12 +35,12 @@
       "types": "./dist/SearchModal.svelte.d.ts",
       "svelte": "./dist/SearchModal.svelte"
     },
-    "./style.css": "./dist/style.css"
+    "./Search.astro": "./dist/Search.astro"
   },
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "svelte-kit sync && svelte-package -i src -o dist && publint",
+    "build": "svelte-package -i src -o dist && publint",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -48,9 +48,7 @@
     "@astrojs/starlight": "^0.39.0",
     "svelte": "^5.0.0"
   },
-  "dependencies": {
-    "cmdk-sv": "^0.0.18"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@sveltejs/kit": "^2.7.0",
     "@sveltejs/package": "^2.3.7",

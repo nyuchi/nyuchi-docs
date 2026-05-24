@@ -23,7 +23,7 @@ describe('package manifest', () => {
     expect(pkg.peerDependencies['svelte']).toMatch(/\^5/);
   });
 
-  it('depends on cmdk-sv', () => {
-    expect(pkg.dependencies['cmdk-sv']).toBeTruthy();
+  it('declares no runtime dependencies (pure Svelte 5)', () => {
+    expect(Object.keys(pkg.dependencies ?? {})).toHaveLength(0);
   });
 });
