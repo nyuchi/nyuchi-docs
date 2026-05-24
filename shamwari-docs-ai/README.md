@@ -22,18 +22,38 @@ Cloudflare Worker that powers the **Ask AI** tab in
 CORS: allows `https://docs.nyuchi.com`, `https://docs.bundu.org`,
 `https://*.vercel.app`, and `localhost`/`127.0.0.1` for dev.
 
+## Live deployment
+
+- URL: `https://shamwari-docs-ai.nyuchi.workers.dev`
+- Health: `GET /health` → `{"ok":true,"ts":…}`
+
 ## One-time setup
+
+Requires a Cloudflare API token scoped with **Workers Scripts (Edit)**,
+**Workers AI (Edit)**, **Vectorize (Edit)**, and **AI Gateway (Edit)**.
 
 ```sh
 # 1. Vectorize index (768-dim cosine, matches BGE base).
 wrangler vectorize create shamwari-docs --dimensions 768 --metric cosine
 
-# 2. AI Gateway.
-wrangler ai-gateway create shamwari-docs
+# 2. AI Gateway (Dashboard → AI → AI Gateway, "Create gateway", name
+#    `shamwari-docs`). The Wrangler CLI does not yet expose ai-gateway
+#    CRUD; the binding is referenced via the AI_GATEWAY_ID var.
 
-# 3. Deploy.
+# 3. Deploy with the canonical wrangler.toml (which references both bindings).
 pnpm --filter shamwari-docs-ai deploy
 ```
+
+> **Bootstrap mode** — the repo also ships `wrangler.bootstrap.toml`, which
+> omits the Vectorize + AI bindings so the worker URL can be provisioned
+> before those resources exist. Use it for the very first deploy if the
+> Vectorize index hasn't been created yet:
+>
+> ```sh
+> pnpm --filter shamwari-docs-ai exec wrangler deploy --config wrangler.bootstrap.toml
+> ```
+>
+> Then create the resources above and redeploy with the canonical config.
 
 ## Ingest a docs site
 

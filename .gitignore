@@ -2,6 +2,7 @@
 dist/
 .svelte-kit/
 .wrangler/
+.wrangler-build/
 # generated types
 .astro/
 # dependencies
