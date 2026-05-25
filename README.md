@@ -8,7 +8,7 @@ This repo is a **pnpm workspace** with three packages:
 
 | Package                | Path                  | What it does                                                                              |
 | ---------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
-| `site`                 | `site/`               | The Astro + [Starlight](https://starlight.astro.build) docs site itself.                  |
+| `site`                 | `site/`               | The Astro + [Starlight](https://starlight.astro.build) docs site itself. Ships as a Cloudflare Worker with Static Assets. |
 | `nyuchi-docs-search`   | `nyuchi-docs-search/` | Publishable npm package: cmdk-style search modal + Ask-AI tab for Starlight sites.        |
 | `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker — thin proxy in front of Cloudflare AI Search instances.                |
 
@@ -56,13 +56,23 @@ cp site/.env.example site/.env
 
 ## Deploy
 
-- **Site** — built by the existing CI workflow (`.github/workflows/build.yml`)
-  and shipped by the docs-site host (Cloudflare Pages / Vercel).
-- **Worker** — `.github/workflows/deploy-shamwari-docs-ai.yml` runs
-  `wrangler deploy` on push to `main` whenever `shamwari-docs-ai/**` changes.
-  Crawl, chunk, embed, retrieve, and generate are handled by Cloudflare
-  **AI Search**. See [`shamwari-docs-ai/README.md`](./shamwari-docs-ai/README.md)
-  for the per-corpus AI Search instance setup (managed via REST API).
+Both workers in this repo deploy via **Cloudflare Workers Builds** — the
+[Cloudflare GitHub App](https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/github-integration/)
+is connected to `nyuchi/nyuchi-docs` with one trigger per worker (root
+directory points at the worker package). No GitHub Actions deploy workflow,
+no `CLOUDFLARE_API_TOKEN` repo secret.
+
+- **`nyuchi-docs` (site)** — root `site/`, ships as a Cloudflare Worker with
+  [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/).
+  Live at `https://nyuchi-docs.nyuchi.workers.dev`. Custom domain
+  `docs.nyuchi.com` is attached via the Workers custom-domain API in a
+  separate cutover step (apex still points at the legacy Mintlify-on-Vercel
+  deployment until then).
+- **`shamwari-docs-ai`** — root `shamwari-docs-ai/`, thin proxy in front of
+  Cloudflare **AI Search**. Live at
+  `https://shamwari-docs-ai.nyuchi.workers.dev`. See
+  [`shamwari-docs-ai/README.md`](./shamwari-docs-ai/README.md) for the
+  per-corpus AI Search instance setup (managed via REST API).
 
 ## Why pnpm workspace
 
