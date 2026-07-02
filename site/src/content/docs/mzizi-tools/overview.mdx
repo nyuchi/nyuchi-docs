@@ -1,6 +1,6 @@
 ---
 title: Mzizi tools overview
-description: Using mzizi-mcp, mzizi-sdk, and mzizi-skills from inside a Nyuchi project.
+description: Using mzizi-mcp, mzizi-cli, and mzizi-skills from inside a Nyuchi project.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -9,10 +9,30 @@ import { Aside } from '@astrojs/starlight/components';
   This section is a stub. Treat it as a TODO list, not a reference.
 </Aside>
 
-The Mzizi tooling — `mzizi-mcp`, `mzizi-sdk`, and `mzizi-skills` — is built by
-Bundu Labs as the open Mzizi project, and consumed by every Nyuchi codebase.
-This section documents *how Nyuchi uses them*; the upstream reference lives in
-[bundu-docs](https://docs.bundu.org).
+The Mzizi tooling — `@nyuchi/mzizi-mcp`, `@nyuchi/mzizi-cli` (the fundi agent
+SDK + CLI, in the monorepo's `mzizi-sdk/` directory), and
+`@nyuchi/mzizi-skills` — is governed by the Bundu Foundation and operated by
+Nyuchi as part of the open Mzizi project, and consumed by every Nyuchi
+codebase. This section documents *how Nyuchi uses them*; the upstream
+reference lives in [bundu-docs](https://docs.bundu.org).
+
+## Quick start — connecting to the MCP
+
+Two live MCP surfaces read the same Mzizi document store:
+
+- `https://mzizi.dev/mcp` — the portal's canonical document-route MCP
+  (components, collections, database status).
+- `https://mcp.mzizi.dev/mcp` — the standalone `mzizi-mcp` Cloudflare Worker;
+  registry-driven (~60 tools from `mcp_tool_registry`) behind a free Connect
+  OAuth signup gate.
+
+```json
+{
+  "mcpServers": {
+    "mzizi": { "type": "url", "url": "https://mzizi.dev/mcp" }
+  }
+}
+```
 
 ## What needs to land here
 
@@ -24,7 +44,7 @@ This section documents *how Nyuchi uses them*; the upstream reference lives in
 - Common workflows: scaffolding a new mini-app, validating component
   back-links, running the registry health check.
 
-### `mzizi-sdk`
+### `mzizi-cli` (`mzizi-sdk/` directory)
 
 - Install + minimum-viable usage from a Nyuchi project.
 - The auth helpers (Nyuchi JWT verification, org-scoped clients).
