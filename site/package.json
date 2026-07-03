@@ -13,6 +13,7 @@
   "dependencies": {
     "@astrojs/starlight": "^0.39.2",
     "@astrojs/svelte": "^8.1.1",
+    "@bundu/ui": "^0.1.1",
     "astro": "^6.3.7",
     "nyuchi-docs-search": "workspace:*",
     "sharp": "^0.34.5",
