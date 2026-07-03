@@ -1,0 +1,50 @@
+# Nyuchi Docs
+
+> Engineering and product documentation for the Nyuchi platform — how things
+> are done at Nyuchi, the product guide for platform.nyuchi.com, and how to use
+> the Mzizi tools. Nyuchi Africa is a Zimbabwean frontier-infrastructure company
+> inside the Bundu Foundation ecosystem. Long-form product docs for the wider
+> ecosystem live at docs.bundu.org; this site is the engineering / how-to surface.
+
+## Platform
+
+- [Quickstart](https://docs.nyuchi.com/platform/quickstart): Get started on the Nyuchi platform.
+- [Key concepts](https://docs.nyuchi.com/platform/key-concepts): The core model behind the platform.
+- [Product workspaces](https://docs.nyuchi.com/platform/product-workspaces): How product surfaces are organised.
+- [Configuration](https://docs.nyuchi.com/platform/configuration/settings): Settings, sign-in, user management.
+- [Administration](https://docs.nyuchi.com/platform/administration/roles-permissions): Roles, permissions, audit logs.
+- [API](https://docs.nyuchi.com/platform/api/overview): Overview, authentication, security.
+
+## Analytics
+
+- [Quickstart](https://docs.nyuchi.com/analytics/quickstart): Connect data and get started.
+- [Dashboards](https://docs.nyuchi.com/analytics/dashboards/create-dashboard): Build dashboards, charts, sharing/exports.
+- [Reports](https://docs.nyuchi.com/analytics/reports/build-report): Build and schedule reports.
+
+## Integrations
+
+- [Quickstart](https://docs.nyuchi.com/integrations/quickstart): Authentication and the API gateway.
+- [Connectors](https://docs.nyuchi.com/integrations/connectors/crm): CRM, data warehouse, messaging.
+- [Webhooks & events](https://docs.nyuchi.com/integrations/webhooks/configure): Configure, event types, retry policies.
+- [Nyuchi API](https://docs.nyuchi.com/integrations/nyuchi-api/overview): Commerce, Pay, Logistics, Lingo, News, Weather.
+
+## Identity & Console
+
+- [Identity](https://docs.nyuchi.com/identity/overview): Authentication and identity across the platform.
+- [Console](https://docs.nyuchi.com/console/overview): The Nyuchi Console (platform.nyuchi.com).
+
+## Mzizi Tools
+
+- [Overview](https://docs.nyuchi.com/mzizi-tools/overview): The Mzizi consumer tooling — mzizi-mcp, mzizi-cli (the fundi agent), mzizi-skills, and the Mzizi MCP quick start. The Mzizi design system itself lives at mzizi.dev.
+
+## Deployment & Conventions
+
+- [Deployment](https://docs.nyuchi.com/deployment/overview): How Nyuchi surfaces are deployed.
+- [Conventions](https://docs.nyuchi.com/conventions/overview): Engineering conventions and doctrine.
+
+## Ecosystem
+
+- Mzizi design system: https://mzizi.dev
+- Bundu Foundation product docs: https://docs.bundu.org
+- Nyuchi Africa: https://www.nyuchi.com
+- Sitemap: https://docs.nyuchi.com/sitemap-index.xml
