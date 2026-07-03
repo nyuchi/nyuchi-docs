@@ -1,0 +1,6 @@
+# docs.nyuchi.com — Nyuchi engineering & product documentation.
+# Open documentation: everything here is meant to be crawled and indexed.
+User-agent: *
+Allow: /
+
+Sitemap: https://docs.nyuchi.com/sitemap-index.xml
