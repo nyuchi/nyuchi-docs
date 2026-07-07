@@ -1,0 +1,46 @@
+---
+title: Mukoko Weather user guide
+description: How to use mukoko weather — current conditions, forecasts, activities, community reports, and AI insights.
+sidebar:
+  label: User guide
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+[weather.mukoko.com](https://weather.mukoko.com) is an AI-powered global weather platform — real-time conditions, 7-day forecasts, frost alerts, and contextual advice for farming, mining, travel, and daily life. The core service is free and works without an account.
+
+## Your current location
+
+The home page **is** your current-location weather. On first visit the app asks once for device location; grant it and the dashboard follows you wherever you are — the *MY LOCATION* label confirms a GPS fix. If you decline, the app falls back to your last-viewed location or a rough network-based estimate, and you can always search for any place worldwide.
+
+Every named location also has its own shareable page (for example `/harare`), with dedicated sub-pages:
+
+- **Forecast** — hour-by-hour and 7-day charts plus sunrise/sunset
+- **Atmosphere** — 24-hour humidity, wind, pressure, and UV trends
+- **Map** — full-screen interactive weather map with precipitation, cloud, temperature, and wind layers
+
+## Personalising with My Weather
+
+Open **My Weather** (map-pin button) to save locations, pick your activities — farming, mining, transport, outdoors, sports, or lifestyle — and set the theme. Activity cards on each location page then show a suitability rating, a 24-hour feasibility trend, and weather-driven tips specific to what you do. The AI summary also uses your selections to ground its advice.
+
+## AI insights
+
+Signed-in users get a **Shamwari Weather Insight** on every location page — a short, locally grounded summary of what the weather means for the day, with an inline follow-up chat for questions. Weather data itself never requires sign-in; only the AI features, aviation planner, and historical dashboard do.
+
+## Community weather reports
+
+Anyone can report what the sky is actually doing — rain, hail, fog, frost, dust, and more — straight from a location page. Reports are cross-checked against the forecast data and shown to everyone nearby for 24–72 hours depending on severity. Community weather stations feed the same pages automatically; see the [weather stations guide](/mukoko-weather/weather-stations/).
+
+## Frequently asked questions
+
+**Is it free?** Yes — current conditions, forecasts, maps, and alerts are free for everyone.
+
+**How accurate is it?** Forecasts come from Tomorrow.io with Open-Meteo as a fallback, cross-validated with community reports and stations. Forecasts are guidance, not guarantees — for critical decisions consult your national meteorological service.
+
+**Why can't I find my location?** Any valid coordinates work. Use the GPS button or search; brand-new places are created on the fly from your position.
+
+**Does it work offline?** The app is installable (PWA) and shows an offline page without a connection, but live weather needs the network.
+
+<Aside type="tip">
+  Need help? Contact <a href="mailto:support@mukoko.com">support@mukoko.com</a> or report an issue on <a href="https://github.com/nyuchi/mukoko-weather/issues/new/choose">GitHub</a>.
+</Aside>
