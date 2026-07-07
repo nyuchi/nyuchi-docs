@@ -1,0 +1,93 @@
+---
+/**
+ * Footer override — renders Starlight's default footer (prev/next
+ * pagination, edit link) and appends the ecosystem footer bar shared
+ * with docs.bundu.org. Accent + neutrals come from the @bundu/ui
+ * Mzizi tokens imported in styles/theme.css (gold — the Nyuchi
+ * brand→mineral).
+ */
+import Default from '@astrojs/starlight/components/Footer.astro';
+---
+
+<Default><slot /></Default>
+
+<footer class="ecosystem-footer">
+  <div class="row">
+    <div class="brand">
+      <span class="dot" aria-hidden="true"></span>
+      <a href="https://nyuchi.com" class="wordmark">nyuchi</a>
+      <span class="tagline">frontier infrastructure, built in Harare</span>
+    </div>
+    <nav class="links" aria-label="Ecosystem">
+      <a href="https://nyuchi.com">Website</a>
+      <a href="https://platform.nyuchi.com">Platform</a>
+      <a href="https://docs.bundu.org">Bundu docs</a>
+      <a href="https://github.com/nyuchi">GitHub</a>
+    </nav>
+  </div>
+  <div class="legal">
+    <span>© 2026 Nyuchi Africa (Pvt) Ltd</span>
+    <span class="sep" aria-hidden="true">·</span>
+    <span>Part of the Bundu Foundation</span>
+  </div>
+</footer>
+
+<style>
+  .ecosystem-footer {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--sl-color-gray-5);
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .dot {
+    align-self: center;
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-gold, var(--sl-color-accent));
+  }
+  .wordmark {
+    font-family: var(--nyuchi-font-serif);
+    text-transform: lowercase;
+    font-size: var(--sl-text-base);
+    color: var(--sl-color-white);
+    text-decoration: none;
+  }
+  .tagline {
+    color: var(--sl-color-gray-3);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+  .links a {
+    color: var(--sl-color-gray-2);
+    text-decoration: none;
+  }
+  .links a:hover {
+    color: var(--sl-color-white);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .legal {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+  }
+</style>
