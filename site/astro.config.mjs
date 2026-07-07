@@ -10,7 +10,7 @@ export default defineConfig({
   integrations: [
     svelte(),
     starlight({
-      title: 'nyuchi-docs',
+      title: 'Nyuchi Docs',
       description:
         'Nyuchi engineering documentation — how things are done at Nyuchi, the product guide for the Nyuchi platform, and how to use the Mzizi tools.',
       plugins: [
