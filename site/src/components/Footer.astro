@@ -7,11 +7,26 @@
  * brand→mineral).
  */
 import Default from '@astrojs/starlight/components/Footer.astro';
+
+const minerals = [
+  'cobalt',
+  'tanzanite',
+  'malachite',
+  'gold',
+  'terracotta',
+  'sodalite',
+  'copper',
+] as const;
 ---
 
 <Default><slot /></Default>
 
 <footer class="ecosystem-footer">
+  <!-- Canonical N7 shell anatomy: horizontal seven-mineral identity
+       strip across the footer top (see mzizi nyuchi-footer). -->
+  <div class="mineral-strip-h" aria-hidden="true" data-slot="mineral-strip-horizontal">
+    {minerals.map((mineral) => <span style={`background-color: var(--color-${mineral});`} />)}
+  </div>
   <div class="row">
     <div class="brand">
       <span class="dot" aria-hidden="true"></span>
@@ -35,10 +50,17 @@ import Default from '@astrojs/starlight/components/Footer.astro';
 <style>
   .ecosystem-footer {
     margin-top: 3rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--sl-color-gray-5);
     font-size: var(--sl-text-xs);
     color: var(--sl-color-gray-3);
+  }
+  .mineral-strip-h {
+    display: flex;
+    block-size: 3px;
+    inline-size: 100%;
+    margin-bottom: 1.25rem;
+  }
+  .mineral-strip-h span {
+    flex: 1 1 0;
   }
   .row {
     display: flex;
