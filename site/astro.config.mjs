@@ -20,9 +20,12 @@ export default defineConfig({
         }),
       ],
       customCss: ['./src/styles/theme.css'],
+      components: {
+        Footer: './src/components/Footer.astro',
+      },
       logo: {
-        light: './src/assets/logo-light.svg',
-        dark: './src/assets/logo-dark.svg',
+        light: './src/assets/icon-light.png',
+        dark: './src/assets/icon-dark.png',
         replacesTitle: false,
       },
       social: [
