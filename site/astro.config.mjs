@@ -142,6 +142,14 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Mukoko Weather',
+          collapsed: true,
+          items: [
+            'mukoko-weather/user-guide',
+            'mukoko-weather/weather-stations',
+          ],
+        },
+        {
           label: 'Identity',
           items: ['identity/overview'],
         },
