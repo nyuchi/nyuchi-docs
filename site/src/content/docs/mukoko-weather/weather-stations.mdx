@@ -1,0 +1,61 @@
+---
+title: Community weather stations
+description: Register a station on the Mukoko Weather Stations console and feed live readings into the mukoko weather network — digital consoles and analog instruments alike.
+sidebar:
+  label: Weather stations
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The **Mukoko Weather Stations console** at [weatherstations.nyuchi.com](https://weatherstations.nyuchi.com) lets anyone put a weather station on the map. Validated readings replace the modelled "current conditions" on [weather.mukoko.com](https://weather.mukoko.com) for everyone within 50 km — ground truth beats a model every time.
+
+## Register a station
+
+1. Sign in at [weatherstations.nyuchi.com](https://weatherstations.nyuchi.com) — the same Nyuchi account used on weather.mukoko.com.
+2. Choose **Register a station**, give it a name (e.g. *Marondera High School*), and set its coordinates — the **Use GPS** button fills them in if you're standing at the station.
+3. Pick the station type: **Digital** (a console that uploads automatically) or **Analog** (manual readings).
+
+<Aside type="caution">
+  Registration returns a **station ID** and an **ingest key** exactly once. Save them immediately — the key is stored only as a salted hash on our side and cannot be recovered, only re-issued.
+</Aside>
+
+## Connect a digital console
+
+Most consumer stations (Ecowitt, Fine Offset, Ambient-style, and compatibles) support a "customized upload" destination. Point it at the mukoko network — no Weather Underground account required:
+
+**Wunderground protocol**
+
+| Setting | Value |
+| ------- | ----- |
+| Server | `weather.mukoko.com` |
+| Path | `/api/py/stations/ingest` |
+| Station ID | your station ID |
+| Password / key | your ingest key |
+
+**Ecowitt protocol**
+
+| Setting | Value |
+| ------- | ----- |
+| Server | `weather.mukoko.com` |
+| Path | `/api/py/stations/ingest` |
+| PASSKEY | `<stationId>:<ingestKey>` |
+
+Imperial units are converted automatically, and every reading passes plausibility checks (quality control) before it becomes a validated observation.
+
+## Log manual readings (analog stations)
+
+Farms and schools with a rain gauge and thermometer — no electronics — log readings directly in the console. Open your station card, enter any of temperature (°C), rainfall (mm), humidity (%), pressure (hPa), or wind (km/h), and submit. The same quality checks apply, and accepted readings join the network exactly like digital ones.
+
+## How your data is used
+
+```
+station hardware / manual entry
+        → raw archive → quality control → validated observation
+        → live current conditions on weather.mukoko.com (within 50 km, last 60 min)
+```
+
+Station status — last reading time and latest metrics — is visible on your station card in the console. Your ingest key stays in your browser and your hardware; treat it like a password.
+
+<Aside type="tip">
+  Questions or a station that won't connect? Email <a href="mailto:support@mukoko.com">support@mukoko.com</a>.
+</Aside>
