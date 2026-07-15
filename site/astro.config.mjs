@@ -162,7 +162,7 @@ export default defineConfig({
         },
         {
           label: 'Identity',
-          items: ['identity/overview'],
+          items: ['identity/overview', 'identity/authkit'],
         },
         {
           label: 'Console',
