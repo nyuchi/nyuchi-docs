@@ -10,7 +10,7 @@ This repo is a **pnpm workspace** with three packages:
 | ---------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
 | `site`                 | `site/`               | The Astro + [Starlight](https://starlight.astro.build) docs site itself. Ships as a Cloudflare Worker with Static Assets. |
 | `nyuchi-docs-search`   | `nyuchi-docs-search/` | Publishable npm package: cmdk-style search modal + Ask-AI tab for Starlight sites.        |
-| `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker — thin proxy in front of Cloudflare AI Search instances.                |
+| `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker — Ask-AI proxy + the docs MCP server at docs.nyuchi.com/mcp.            |
 
 ## Companion site
 
