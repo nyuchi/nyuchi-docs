@@ -6,18 +6,26 @@ description: How Nyuchi handles identity — WorkOS, identity.nyuchi.com, organi
 import { Aside } from '@astrojs/starlight/components';
 
 <Aside type="caution">
-  This section is a stub. Treat it as a TODO list, not a reference.
+  This section is still partly a stub — the unticked items below are a TODO
+  list, not a reference.
 </Aside>
 
 The Nyuchi identity layer is built on **WorkOS**, fronted by
 `identity.nyuchi.com`. Every Nyuchi product, every Mzizi mini-app, and every
 mzizi-tools API call ultimately authenticates against the same JWT shape.
 
+## Landed
+
+- **[Hosted sign-in (AuthKit)](/identity/authkit/)** — the sign-in doctrine:
+  one WorkOS environment, per-app AuthKit applications, required MFA on the
+  hosted page, the shared session that gives continuous sign-in across apps,
+  the Next.js integration pattern, and the per-app configuration checklist.
+
 ## What needs to land here
 
 - **WorkOS setup** — project layout, environments, the directory sync model.
-- **`identity.nyuchi.com`** — the hosted sign-in surface, allowed redirect
-  origins, branded login, and the `/.well-known/` endpoints we expose.
+- **`identity.nyuchi.com`** — allowed redirect origins, branded login, and the
+  `/.well-known/` endpoints we expose.
 - **Organisations** — the org model, org-scoped roles, how orgs map to billing
   and to Console plans.
 - **SSO** — connecting customer IdPs (SAML / OIDC), domain claiming, the
