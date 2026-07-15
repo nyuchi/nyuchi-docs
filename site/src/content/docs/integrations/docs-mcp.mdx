@@ -32,7 +32,19 @@ namespace for triage.
 
 ## Connecting
 
-Claude (or any MCP client that supports Streamable HTTP):
+Stdio clients — via the published npm bridge
+([`nyuchi-docs-mcp`](https://www.npmjs.com/package/nyuchi-docs-mcp)):
+
+```bash
+claude mcp add nyuchi-docs -- npx nyuchi-docs-mcp
+```
+
+The server is listed on the official MCP registry as
+**`io.github.nyuchi/nyuchi-docs`** (manifest: `server.json` at the
+repo root), so registry-aware clients can install it by name.
+
+Claude (or any MCP client that supports Streamable HTTP) can skip the
+package and connect directly:
 
 ```json
 {
@@ -55,7 +67,14 @@ curl -s https://docs.nyuchi.com/mcp \
 
 ## Operations
 
-- **Code:** `shamwari-docs-ai/src/mcp.ts` (tests in `tests/mcp.test.ts`).
+- **Code:** `shamwari-docs-ai/src/mcp.ts` (tests in `tests/mcp.test.ts`);
+  the npm stdio bridge lives in `nyuchi-docs-mcp/`.
+- **Releases:** publish a GitHub release (tag `mcp-vX.Y.Z`) — the
+  `publish-mcp.yml` workflow tests the bridge, publishes
+  `nyuchi-docs-mcp` to npm (`NPM_TOKEN` secret), and publishes
+  `server.json` to the MCP registry via GitHub OIDC. Keep the version
+  in `nyuchi-docs-mcp/package.json` and `server.json` in lockstep —
+  the workflow enforces it.
 - **Routing:** `wrangler.toml` routes `docs.nyuchi.com/mcp*` to the
   worker; the static docs site worker keeps every other path. The
   worker is also reachable at

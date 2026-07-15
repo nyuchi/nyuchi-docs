@@ -1,0 +1,65 @@
+# Publishes the docs MCP server: nyuchi-docs-mcp to npm, then the
+# server record (server.json) to the official MCP registry
+# (registry.modelcontextprotocol.io) using GitHub OIDC — no registry
+# credentials needed for the io.github.nyuchi/* namespace.
+#
+# One-time setup: add the NPM_TOKEN repo secret (npm automation token
+# with publish rights on `nyuchi-docs-mcp`). Keep the versions in
+# nyuchi-docs-mcp/package.json and server.json in lockstep — this
+# workflow refuses to publish if they drift.
+#
+# Trigger: publish a GitHub release (tag e.g. mcp-v0.1.0), or run
+# manually via workflow_dispatch.
+name: Publish MCP
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # OIDC for mcp-publisher
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Check versions are in lockstep
+        run: |
+          PKG=$(node -p "require('./nyuchi-docs-mcp/package.json').version")
+          SRV=$(node -p "require('./server.json').version")
+          SRVPKG=$(node -p "require('./server.json').packages[0].version")
+          echo "package=$PKG server.json=$SRV server.json.packages[0]=$SRVPKG"
+          test "$PKG" = "$SRV" && test "$PKG" = "$SRVPKG"
+
+      - name: Install + test
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter nyuchi-docs-mcp test
+
+      - name: Publish to npm
+        working-directory: nyuchi-docs-mcp
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install mcp-publisher
+        run: |
+          curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m).tar.gz" | tar xz mcp-publisher
+
+      - name: Publish to the MCP registry
+        run: |
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

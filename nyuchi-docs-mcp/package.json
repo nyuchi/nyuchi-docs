@@ -1,0 +1,38 @@
+{
+  "name": "nyuchi-docs-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for the Nyuchi docs (docs.nyuchi.com) — search, read, ask, send feedback and raise issues. Stdio bridge to the hosted Streamable HTTP endpoint at docs.nyuchi.com/mcp.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "nyuchi-docs-mcp": "bin/nyuchi-docs-mcp.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.4"
+  },
+  "mcpName": "io.github.nyuchi/nyuchi-docs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nyuchi/nyuchi-docs.git",
+    "directory": "nyuchi-docs-mcp"
+  },
+  "homepage": "https://docs.nyuchi.com/integrations/docs-mcp/",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "documentation",
+    "nyuchi",
+    "docs"
+  ]
+}
