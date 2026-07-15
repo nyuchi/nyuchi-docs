@@ -150,6 +150,17 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Mukoko Kweli',
+          collapsed: true,
+          items: [
+            'kweli/overview',
+            'kweli/verification',
+            'kweli/cross-app-verification',
+            'kweli/data-quality',
+            'kweli/design-system',
+          ],
+        },
+        {
           label: 'Identity',
           items: ['identity/overview'],
         },
