@@ -17,6 +17,14 @@ packages that are shared with the companion repo
 | `nyuchi-docs-search` | `nyuchi-docs-search/`  | Publishable npm package (MIT): a Mintlify-style `⌘K`/`Ctrl+K` search modal (Pagefind-backed) with an "Ask AI" tab. Consumed here via `workspace:*` and by `bundu-docs` from the registry — this shared package is the reason the monorepo exists. |
 | `shamwari-docs-ai`   | `shamwari-docs-ai/`    | Cloudflare Worker — thin proxy in front of Cloudflare **AI Search** that powers the Ask-AI tab for both docs sites (CORS, SSE), **plus the docs MCP server at `docs.nyuchi.com/mcp`** (read tools over the same AI Search index; feedback/issue write tools into the `FEEDBACK` KV namespace, optional `GITHUB_TOKEN` secret files real issues). |
 
+A fourth package, `nyuchi-docs-mcp/`, is the published npm stdio
+bridge to the hosted MCP endpoint (MCP registry name
+`io.github.nyuchi/nyuchi-docs`; manifest `server.json` at the repo
+root; released via `.github/workflows/publish-mcp.yml` — npm publish
+needs the `NPM_TOKEN` secret, registry publish uses GitHub OIDC, and
+the workflow enforces version lockstep between `package.json` and
+`server.json`).
+
 _Shamwari_ = "friend" in Shona. Nyuchi is part of the **Bundu
 Foundation** ecosystem; the design system is **Mzizi**
 (`mzizi.dev`), consumed via `@bundu/ui` tokens.
