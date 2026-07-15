@@ -1,0 +1,114 @@
+---
+title: Sign-in with WorkOS AuthKit
+description: The hosted sign-in doctrine — one WorkOS environment, per-app AuthKit applications, required MFA, and the shared session that gives continuous sign-in across every Nyuchi and Mukoko app.
+sidebar:
+  label: Hosted sign-in (AuthKit)
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+  **Never build your own sign-in form.** All user authentication goes through the
+  **WorkOS-hosted AuthKit page**. The hosted page owns the entire flow — Magic
+  Auth, passwords, passkeys, and the environment-required **MFA step-up** — and
+  maintains the shared session that gives continuous sign-in across apps.
+  (Owner doctrine 2026-07-09; this supersedes the earlier inline-form
+  experiment, whose hand-rolled MFA step-up is what kept breaking sign-in.)
+</Aside>
+
+## Why hosted
+
+Two properties fall out of the hosted page that no embedded form can replicate:
+
+1. **MFA that always works.** The WorkOS environment enforces `MFA = Required`,
+   so _every_ sign-in hits the step-up. The hosted page handles TOTP enrolment
+   and challenge natively. An embedded form has to re-implement that flow with
+   the `multiFactorAuth` primitives — fragile custom code on every user's
+   critical path.
+2. **Continuous sign-in across apps.** All products are AuthKit applications in
+   the **same WorkOS environment**, so the hosted page keeps **one session on
+   the auth domain**. A user signed in on one app is silently re-authenticated
+   when any other app redirects to the hosted page — no credentials, no MFA
+   re-prompt within the session window.
+
+## Environment layout
+
+One production WorkOS environment; each product is its **own AuthKit
+application** with its own client ID. Session continuity comes from the shared
+environment-level hosted session — **not** from sharing client IDs.
+
+| Application | Client | Primary surface |
+|---|---|---|
+| Nyuchi Console (default app) | `client_01KQBBSMQT…` | `platform.nyuchi.com` |
+| Mukoko News | `client_01KV2G41CH…` | `news.mukoko.com` |
+| Mukoko Weather | `client_01KWAQ1EAP…` | `weather.mukoko.com` |
+| Mukoko | `client_01KV2G518H…` | `www.mukoko.com` |
+| Mukoko Events | `client_01KV2G5FE7…` | Nhimbe events API |
+
+<Aside type="danger">
+  **Each app must use its own client ID.** Redirect URIs are registered
+  per-application, so pointing an app's `WORKOS_CLIENT_ID` at another app's
+  client makes WorkOS reject the authorize request outright. This exact
+  misconfig (News running with the Console client) broke production sign-in on
+  news.mukoko.com — always verify the env var against the app's registered
+  redirect URI.
+</Aside>
+
+## The integration pattern (Next.js)
+
+`nyuchi/mukoko-news` is the reference implementation
+(`@workos-inc/authkit-nextjs`). Its `auth.md` is the authoritative trust model;
+the shape every AuthKit web app should follow:
+
+- **`/sign-in`** — the single sign-in entry point. Validates `returnTo`
+  (root-relative only), sends signed-in users straight through, and redirects
+  everyone else to `/auth/login`. A callback failure (`?error=…`) renders a
+  **manual-retry error card** — never an automatic bounce back into the flow,
+  which would loop on a persistent failure.
+- **`/auth/login`** — the AuthKit **initiate-login endpoint** (set it as the
+  application's `initiateLoginUri`) and the **only** `getSignInUrl()` call
+  site. 307s into a fresh hosted sign-in; also used by IdP-initiated flows and
+  hosted-page restarts.
+- **`/auth/callback`** — the OAuth return path, hardened with
+  `handleAuth({ onError })` so a bad/missing `code` or a failed exchange
+  redirects to `/sign-in?error=…` instead of a 500.
+- **Middleware** — AuthKit session-refresh only. Public routes stay public;
+  private surfaces are gated **server-side** (`withAuth()` + role checks in
+  the layout/page), never by cookie presence in middleware.
+
+<Aside type="tip">
+  **`getSignInUrl()` writes the PKCE/state cookie**, and Next.js only allows
+  cookie writes in a Server Action or Route Handler. Calling it while rendering
+  a page **throws** (`Cookies can only be modified in a Server Action or Route
+  Handler`) — usually silently, inside a try/catch, leaving a dead sign-in
+  page. Keep it in the `/auth/login` Route Handler and nowhere else.
+</Aside>
+
+### Per-app configuration checklist
+
+For each AuthKit application (WorkOS dashboard) and its deployment:
+
+1. `WORKOS_CLIENT_ID` = **this app's** client ID (see the warning above).
+2. `WORKOS_API_KEY` = a key issued for this application.
+3. The deployment's callback URL is a registered **redirect URI** on the app.
+4. `initiateLoginUri` points at the app's `/auth/login` endpoint (and that
+   route exists — an unset or 404ing initiate-login URI breaks IdP-initiated
+   and restarted flows).
+5. Logout URIs registered; `WORKOS_COOKIE_PASSWORD` set (32+ chars).
+
+## The backend variant (Console / API gateway)
+
+`nyuchi/mukoko-platform` consumes the same hosted page via its FastAPI
+backend: `GET /v1/auth/workos/login` builds the AuthKit authorization URL,
+the callback exchanges the code server-side, upserts `identity.person`, and
+mints the **platform JWT** (HS256, signed with the Supabase JWT secret) that
+the Console and RLS consume. Same hosted session, different token shape —
+see the platform repo's `CLAUDE.md`.
+
+## Authorization is separate
+
+AuthKit answers _who you are_. What you may do is decided per product,
+server-side, from verified claims — e.g. Mukoko News resolves RBAC tiers from
+WorkOS role + permissions **scoped to the platform-team organisation**
+(permission slugs are environment-wide, so unscoped checks would leak access
+across orgs). Never gate on claims the client asserts.
