@@ -1,0 +1,60 @@
+---
+title: Venue verification
+description: The four-tier Kweli verification ladder, the claim flow, community vouches, and where verification state lives in the graph.
+sidebar:
+  label: Verification
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Verification is how a venue proves who it is. It covers **all entity types** — schools, NGOs, government offices, media organizations, companies, and parks all go through the same flow, not just hospitality.
+
+## The four-tier ladder
+
+Each tier maps to a mineral color — this is the `nyuchi-verified-badge` contract, and every app in the ecosystem renders the badge the same way.
+
+| Tier | Name | Mineral | How it is earned |
+|------|------|---------|------------------|
+| 1 | Community | Terracotta | Community members vouch for the venue's operator |
+| 2 | Identity (OTP) | Cobalt | The operator verifies contact ownership via OTP |
+| 3 | Government | Gold | Checked against an official government registry |
+| 4 | Licensed | Tanzanite | Holds a licence from the relevant regulator |
+
+## Where verification state lives
+
+- **Current tier:** the `bundu.verificationTier` sub-object, carried by place, person, **and** entity documents. This is the single source of truth — apps read it, they never recompute it.
+- **Audit trail:** `entity.verifications` — one record per tier change with `verificationType`, `verificationMethod`, `tierBefore`/`tierAfter`, and evidence. Read-only for Kweli.
+
+## The claim flow
+
+A representative claims a venue before verification can proceed:
+
+1. The representative submits a claim — `POST /api/claims`.
+2. A pending row is written to `entity.representativeClaims` (`claimantPersonId`, `entityId`, `claimedRole`, `status`, `evidenceUrl`).
+3. An admin approves or rejects the claim in the Kweli dashboard.
+
+Approved claims give the claimant a management role on the entity; verification then proceeds up the tier ladder.
+
+## Community vouches
+
+Signed-in users can vouch for a venue's operator — this is the evidence base for **tier 1 (Community)**.
+
+- `POST /api/vouches` writes to `engagement.vouches`.
+- Each vouch declares a relationship via `vouchingType`:
+
+| `vouchingType` | Meaning |
+|----------------|---------|
+| `personal_knowledge` | I personally know the operator |
+| `long_term_customer` | I have been a customer over time |
+| `business_partner` | I do business with them |
+| `community_member` | We are part of the same community |
+| `neighbor` | I am located nearby |
+| `professional_endorsement` | Professional endorsement of their work |
+
+Enough **active** vouches satisfy the `community_attestation` verification method toward tier 1.
+
+Owners can also publish a **community verification request** (`POST /api/verification-requests`) — a public call for vouches shown on the venue page.
+
+<Aside type="tip">
+  Sibling apps that need to display or trigger verification should read the [cross-app verification how-to](/kweli/cross-app-verification/) — never build a parallel flow.
+</Aside>

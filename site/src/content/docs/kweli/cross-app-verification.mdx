@@ -1,0 +1,49 @@
+---
+title: Cross-app verification
+description: How sibling Mukoko apps (Nhimbe, BushTrade, News, …) verify venues by deep-linking to the Kweli gateway instead of building their own flow.
+sidebar:
+  label: Cross-app how-to
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+  **Never build your own venue verification.** Kweli is the ecosystem's single verification surface. Sibling apps only _read_ `bundu.verificationTier` from the graph and render the mineral badge; anything that changes verification state happens on Kweli.
+</Aside>
+
+## The verify gateway
+
+When a venue on your app needs to prove who it is, deep-link the user to the Kweli gateway:
+
+```text
+https://kweli.mukoko.com/[locale]/verify?entity=<entityId>
+https://kweli.mukoko.com/[locale]/verify?place=<placeId>&source=<yourapp>
+```
+
+| Query param | Required | Meaning |
+|-------------|----------|---------|
+| `entity` | one of `entity`/`place` | The `entity.entities` UUID to verify |
+| `place` | one of `entity`/`place` | The `places.places` UUID — the gateway resolves the venue's entity via `ownerEntityId` |
+| `source` | no | Your app's identifier (e.g. `nhimbe`, `bushtrade`) for attribution |
+
+The gateway resolves the venue, shows the current verification tier, the claim action for representatives, and the community vouch panel for everyone else.
+
+## Rendering the badge
+
+Read `bundu.verificationTier` from the venue's graph document and render the mineral-tiered badge (the `nyuchi-verified-badge` contract): 1 Community/Terracotta, 2 Identity/Cobalt, 3 Government/Gold, 4 Licensed/Tanzanite. The badge is **read-only** in your app — see the [tier ladder](/kweli/verification/#the-four-tier-ladder).
+
+## Example: integrating from Nhimbe
+
+An event on Nhimbe is hosted at a venue. Nhimbe shows the venue's badge and offers a verify CTA when the venue is unverified:
+
+```tsx
+// Badge: read-only, straight from the graph document
+<VerifiedBadge tier={venue.bundu?.verificationTier} />
+
+// CTA: deep-link to the Kweli gateway — no local flow
+const verifyUrl =
+  `https://kweli.mukoko.com/${locale}/verify` +
+  `?place=${venue.id}&source=nhimbe`;
+```
+
+That is the entire integration: one read (`bundu.verificationTier`) and one link. When the operator completes verification on Kweli, the tier updates in the graph and Nhimbe's badge reflects it on the next read.

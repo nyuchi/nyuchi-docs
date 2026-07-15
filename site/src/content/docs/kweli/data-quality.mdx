@@ -1,0 +1,42 @@
+---
+title: Seeding and data quality
+description: How venues enter the graph from OpenStreetMap, the junk-name policy, non-Latin names, and the category taxonomy.
+sidebar:
+  label: Data quality
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Seeding
+
+Venues are seeded from **OpenStreetMap**:
+
+- `/api/bars/seed` — the admin bootstrap route (legacy name), which upserts OSM-derived places directly into `places.places`.
+- The platform **Fundi** worker — city-by-city seeding at scale across the continent.
+
+Every seeded place gets an `ownerEntityId`: a tier-0 organization is auto-created in `entity.entities` for each place, so ownership edges exist from day one and the claim flow always has a target.
+
+## Junk-name policy
+
+Some OSM records carry names that are not names — `"."`, `"8318"`, stray punctuation. The rule:
+
+- A name containing **no letters in any script** is junk. It is seeded with `status: 'flagged'` and `isActive: false`, queued for admin review, and **never published live**.
+- A name containing letters in **any** real script passes — Arabic, Shona, Ndebele, Portuguese, and every other script are valid.
+
+<Aside type="note">
+  Non-Latin names are correct data, not corruption. Arabic names in Egypt, Morocco, and Algeria and Portuguese names in Mozambique are exactly what the graph should hold. Never "clean" a name because of its script.
+</Aside>
+
+## Category taxonomy
+
+The taxonomy lives in `places.categories` and maps each `categorySlug` to one or more schema.org `@type` values via `schemaOrgType`. Examples:
+
+| `categorySlug` | schema.org `@type`(s) |
+|----------------|------------------------|
+| `restaurants` | `Restaurant`, `FoodEstablishment` |
+| `national-parks` | `Park`, `TouristAttraction` |
+| `tech-companies` | `Organization` |
+| `education` | `EducationalOrganization` |
+| `landmarks` | `LandmarksOrHistoricalBuildings` |
+
+Places reference the taxonomy via `primaryCategoryId` and `secondaryCategoryIds` — categories are never duplicated onto place documents.
