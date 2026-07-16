@@ -8,8 +8,9 @@ actually competing with — Trustpilot, Google Business Profile (GBP) /
 Maps, Yelp, Foursquare, TripAdvisor, the legacy African directories
 (Brabys, Yellosa, Yellow Pages Kenya/SA), and Jiji's classifieds
 encroachment. Four lenses: **doing well**, **missing**, **bugs**, and
-**steal**. Audited July 2026 against the live codebase (branch
-`claude/claude-md-docs-n16yru`) and current competitor feature sets.
+**steal**. First audited July 2026; **re-scored mid-July 2026** after
+the P0 wave (barstool #85) and P1 wave (barstool #86) shipped every
+P0 and P1 from the original priority order.
 
 ## The verdict in one paragraph
 
@@ -19,12 +20,15 @@ type (schools, NGOs, parks, government offices — not just businesses),
 a verification ladder that works **without formal premises** (GBP's
 video-default verification requires signage and a till), a trust badge
 that **travels across an ecosystem**, African-language locales, or
-agent discoverability for African entities. But the *execution* today
-is far behind the position: the review loop is a disabled button, the
-browse hierarchy (city × category pages — the incumbents' entire SEO
-engine) doesn't exist, owners can't edit their venues, and the
-verification product has no visible output because no entity carries a
-tier yet. The moat is real; the castle is scaffolding.
+agent discoverability for African entities. **The execution gap has
+now closed on the fundamentals**: the review loop is live, the browse
+hierarchy (54 countries × 567 provinces × 21 categories × 15,316
+venues — the incumbents' entire SEO engine) exists and is indexed,
+owners edit their venues in-app, the chrome speaks Shona and Ndebele,
+and verification renders wherever a tier exists. What separates Kweli
+from the incumbents now is **liquidity, not capability**: review
+volume, photos, vouches and claimed profiles. The moat is real; the
+castle is built; it needs residents.
 
 ## What we're doing well
 
@@ -61,92 +65,77 @@ African directories composite.
 
 | Capability | GBP | Yelp | Trustpilot | TripAdvisor | AfrDir | Jiji | **Kweli today** |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Search + filters (city/category/open-now/price) | ● | ● | ○ | ● | ◐ | ● | ◐ (search, tags, city, nearest) |
-| City × category landing pages (SEO engine) | — | ●● | ◐ | ●● | ◐ | ● | **○ none** |
-| Profile anatomy (photos/hours/menu/Q&A/posts/booking) | ● | ● | ○ | ● | ○ | ◐ | ◐ (thin: no hours/phone render, no Q&A/booking) |
-| Reviews written by users | ● | ● | ● | ● | ○ | ◐ | **○ disabled button** |
-| Fake-review defense (published program) | ◐ | ● | ● | ●● | ○ | ○ | ○ (designed, not live) |
-| Owner claim → verify | ◐ video-default | ◐ | ◐ domain | ◐ | pay≈verified | phone | ● 4-tier (no visible output yet) |
+| Search + filters (city/category/open-now/price) | ● | ● | ○ | ● | ◐ | ● | ● (search, tags, city, nearest, browse facets) |
+| City × category landing pages (SEO engine) | — | ●● | ◐ | ●● | ◐ | ● | **● live** — `/{locale}/{country}/{region}/{category}` ×15,316 venues, JSON-LD + sitemap |
+| Profile anatomy (photos/hours/menu/Q&A/posts/booking) | ● | ● | ○ | ● | ○ | ◐ | ◐→● (hours/phone/website/WhatsApp/mobile-money render; no Q&A/booking/menus yet) |
+| Reviews written by users | ● | ● | ● | ● | ○ | ◐ | **● live loop** (volume still ~0 — the growth job) |
+| Fake-review defense (published program) | ◐ | ● | ● | ●● | ○ | ○ | ○ (designed, not published) |
+| Owner claim → verify | ◐ video-default | ◐ | ◐ domain | ◐ | pay≈verified | phone | ●● 4-tier, badge renders page+lists+MCP+analytics |
 | Badge portable across ecosystem | ○ | ○ | ○ | ○ | ○ | ○ | **●● unique** |
 | Non-business entities | ◐ pins only | ○ | ○ | ◐ tourism | ○ | ○ | **●● unique** |
-| Owner dashboard + analytics | ● | ● | ● | ● | ○ | ● | ◐ (unreachable: roles empty) |
+| Owner dashboard + analytics | ● | ● | ● | ● | ○ | ● | ● (in-app venue editing on the platform API; open analytics) |
 | Embeddable badge/review widget | ◐ | ◐ | ●● TrustBox | ● | ○ | ○ | ○ |
-| Agent/MCP surface | ◐ Gemini-gated | ●● open MCP | ○ | ○ | ○ | ○ | ● WebMCP + discovery |
-| African coverage/languages | ◐ / ○ | ○ | ○ | ◐ tourism | ◐ stale | ● / ○ | ● graph / ◐ (sn/nd routes serve English) |
+| Agent/MCP surface | ◐ Gemini-gated | ●● open MCP | ○ | ○ | ○ | ○ | ●● own `/mcp` + WebMCP + OAuth discovery + open stats |
+| African coverage/languages | ◐ / ○ | ○ | ○ | ◐ tourism | ◐ stale | ● / ○ | ● graph / ● chrome in sn/nd (content-level translation pending) |
 
 ## What's missing (table stakes, ranked by impact)
 
-1. **Working reviews.** The "Vibe Check" submit button is permanently
-   disabled and review bodies are mapped to `null` — a review platform
-   where nobody can review. The platform's E2E block was lifted; the
-   app never caught up.
-2. **The browse hierarchy.** `/en/zw/harare/restaurants` does not
-   exist. No country, region, or category pages at all — this is both
-   the #1 discovery gap and the #1 SEO gap (city×category pages are
-   how Yelp/TripAdvisor own the SERPs). The route plan, breadcrumb
-   builders, and taxonomy service all exist as dead code.
-3. **Owner venue editing.** `PATCH /api/venues` exists, but the only
-   edit UI is a card telling owners to visit the abandoned
-   `business.mukoko.com`. Hours and phone can't render anyway (bugs
-   below).
-4. **A working new-user funnel.** With `ALLOW_PERSON_AUTOPROVISION=false`
-   (the default), a fresh WorkOS sign-up loops forever between
-   dashboard and login; the settings page shows no email/name.
-5. **Visible verification.** No entity carries `bundu.verificationTier`
-   yet, so the badge — the product — renders nowhere. Backfilling even
-   tier-1 for claimed/vouched entities would make the kweli visible.
-6. **Real i18n.** `sn`/`nd` routes serve English; message files are
-   orphaned; 40+ links hardcode `/en`; no language switcher renders.
-   The African-languages differentiator is currently a URL prefix.
-7. **Retention primitives.** No saved lists, no follow (subscribe is a
-   "coming soon" orphan), no notifications, no user profile. Nothing
-   brings a visitor back.
-8. **Q&A and attributes.** GBP's accessibility/identity attributes
-   (wheelchair access, women-owned) and community Q&A are cheap,
-   high-trust profile modules nobody offers for Africa.
-9. **Photos at scale.** Most OSM-seeded venues have no imagery;
-   upload exists but there's no contribution prompt or mission loop.
-10. **An embeddable kweli badge.** Trustpilot's TrustBox is its whole
-    growth engine: businesses embed the widget, advertising the
-    platform on their own sites and feeding SERP stars.
+**Shipped since the first audit** (P0 wave #85 + P1 wave #86):
+✅ working reviews (Vibe Check → platform API, plaintext bodies render)
+· ✅ the browse hierarchy (country/region/category/venue pages, JSON-LD,
+sitemap, 301s from `/bars/[id]`) · ✅ owner venue editing (in-app, on
+the platform API, deny-by-default authz) · ✅ the new-user funnel
+(AccountPending replaces the redirect loop) · ✅ visible verification
+(effective tier = max of place + owning entity, rendered on pages,
+lists, MCP and analytics) · ✅ real i18n (locale-aware links, rendered
+switcher, sn/nd chrome).
 
-## Bugs (broken today, verified in code)
+Still open, ranked:
 
-**Severity 1 — user-facing, every venue:**
-- JSON-LD `url`/`@id` omits the locale segment → every venue's
-  structured-data URL 404s (`lib/schema/bar.schema.ts:6`).
-- Telephone never renders: `getVenueById` hardcodes
-  `organization: null, local_business: null` while the page reads only
-  those; the doc's real `telephone` is dropped. The call action is
-  dead for all 1,567 venues.
-- Opening hours never render: the mapper hardcodes
-  `opening_hours_text: null` even though the seed writes OSM hours.
-- Sync buttons in the mobile nav and footer are shown to **every
-  visitor** but require admin → guaranteed "Sync failed" toast; the
-  admin Google-sync page 410s on every click.
+1. **Liquidity, not features.** Review volume ~0, most venues photo-less,
+   zero vouches, zero approved claims. The loops exist; they need
+   seeding (missions, contribution prompts, owner outreach).
+2. **Retention primitives.** No saved lists, no follow, no
+   notifications, no user profile. Nothing brings a visitor back.
+3. **Q&A and remaining attributes.** Mobile-money (`paymentAccepted`)
+   and WhatsApp CTA now render; GBP-style accessibility/identity
+   attributes (wheelchair access, women-owned) and community Q&A are
+   still missing.
+4. **Photos at scale.** Upload exists but there's no contribution
+   prompt or mission loop.
+5. **An embeddable kweli badge.** Trustpilot's TrustBox is its whole
+   growth engine: businesses embed the widget, advertising the
+   platform on their own sites and feeding SERP stars.
+6. **Content-level translation.** The chrome is sn/nd; venue
+   descriptions and editorial content are not (graph `translations`
+   sub-objects are unpopulated).
 
-**Severity 2 — funnel and locale:**
-- New-user auth redirect loop (autoprovision default) — see above.
-- Hardcoded `/en` in 40+ links ejects `sn`/`nd` users from their
-  locale; `BarCard` links `/en/bars/…` from every locale.
-- WebMCP `open_venue` navigates by slug but the route only resolves by
-  UUID → agent deep-links 404. There is no slug route at all.
-- `/verify?entity=` filters `isActive: true` strictly, so places
-  missing the flag 404 on cross-app deep links.
+## Bugs
 
-**Severity 3 — trust and polish:**
-- SearchAction JSON-LD advertises `?q=` which the home page ignores.
-- Breadcrumbs violate the no-Home doctrine and emit degenerate
-  JSON-LD (three items pointing at the home URL).
-- Default schema type `BarOrRestaurant` is not a valid schema.org type.
-- The venue page `Promise.all`s side-collection reads without
-  per-section catches — one engagement-DB hiccup 500s the whole page.
-- Legacy `mukoko_token` fallback decodes an **unverified** JWT and
-  trusts its `sub` as a person UUID — an auth-bypass seam; the cookie
-  path should be deleted, not kept as fallback.
-- Help page documents features that don't exist ("Write a Review"
-  button); 404 page uses a beer icon; sitemap lists `sn`/`nd`
-  duplicates that canonicalize to `/en`; no `loading.tsx` anywhere.
+**All bugs from the first audit are fixed and verified** across the
+P0 wave (#85) and P1 wave (#86):
+
+- **Severity 1** (every venue): locale-correct JSON-LD `url`/`@id` on
+  canonical hierarchy URLs; telephone/website/hours wired through the
+  mappers and rendering; visitor-facing sync buttons removed and the
+  410 admin sync page rebuilt on the real OSM seed.
+- **Severity 2** (funnel + locale): AccountPending page replaces the
+  autoprovision redirect loop; locale-aware links everywhere (cards
+  included); `open_venue` deep-links resolve by slug **and** UUID via
+  the `/bars/[id]` 301 resolver; `/verify` treats a missing `isActive`
+  flag as active.
+- **Severity 3** (trust + polish): working `?q=` SearchAction without
+  losing home ISR; doctrine-correct linked breadcrumbs with valid
+  BreadcrumbList; valid `LocalBusiness` default type + ISO
+  `addressCountry`; per-section catches on all side-collection reads
+  (one engagement-DB hiccup can't 500 a venue page); the legacy
+  `mukoko_token` unverified-JWT seam **deleted** (`getPersonId` is
+  WorkOS `withAuth()`-only); honest help page; en-only sitemap;
+  route-level loading states; padded maskable app icons (web-app
+  installs no longer clip).
+
+New findings get triaged through the review gate on every merge
+(`docs/review.md` in the repo) rather than accumulating here.
 
 ## What to steal (per competitor)
 
@@ -202,23 +191,61 @@ African directories composite.
 
 ## Priority order
 
-**P0 — make the core loop real:** review submission + plaintext
-bodies; fix telephone/hours/JSON-LD-URL mappers; kill the
-visitor-facing sync buttons and the 410 sync page; fix the
-autoprovision funnel loop.
+**P0 — make the core loop real: ✅ shipped** (barstool #85). Review
+submission + plaintext bodies; telephone/hours/JSON-LD-URL mappers;
+visitor-facing sync buttons and the 410 sync page; the autoprovision
+funnel loop.
 
-**P1 — build the engine:** the `[country]/[region]/[category]/[slug]`
-browse hierarchy with slug routes and 301s from `/bars/[id]`; owner
-venue editing on the existing PATCH API; backfill tier-1 verification
-so badges render; real i18n (locale-aware links + rendered switcher).
+**P1 — build the engine: ✅ shipped** (barstool #86). The
+`[country]/[region]/[category]/[slug]` browse hierarchy with slug
+resolution and 301s from `/bars/[id]`; owner venue editing on the
+PATCH API (platform-API write, deny-by-default authz); verification
+rendered wherever a tier exists — page, lists, MCP and analytics give
+one trust answer (no tiers were fabricated: backfill waits on real
+vouches/claims); real i18n (locale-aware links + rendered switcher +
+sn/nd chrome). Three P2 items landed early: WhatsApp CTA, mobile-money
+attributes, and `kweli.mukoko.com/mcp` (+ server card, open stats).
 
-**P2 — compound the moat:** WhatsApp CTA + mobile-money attributes;
-embeddable kweli badge; Q&A + attributes; `kweli.mukoko.com/mcp`
-modeled on this docs site's endpoint; saved lists/follows; transparency
-report; FSQ OS Places conflation for coverage beyond Zimbabwe.
+**P2 — compound the moat (the active list):**
 
-**Biggest external threats:** Google Maps' Gemini layer passively
-improving African coverage, and Jiji/WhatsApp absorbing the "just find
-me a business" job informally. Both are beatable only by owning what
-they structurally can't: verified identity for every entity type, in
-local languages, portable across an ecosystem.
+1. **Seed liquidity** — contribution missions (ubuntu schema), owner
+   outreach to claim/verify, photo prompts; the loops are built and
+   empty.
+2. **Embeddable kweli badge** — the TrustBox-style growth loop.
+3. **Q&A + accessibility/identity attributes.**
+4. **Saved lists / follows / notifications** — retention.
+5. **Transparency report** — the ritual for a product named "truth";
+   pair with a Bayesian time-decayed trust score before volume grows.
+6. **FSQ OS Places conflation** — coverage beyond the OSM seed.
+7. **Content-level sn/nd translation** (+ Swahili as the 4th locale).
+
+**Biggest external threats:** unchanged — Google Maps' Gemini layer
+passively improving African coverage, and Jiji/WhatsApp absorbing the
+"just find me a business" job informally. Both are beatable only by
+owning what they structurally can't: verified identity for every
+entity type, in local languages, portable across an ecosystem.
+
+## Goal-check: are we ahead?
+
+Post-P1, against each incumbent's core weapon:
+
+- **vs GBP/Maps** — they still have no claim path for most informal
+  African businesses and no non-commercial entity pages; we now match
+  their profile anatomy basics (hours, phone, website, WhatsApp,
+  payments, inline map) and beat them on verification model, agent
+  surface and languages. They beat us on data density and habit.
+- **vs Yelp/TripAdvisor** — their SEO engine (city×category pages) is
+  no longer a structural advantage; ours is live with cleaner JSON-LD.
+  They beat us on review volume and fraud-defense track record — the
+  liquidity gap is the whole fight.
+- **vs Trustpilot** — we match "reviews + verified business" and beat
+  them on physical-place coverage and Africa; their TrustBox embed
+  loop remains the one growth mechanic we haven't copied (P2 #2).
+- **vs the directories/Jiji** — structurally ahead on everything except
+  Jiji's phone-first liquidity playbook, which is a marketing motion,
+  not a product gap.
+
+**Net: the capability scoreboard now favors Kweli in its arena; every
+remaining deficit is volume.** Rerun this goal-check after the first
+liquidity push and update the scoreboard honestly — including the
+rows where incumbents still win.
