@@ -109,6 +109,7 @@ export default defineConfig({
                 'integrations/quickstart',
                 'integrations/authentication',
                 'integrations/api-gateway',
+                'integrations/docs-mcp',
               ],
             },
             {
@@ -158,6 +159,7 @@ export default defineConfig({
             'kweli/cross-app-verification',
             'kweli/data-quality',
             'kweli/design-system',
+            'kweli/competitive-audit',
           ],
         },
         {
