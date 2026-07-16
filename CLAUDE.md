@@ -15,7 +15,15 @@ packages that are shared with the companion repo
 | -------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `site`               | `site/`                | The docs website — Astro 6 + Starlight + Svelte 5. Private.                                                                                                                             |
 | `nyuchi-docs-search` | `nyuchi-docs-search/`  | Publishable npm package (MIT): a Mintlify-style `⌘K`/`Ctrl+K` search modal (Pagefind-backed) with an "Ask AI" tab. Consumed here via `workspace:*` and by `bundu-docs` from the registry — this shared package is the reason the monorepo exists. |
-| `shamwari-docs-ai`   | `shamwari-docs-ai/`    | Cloudflare Worker — thin proxy in front of Cloudflare **AI Search** that powers the Ask-AI tab for both docs sites. Keeps the API token server-side, adds CORS, streams SSE.            |
+| `shamwari-docs-ai`   | `shamwari-docs-ai/`    | Cloudflare Worker — thin proxy in front of Cloudflare **AI Search** that powers the Ask-AI tab for both docs sites (CORS, SSE), **plus the docs MCP server at `docs.nyuchi.com/mcp`** (read tools over the same AI Search index; feedback/issue write tools into the `FEEDBACK` KV namespace, optional `GITHUB_TOKEN` secret files real issues). |
+
+A fourth package, `nyuchi-docs-mcp/`, is the published npm stdio
+bridge to the hosted MCP endpoint (MCP registry name
+`io.github.nyuchi/nyuchi-docs`; manifest `server.json` at the repo
+root; released via `.github/workflows/publish-mcp.yml` — npm publish
+needs the `NPM_TOKEN` secret, registry publish uses GitHub OIDC, and
+the workflow enforces version lockstep between `package.json` and
+`server.json`).
 
 _Shamwari_ = "friend" in Shona. Nyuchi is part of the **Bundu
 Foundation** ecosystem; the design system is **Mzizi**
@@ -129,7 +137,12 @@ docs.nyuchi.com (site)
 - Worker API: `POST /chat` with
   `{ messages: ChatMessage[], source?: 'nyuchi' | 'bundu' }`,
   responding with SSE frames `citations` / `token` / `done` /
-  `error`; `GET /health`.
+  `error`; `GET /health`; `POST /mcp` — MCP Streamable HTTP
+  (JSON-RPC) with tools `search_docs` / `ask_docs` / `read_page` /
+  `submit_feedback` / `raise_issue` (`src/mcp.ts`, routed from
+  `docs.nyuchi.com/mcp*` via `wrangler.toml` routes; server card at
+  `site/public/.well-known/mcp/server-card.json`, guide at
+  `integrations/docs-mcp.mdx`).
 - Worker config (`shamwari-docs-ai/wrangler.toml`): vars `TOP_K`,
   `ALLOWED_ORIGINS`; AI Search binding `NYUCHI_DOCS`. The
   `BUNDU_DOCS` binding is **commented out** (blocked on

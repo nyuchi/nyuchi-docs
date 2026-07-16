@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.nyuchi/nyuchi-docs",
+  "description": "Search, read, and ask the Nyuchi engineering + product docs (docs.nyuchi.com), and send feedback or raise issues about them.",
+  "repository": {
+    "url": "https://github.com/nyuchi/nyuchi-docs",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "websiteUrl": "https://docs.nyuchi.com/integrations/docs-mcp/",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://docs.nyuchi.com/mcp"
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "nyuchi-docs-mcp",
+      "version": "0.1.0",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

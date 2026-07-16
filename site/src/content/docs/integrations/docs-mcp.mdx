@@ -1,0 +1,87 @@
+---
+title: Docs MCP server
+description: Read, search, and send feedback to the Nyuchi docs from any MCP-capable agent via docs.nyuchi.com/mcp.
+---
+
+The documentation site is itself an MCP server. Any Model Context
+Protocol client (Claude, IDE agents, custom tooling) can connect to
+**`https://docs.nyuchi.com/mcp`** (Streamable HTTP transport, JSON-RPC
+2.0 over `POST`) to read these docs and — crucially — write back:
+feedback, corrections, and issues flow straight to the docs team.
+
+The endpoint is served by the `shamwari-docs-ai` Cloudflare Worker (a
+path route on the docs domain) and rides the same Cloudflare AI Search
+index that powers the Ask-AI tab, so agents and humans read from one
+corpus. A server card is published at
+`/.well-known/mcp/server-card.json` for discovery.
+
+## Tools
+
+| Tool | Kind | What it does |
+| --- | --- | --- |
+| `search_docs` | read | Keyword/semantic search; returns titles, URLs and snippets |
+| `ask_docs` | read | Synthesized answer grounded in the docs, with citations |
+| `read_page` | read | Full readable text of any `docs.nyuchi.com` page |
+| `submit_feedback` | write | Correction / confusing / missing / praise — stored for the docs team |
+| `raise_issue` | write | Actionable problem; files a GitHub issue on `nyuchi/nyuchi-docs` when the `GITHUB_TOKEN` secret is configured, otherwise queued |
+
+Write tools are unauthenticated by design (feedback friction kills
+feedback) but bounded: message sizes are capped, everything is tagged
+`via: mcp`, and queued items land in the `shamwari-docs-feedback` KV
+namespace for triage.
+
+## Connecting
+
+Stdio clients — via the published npm bridge
+([`nyuchi-docs-mcp`](https://www.npmjs.com/package/nyuchi-docs-mcp)):
+
+```bash
+claude mcp add nyuchi-docs -- npx nyuchi-docs-mcp
+```
+
+The server is listed on the official MCP registry as
+**`io.github.nyuchi/nyuchi-docs`** (manifest: `server.json` at the
+repo root), so registry-aware clients can install it by name.
+
+Claude (or any MCP client that supports Streamable HTTP) can skip the
+package and connect directly:
+
+```json
+{
+  "mcpServers": {
+    "nyuchi-docs": {
+      "type": "http",
+      "url": "https://docs.nyuchi.com/mcp"
+    }
+  }
+}
+```
+
+Or probe it by hand:
+
+```bash
+curl -s https://docs.nyuchi.com/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+## Operations
+
+- **Code:** `shamwari-docs-ai/src/mcp.ts` (tests in `tests/mcp.test.ts`);
+  the npm stdio bridge lives in `nyuchi-docs-mcp/`.
+- **Releases:** publish a GitHub release (tag `mcp-vX.Y.Z`) — the
+  `publish-mcp.yml` workflow tests the bridge, publishes
+  `nyuchi-docs-mcp` to npm (`NPM_TOKEN` secret), and publishes
+  `server.json` to the MCP registry via GitHub OIDC. Keep the version
+  in `nyuchi-docs-mcp/package.json` and `server.json` in lockstep —
+  the workflow enforces it.
+- **Routing:** `wrangler.toml` routes `docs.nyuchi.com/mcp*` to the
+  worker; the static docs site worker keeps every other path. The
+  worker is also reachable at
+  `shamwari-docs-ai.nyuchi.workers.dev/mcp`.
+- **Feedback triage:** `wrangler kv key list --namespace-id 9c5af0b28d5c4706840c492b2e3f47e8`
+  (keys are `feedback:<iso-ts>:<id>` and `issue:<iso-ts>:<id>`).
+- **GitHub issues:** set the optional secret once —
+  `wrangler secret put GITHUB_TOKEN` (needs `issues:write` on
+  `nyuchi/nyuchi-docs`) — and `raise_issue` files real issues labeled
+  `docs-feedback` + `via-mcp`.

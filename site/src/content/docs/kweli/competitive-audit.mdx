@@ -1,0 +1,224 @@
+---
+title: Competitive audit
+description: Mukoko Kweli vs Trustpilot, Google Business Profile, Yelp, Foursquare, TripAdvisor and the African directories — what we do well, what's missing, what's broken, and what to steal.
+---
+
+Full-site audit of `kweli.mukoko.com` against the platforms we are
+actually competing with — Trustpilot, Google Business Profile (GBP) /
+Maps, Yelp, Foursquare, TripAdvisor, the legacy African directories
+(Brabys, Yellosa, Yellow Pages Kenya/SA), and Jiji's classifieds
+encroachment. Four lenses: **doing well**, **missing**, **bugs**, and
+**steal**. Audited July 2026 against the live codebase (branch
+`claude/claude-md-docs-n16yru`) and current competitor feature sets.
+
+## The verdict in one paragraph
+
+Kweli's *strategic position* is genuinely unoccupied: no incumbent
+offers one canonical, claimable, verifiable page for **every** entity
+type (schools, NGOs, parks, government offices — not just businesses),
+a verification ladder that works **without formal premises** (GBP's
+video-default verification requires signage and a till), a trust badge
+that **travels across an ecosystem**, African-language locales, or
+agent discoverability for African entities. But the *execution* today
+is far behind the position: the review loop is a disabled button, the
+browse hierarchy (city × category pages — the incumbents' entire SEO
+engine) doesn't exist, owners can't edit their venues, and the
+verification product has no visible output because no entity carries a
+tier yet. The moat is real; the castle is scaffolding.
+
+## What we're doing well
+
+- **Any-entity canon.** One canonical page per place — park, school,
+  NGO, tech company — backed by the knowledge graph's
+  single-source-of-truth rule. Foursquare proved POI canonicalization
+  is the durable asset; GBP still fights duplicate listings; nobody
+  covers non-commercial entities. This is the core differentiator.
+- **A verification model built for African reality.** The four-tier
+  ladder (community/Terracotta → OTP/Cobalt → government/Gold →
+  licensed/Tanzanite) with community vouching at tier 1 is the only
+  model in the set that meets informal commerce (market stalls,
+  home-based services) where it is.
+- **Portable trust.** The kweli travels with the entity across the
+  Mukoko ecosystem (nhimbe events, news, marketplace). Every
+  incumbent's badge is confined to its own surface.
+- **Agent readiness.** OAuth discovery (RFC 9728/8414), `/auth.md`,
+  WebMCP tools. Only Yelp has anything comparable (its open-source MCP
+  server) — and Yelp has no African data.
+- **The technical spine.** Server-component-first rendering (cheap on
+  metered data), resilience/observability/rate-limiting primitives,
+  architecture rules enforced by tests, Mzizi design-system contracts,
+  real health probes, inline maps on every located venue.
+- **Sound trust posture by construction.** Reads from a shared graph,
+  writes through a platform API, verification decoupled from payment —
+  the structural opposite of the "extortion" (Trustpilot/Yelp
+  narratives) and "pay-to-rank" (TripAdvisor placements, directory
+  pay-to-list) reputations that dog this industry.
+
+## The scoreboard
+
+Condensed matrix (● strong ◐ partial ○ weak/none). "AfrDir" = legacy
+African directories composite.
+
+| Capability | GBP | Yelp | Trustpilot | TripAdvisor | AfrDir | Jiji | **Kweli today** |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Search + filters (city/category/open-now/price) | ● | ● | ○ | ● | ◐ | ● | ◐ (search, tags, city, nearest) |
+| City × category landing pages (SEO engine) | — | ●● | ◐ | ●● | ◐ | ● | **○ none** |
+| Profile anatomy (photos/hours/menu/Q&A/posts/booking) | ● | ● | ○ | ● | ○ | ◐ | ◐ (thin: no hours/phone render, no Q&A/booking) |
+| Reviews written by users | ● | ● | ● | ● | ○ | ◐ | **○ disabled button** |
+| Fake-review defense (published program) | ◐ | ● | ● | ●● | ○ | ○ | ○ (designed, not live) |
+| Owner claim → verify | ◐ video-default | ◐ | ◐ domain | ◐ | pay≈verified | phone | ● 4-tier (no visible output yet) |
+| Badge portable across ecosystem | ○ | ○ | ○ | ○ | ○ | ○ | **●● unique** |
+| Non-business entities | ◐ pins only | ○ | ○ | ◐ tourism | ○ | ○ | **●● unique** |
+| Owner dashboard + analytics | ● | ● | ● | ● | ○ | ● | ◐ (unreachable: roles empty) |
+| Embeddable badge/review widget | ◐ | ◐ | ●● TrustBox | ● | ○ | ○ | ○ |
+| Agent/MCP surface | ◐ Gemini-gated | ●● open MCP | ○ | ○ | ○ | ○ | ● WebMCP + discovery |
+| African coverage/languages | ◐ / ○ | ○ | ○ | ◐ tourism | ◐ stale | ● / ○ | ● graph / ◐ (sn/nd routes serve English) |
+
+## What's missing (table stakes, ranked by impact)
+
+1. **Working reviews.** The "Vibe Check" submit button is permanently
+   disabled and review bodies are mapped to `null` — a review platform
+   where nobody can review. The platform's E2E block was lifted; the
+   app never caught up.
+2. **The browse hierarchy.** `/en/zw/harare/restaurants` does not
+   exist. No country, region, or category pages at all — this is both
+   the #1 discovery gap and the #1 SEO gap (city×category pages are
+   how Yelp/TripAdvisor own the SERPs). The route plan, breadcrumb
+   builders, and taxonomy service all exist as dead code.
+3. **Owner venue editing.** `PATCH /api/venues` exists, but the only
+   edit UI is a card telling owners to visit the abandoned
+   `business.mukoko.com`. Hours and phone can't render anyway (bugs
+   below).
+4. **A working new-user funnel.** With `ALLOW_PERSON_AUTOPROVISION=false`
+   (the default), a fresh WorkOS sign-up loops forever between
+   dashboard and login; the settings page shows no email/name.
+5. **Visible verification.** No entity carries `bundu.verificationTier`
+   yet, so the badge — the product — renders nowhere. Backfilling even
+   tier-1 for claimed/vouched entities would make the kweli visible.
+6. **Real i18n.** `sn`/`nd` routes serve English; message files are
+   orphaned; 40+ links hardcode `/en`; no language switcher renders.
+   The African-languages differentiator is currently a URL prefix.
+7. **Retention primitives.** No saved lists, no follow (subscribe is a
+   "coming soon" orphan), no notifications, no user profile. Nothing
+   brings a visitor back.
+8. **Q&A and attributes.** GBP's accessibility/identity attributes
+   (wheelchair access, women-owned) and community Q&A are cheap,
+   high-trust profile modules nobody offers for Africa.
+9. **Photos at scale.** Most OSM-seeded venues have no imagery;
+   upload exists but there's no contribution prompt or mission loop.
+10. **An embeddable kweli badge.** Trustpilot's TrustBox is its whole
+    growth engine: businesses embed the widget, advertising the
+    platform on their own sites and feeding SERP stars.
+
+## Bugs (broken today, verified in code)
+
+**Severity 1 — user-facing, every venue:**
+- JSON-LD `url`/`@id` omits the locale segment → every venue's
+  structured-data URL 404s (`lib/schema/bar.schema.ts:6`).
+- Telephone never renders: `getVenueById` hardcodes
+  `organization: null, local_business: null` while the page reads only
+  those; the doc's real `telephone` is dropped. The call action is
+  dead for all 1,567 venues.
+- Opening hours never render: the mapper hardcodes
+  `opening_hours_text: null` even though the seed writes OSM hours.
+- Sync buttons in the mobile nav and footer are shown to **every
+  visitor** but require admin → guaranteed "Sync failed" toast; the
+  admin Google-sync page 410s on every click.
+
+**Severity 2 — funnel and locale:**
+- New-user auth redirect loop (autoprovision default) — see above.
+- Hardcoded `/en` in 40+ links ejects `sn`/`nd` users from their
+  locale; `BarCard` links `/en/bars/…` from every locale.
+- WebMCP `open_venue` navigates by slug but the route only resolves by
+  UUID → agent deep-links 404. There is no slug route at all.
+- `/verify?entity=` filters `isActive: true` strictly, so places
+  missing the flag 404 on cross-app deep links.
+
+**Severity 3 — trust and polish:**
+- SearchAction JSON-LD advertises `?q=` which the home page ignores.
+- Breadcrumbs violate the no-Home doctrine and emit degenerate
+  JSON-LD (three items pointing at the home URL).
+- Default schema type `BarOrRestaurant` is not a valid schema.org type.
+- The venue page `Promise.all`s side-collection reads without
+  per-section catches — one engagement-DB hiccup 500s the whole page.
+- Legacy `mukoko_token` fallback decodes an **unverified** JWT and
+  trusts its `sub` as a person UUID — an auth-bypass seam; the cookie
+  path should be deleted, not kept as fallback.
+- Help page documents features that don't exist ("Write a Review"
+  button); 404 page uses a beer icon; sitemap lists `sn`/`nd`
+  duplicates that canonicalize to `/en`; no `loading.tsx` anywhere.
+
+## What to steal (per competitor)
+
+- **Trustpilot →** the TrustBox growth loop (build an embeddable
+  kweli-badge widget), Bayesian time-decayed TrustScore so 3 reviews ≠
+  a 5.0, and publishing fake-review removal stats as marketing.
+- **GBP →** the attribute system (wheelchair access, women-owned —
+  map onto place sub-objects), free-forever owner tier as
+  distribution, "What's Happening" module (our blasts/events), Local
+  Guides points/levels as the blueprint for ubuntu missions, and
+  video-evidence UX ideas for tier-2/3 verification.
+- **Yelp →** the agent stack: an open **`/mcp` endpoint for
+  kweli.mukoko.com** modeled on `yelp-mcp` (NL request in, NL answer +
+  structured venue data out), aspect-level AI review insights, and
+  response-quality badges that reward owner engagement, not payment.
+- **TripAdvisor →** the annual public **Transparency Report** (fraud
+  blocked, reviews removed) — a perfect ritual for a product named
+  "truth" — plus per-dimension sub-ratings (our `engagement.ratings`
+  is already per-dimension) and community Q&A.
+- **Foursquare →** FSQ Open Source Places (100M POIs, Apache 2.0) as a
+  conflation/seed source for African coverage beyond OSM, and check-in
+  gamification mechanics.
+- **Jiji →** the liquidity playbook: free listing, phone-number-light
+  onboarding, WhatsApp-adjacent chat behavior, boosts that never gate
+  baseline visibility.
+- **African directories →** their surviving revenue insight: SMEs pay
+  for *presence services* (site, WhatsApp setup, SEO). An honest "get
+  verified + agent-discoverable" service tier monetizes the same
+  demand without pay-to-rank.
+
+## The Africa whitespace (nobody serves this)
+
+1. Claimable, verifiable pages for the non-commercial entity universe
+   (schools, clinics, NGOs, churches, government).
+2. Verification without formal premises — community vouching laddering
+   to OTP/government/licensed.
+3. Trust that ports across surfaces (the kweli).
+4. Content-level local languages (sn/nd now; Swahili is the obvious
+   4th locale for KE/TZ).
+5. Low-data delivery: SSR-first, light pages, offline tolerance,
+   USSD/SMS fallback for OTP verification.
+6. **WhatsApp-first workflows** — click-to-WhatsApp as a first-class
+   profile action, claim/verify OTP over WhatsApp, review collection
+   via WhatsApp links. GBP *removed* messaging in 2024; the seat is
+   empty.
+7. **Mobile-money attributes** — "accepts EcoCash / M-Pesa / MoMo" as
+   structured data (`commerce.paymentAccepted`), later deposits via
+   the wallet schema.
+8. Agent discoverability for African entities — as assistants become
+   the front door, African venues are invisible to them today.
+9. Documented honest monetization: "verification ≠ payment, ranking ≠
+   payment," backed by a transparency report.
+
+## Priority order
+
+**P0 — make the core loop real:** review submission + plaintext
+bodies; fix telephone/hours/JSON-LD-URL mappers; kill the
+visitor-facing sync buttons and the 410 sync page; fix the
+autoprovision funnel loop.
+
+**P1 — build the engine:** the `[country]/[region]/[category]/[slug]`
+browse hierarchy with slug routes and 301s from `/bars/[id]`; owner
+venue editing on the existing PATCH API; backfill tier-1 verification
+so badges render; real i18n (locale-aware links + rendered switcher).
+
+**P2 — compound the moat:** WhatsApp CTA + mobile-money attributes;
+embeddable kweli badge; Q&A + attributes; `kweli.mukoko.com/mcp`
+modeled on this docs site's endpoint; saved lists/follows; transparency
+report; FSQ OS Places conflation for coverage beyond Zimbabwe.
+
+**Biggest external threats:** Google Maps' Gemini layer passively
+improving African coverage, and Jiji/WhatsApp absorbing the "just find
+me a business" job informally. Both are beatable only by owning what
+they structurally can't: verified identity for every entity type, in
+local languages, portable across an ecosystem.

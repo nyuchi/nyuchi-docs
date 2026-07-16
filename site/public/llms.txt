@@ -48,3 +48,9 @@
 - Bundu Foundation product docs: https://docs.bundu.org
 - Nyuchi Africa: https://www.nyuchi.com
 - Sitemap: https://docs.nyuchi.com/sitemap-index.xml
+
+## Agents
+
+- MCP endpoint (read docs + send feedback/raise issues): https://docs.nyuchi.com/mcp
+- Server card: https://docs.nyuchi.com/.well-known/mcp/server-card.json
+- How to connect: https://docs.nyuchi.com/integrations/docs-mcp/
