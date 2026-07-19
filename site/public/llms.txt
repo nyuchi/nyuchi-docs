@@ -13,7 +13,14 @@
 - [Product workspaces](https://docs.nyuchi.com/platform/product-workspaces): How product surfaces are organised.
 - [Configuration](https://docs.nyuchi.com/platform/configuration/settings): Settings, sign-in, user management.
 - [Administration](https://docs.nyuchi.com/platform/administration/roles-permissions): Roles, permissions, audit logs.
-- [API](https://docs.nyuchi.com/platform/api/overview): Overview, authentication, security.
+
+## API Docs
+
+- [API overview](https://docs.nyuchi.com/api/overview): The versioned /v1 gateway and product namespaces.
+- [Authentication](https://docs.nyuchi.com/api/authentication): WorkOS AuthKit sign-in and the platform JWT.
+- [API keys](https://docs.nyuchi.com/api/api-keys): Console-managed client ID and secret pairings.
+- [Security](https://docs.nyuchi.com/api/security): Security and rate limits.
+- [Namespaces](https://docs.nyuchi.com/api/commerce): Commerce, Pay, Logistics, Lingo, News, Weather.
 
 ## Analytics
 
@@ -23,10 +30,9 @@
 
 ## Integrations
 
-- [Quickstart](https://docs.nyuchi.com/integrations/quickstart): Authentication and the API gateway.
+- [Quickstart](https://docs.nyuchi.com/integrations/quickstart): Authentication and integration basics.
 - [Connectors](https://docs.nyuchi.com/integrations/connectors/crm): CRM, data warehouse, messaging.
 - [Webhooks & events](https://docs.nyuchi.com/integrations/webhooks/configure): Configure, event types, retry policies.
-- [Nyuchi API](https://docs.nyuchi.com/integrations/nyuchi-api/overview): Commerce, Pay, Logistics, Lingo, News, Weather.
 
 ## Identity & Console
 

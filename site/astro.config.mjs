@@ -7,6 +7,20 @@ import { starlightDocsSearch } from 'nyuchi-docs-search/plugin';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://docs.nyuchi.com',
+  // API documentation consolidated into the top-level API Docs section.
+  redirects: {
+    '/platform/api/overview': '/api/overview',
+    '/platform/api/authentication': '/api/authentication',
+    '/platform/api/security': '/api/security',
+    '/integrations/api-gateway': '/api/overview',
+    '/integrations/nyuchi-api/overview': '/api/overview',
+    '/integrations/nyuchi-api/commerce': '/api/commerce',
+    '/integrations/nyuchi-api/pay': '/api/pay',
+    '/integrations/nyuchi-api/logistics': '/api/logistics',
+    '/integrations/nyuchi-api/lingo': '/api/lingo',
+    '/integrations/nyuchi-api/news': '/api/news',
+    '/integrations/nyuchi-api/weather': '/api/weather',
+  },
   integrations: [
     svelte(),
     starlight({
@@ -66,12 +80,30 @@ export default defineConfig({
                 'platform/administration/audit-logs',
               ],
             },
+          ],
+        },
+        {
+          label: 'API Docs',
+          collapsed: true,
+          items: [
             {
-              label: 'API',
+              label: 'Getting started',
               items: [
-                'platform/api/overview',
-                'platform/api/authentication',
-                'platform/api/security',
+                'api/overview',
+                'api/authentication',
+                'api/api-keys',
+                'api/security',
+              ],
+            },
+            {
+              label: 'Namespaces',
+              items: [
+                'api/commerce',
+                'api/pay',
+                'api/logistics',
+                'api/lingo',
+                'api/news',
+                'api/weather',
               ],
             },
           ],
@@ -110,7 +142,6 @@ export default defineConfig({
               items: [
                 'integrations/quickstart',
                 'integrations/authentication',
-                'integrations/api-gateway',
                 'integrations/docs-mcp',
               ],
             },
@@ -128,18 +159,6 @@ export default defineConfig({
                 'integrations/webhooks/configure',
                 'integrations/webhooks/event-types',
                 'integrations/webhooks/retry-policies',
-              ],
-            },
-            {
-              label: 'Nyuchi API',
-              items: [
-                'integrations/nyuchi-api/overview',
-                'integrations/nyuchi-api/commerce',
-                'integrations/nyuchi-api/pay',
-                'integrations/nyuchi-api/logistics',
-                'integrations/nyuchi-api/lingo',
-                'integrations/nyuchi-api/news',
-                'integrations/nyuchi-api/weather',
               ],
             },
           ],

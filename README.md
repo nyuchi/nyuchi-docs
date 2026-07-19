@@ -23,11 +23,13 @@ npm and points at the `nyuchi-docs-mcp` worker.
 ## Sections (`site/src/content/docs/`)
 
 - **`platform/`** — the product guide for the Nyuchi platform.
+- **`api/`** — API Docs: the `/v1` gateway, WorkOS authentication,
+  console-managed API keys, security, and the product namespaces.
 - **`analytics/`** — dashboards, reports, and connecting data sources.
 - **`kweli/`** — Mukoko Kweli product guides: verification, cross-app
   how-to, open data, data quality, design system.
 - **`mukoko-weather/`** — Mukoko Weather user guide and stations.
-- **`integrations/`** — connectors, webhooks, the API gateway, and the public Nyuchi API.
+- **`integrations/`** — connectors, webhooks, and the docs MCP server.
 - **`identity/`** — WorkOS, `identity.nyuchi.com`, SSO, JWTs.
 - **`console/`** — the Nyuchi Console at `platform.nyuchi.com`.
 - **`mzizi-tools/`** — `mzizi-mcp`, `mzizi-sdk`, `mzizi-skills`.
