@@ -170,10 +170,9 @@ docs.nyuchi.com (site)
 
 ## Gotchas
 
-- `site/.env.example` points `PUBLIC_SHAMWARI_AI_URL` at
-  `shamwari-docs-ai.nyuchi-com.workers.dev`, while the READMEs use
-  `shamwari-docs-ai.nyuchi.workers.dev` — one of the two is wrong;
-  verify against the deployed worker before relying on either.
+- The deployed worker is `shamwari-docs-ai.nyuchi.workers.dev`
+  (verified live; the old `nyuchi-com` variant in `.env.example` was
+  wrong and has been fixed — don't reintroduce it).
 - Build outputs (`dist/`, `.astro/`, `.wrangler/`, `.svelte-kit/`)
   are gitignored; building `site` in isolation without first
   building `nyuchi-docs-search` fails — use the root/site `build`
@@ -181,5 +180,6 @@ docs.nyuchi.com (site)
 - The README notes the `docs.nyuchi.com` apex may still point at the
   legacy Mintlify-on-Vercel deployment until cutover completes.
 - The sidebar in `astro.config.mjs` and the sections listed in the
-  root README can drift (e.g. Mukoko Weather appears in the sidebar
-  but not the README) — the Astro config is the source of truth.
+  root README can drift — the Astro config is the source of truth.
+  When adding a section, update both (the README list was re-synced
+  to include Kweli and Mukoko Weather).
