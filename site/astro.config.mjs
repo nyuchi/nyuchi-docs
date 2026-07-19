@@ -21,6 +21,8 @@ export default defineConfig({
       ],
       customCss: ['./src/styles/theme.css'],
       components: {
+        PageFrame: './src/components/PageFrame.astro',
+        Header: './src/components/Header.astro',
         Footer: './src/components/Footer.astro',
       },
       logo: {
@@ -157,6 +159,7 @@ export default defineConfig({
             'kweli/overview',
             'kweli/verification',
             'kweli/cross-app-verification',
+            'kweli/open-data',
             'kweli/data-quality',
             'kweli/design-system',
             'kweli/competitive-audit',

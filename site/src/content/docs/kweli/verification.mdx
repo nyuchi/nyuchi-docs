@@ -25,15 +25,32 @@ Each tier maps to a mineral color — this is the `nyuchi-verified-badge` contra
 - **Current tier:** the `bundu.verificationTier` sub-object, carried by place, person, **and** entity documents. This is the single source of truth — apps read it, they never recompute it.
 - **Audit trail:** `entity.verifications` — one record per tier change with `verificationType`, `verificationMethod`, `tierBefore`/`tierAfter`, and evidence. Read-only for Kweli.
 
+## Starting a verification
+
+Representatives do not need a deep link: [`kweli.mukoko.com/en/verify`](https://kweli.mukoko.com/en/verify) is the flow's front door. It offers a venue finder (search the graph by name), the signed-in user's owned venues and pending claims with status chips, and the tier-ladder explainer. Sibling apps can still deep-link a specific venue — see [Cross-app verification](/kweli/cross-app-verification/).
+
 ## The claim flow
 
 A representative claims a venue before verification can proceed:
 
 1. The representative submits a claim — `POST /api/claims`.
 2. A pending row is written to `entity.representativeClaims` (`claimantPersonId`, `entityId`, `claimedRole`, `status`, `evidenceUrl`).
-3. An admin approves or rejects the claim in the Kweli dashboard.
+3. An admin decides the claim in the **verification console** (below).
 
 Approved claims give the claimant a management role on the entity; verification then proceeds up the tier ladder.
+
+## The verification console (internal)
+
+Kweli is a full KYC platform — individuals and organizations, not just venue claims. The admin console at `/dashboard/admin/claims` (admin role required) has four tabs:
+
+| Tab | What it shows |
+|-----|---------------|
+| **Queue** | Pending ownership claims — claimant, role, evidence link, review sheet with an optional decision note, approve/reject |
+| **People** | Individual KYC over `identity.persons` — auth-identity and email-verified signals, tier, search + tier filter |
+| **Entities** | Organization KYC over `entity.entities` — legal name, entity type, tier, Ubuntu trust score |
+| **Audit** | The platform-recorded tier transitions from `entity.verifications` |
+
+Claim decisions flow through the platform API (`/v1/admin/claims/:id/decide`) — the console never writes tiers to the graph directly. People/Entities are read-only review surfaces until the platform exposes person- and entity-level decision endpoints.
 
 ## Community vouches
 

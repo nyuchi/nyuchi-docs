@@ -23,6 +23,9 @@ npm and points at the same `shamwari-docs-ai` worker.
 
 - **`platform/`** — the product guide for the Nyuchi platform.
 - **`analytics/`** — dashboards, reports, and connecting data sources.
+- **`kweli/`** — Mukoko Kweli product guides: verification, cross-app
+  how-to, open data, data quality, design system.
+- **`mukoko-weather/`** — Mukoko Weather user guide and stations.
 - **`integrations/`** — connectors, webhooks, the API gateway, and the public Nyuchi API.
 - **`identity/`** — WorkOS, `identity.nyuchi.com`, SSO, JWTs.
 - **`console/`** — the Nyuchi Console at `platform.nyuchi.com`.

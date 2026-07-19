@@ -1,0 +1,53 @@
+---
+title: Open data
+description: Kweli's Ubuntu open-data surface — anonymous aggregate statistics over the knowledge graph and the trust ladder, served as a page, a JSON API, and MCP tools.
+sidebar:
+  label: Open data
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Mukoko is not building to conceal. The shape of the knowledge graph — how many venues, where they are, how far verification has spread — is a commons, open to everyone with **no account and no key**. _I am because we are._
+
+<Aside type="caution">
+  Open data means **aggregates, never rows**. Individual KYC records (names, emails, evidence) are never part of the open surface — the commons is the shape of the graph, not anyone's personal record.
+</Aside>
+
+## The three surfaces
+
+The same snapshot (recomputed roughly every five minutes) is served three ways:
+
+| Surface | Where | Audience |
+|---------|-------|----------|
+| Page | [`kweli.mukoko.com/en/analytics`](https://kweli.mukoko.com/en/analytics) | Humans — no sign-in |
+| JSON API | `GET https://kweli.mukoko.com/api/open/stats` | Programs — anonymous, CORS-open (`*`), cached 5 min, rate-limited |
+| MCP | `get_open_stats` tool on `https://kweli.mukoko.com/mcp` | AI agents — `authentication: none` |
+
+## What the snapshot contains
+
+```jsonc
+{
+  "totalVenues": 15316,
+  "byCountry": [{ "name": "Zimbabwe", "isoCode": "zw", "count": 2534 }, ...],
+  "topCities": [{ "city": "Harare", "count": ... }, ...],
+  "verifiedByTier": [{ "tier": 1, "label": "community", "count": ... }, ...],
+  "trust": {
+    "totalEntities": 12292,
+    "entitiesByTier": [{ "tier": 3, "label": "government", "count": 2 }, ...],
+    "totalVouches": 0,
+    "verificationEvents": 0
+  },
+  "generatedAt": "..."
+}
+```
+
+- **`verifiedByTier`** counts venues at their _effective_ tier — the max of the place's own tier and its owning entity's tier, the same answer venue pages give.
+- **`trust`** is the verification commons: organizations in the graph, how many hold each tier, community vouches recorded, and events on the platform's verification audit trail. As the [verification ladder](/kweli/verification/) gets climbed, these numbers are the public proof.
+
+## Using it from a script
+
+```bash
+curl https://kweli.mukoko.com/api/open/stats
+```
+
+No key, no origin restriction — the endpoint sends `Access-Control-Allow-Origin: *`, so browser apps on any domain can fetch it directly. Heavy consumers should respect the 5-minute cache (`s-maxage=300`); the numbers do not move faster than that.

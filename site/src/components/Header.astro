@@ -1,0 +1,123 @@
+---
+/**
+ * Header override — the Mzizi N7 shell header anatomy shared across
+ * the ecosystem (nhimbe/kweli parity): wordmark on the left, ONE
+ * pill-shaped icon group on the right. The search trigger is the
+ * LEFTMOST slot in the group (icon-only here; ⌘K still opens the
+ * modal globally), followed by theme, then social.
+ *
+ * Contract notes (mzizi icon-group / nyuchi-header):
+ * - pill container: border-radius 9999px, hairline border, subtle bg
+ * - slots divided by a 1px inline border (logical properties — RTL)
+ * - 44px minimum touch targets
+ * - colors only via Starlight/Mzizi CSS variables, no raw hex
+ */
+import Search from 'virtual:starlight/components/Search';
+import SiteTitle from 'virtual:starlight/components/SiteTitle';
+import SocialIcons from 'virtual:starlight/components/SocialIcons';
+import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
+---
+
+<div class="header" data-slot="nyuchi-header">
+  <div class="title-wrapper sl-flex">
+    <SiteTitle />
+  </div>
+  <div class="icon-group print:hidden" role="toolbar" aria-label="Site actions" data-slot="icon-group">
+    <div class="slot search-slot">
+      <Search />
+    </div>
+    <div class="slot theme-slot">
+      <ThemeSelect />
+    </div>
+    <div class="slot social-slot sl-hidden md:sl-flex">
+      <SocialIcons />
+    </div>
+  </div>
+</div>
+
+<style>
+  .header {
+    display: flex;
+    gap: var(--sl-nav-gap);
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+  }
+
+  .title-wrapper {
+    overflow: clip;
+    padding: 0.25rem;
+    margin: -0.25rem;
+    min-width: 0;
+  }
+
+  .icon-group {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 9999px;
+    background-color: var(--sl-color-black);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 2.75rem; /* 44px touch target */
+    min-block-size: 2.75rem;
+  }
+
+  .slot + .slot {
+    border-inline-start: 1px solid var(--sl-color-gray-5);
+  }
+
+  /* Compact the package's search trigger into an icon slot. The
+     .nds-* classes belong to nyuchi-docs-search; we restyle them here
+     rather than fork the shared package. */
+  .search-slot :global(.nds-trigger) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--sl-color-gray-3);
+    cursor: pointer;
+  }
+  .search-slot :global(.nds-trigger:hover) {
+    color: var(--sl-color-white);
+    background-color: var(--sl-color-gray-6);
+  }
+  .search-slot :global(.nds-trigger span),
+  .search-slot :global(.nds-trigger kbd) {
+    display: none;
+  }
+
+  .theme-slot :global(select) {
+    border: 0;
+    background: transparent;
+  }
+  .theme-slot {
+    padding-inline: 0.375rem;
+  }
+
+  .social-slot {
+    gap: 0;
+    padding-inline: 0.375rem;
+  }
+  .social-slot :global(a) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.25rem;
+    block-size: 2.75rem;
+    color: var(--sl-color-gray-3);
+  }
+  .social-slot :global(a:hover) {
+    color: var(--sl-color-white);
+  }
+</style>
