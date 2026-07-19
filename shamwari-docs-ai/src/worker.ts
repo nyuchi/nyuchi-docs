@@ -1,18 +1,14 @@
 // shamwari-docs-ai: Cloudflare Worker that proxies the docs Ask-AI tab to
 // Cloudflare AI Search. Routes:
 //   POST /chat    — emits SSE frames the docs-search client already understands
-//   POST /mcp     — Model Context Protocol endpoint (docs.nyuchi.com/mcp)
 //   GET  /health  — liveness probe
 //
 // Crawl, chunk, embed, retrieve, and generate are all handled by the bound
 // AI Search instance(s). This worker exists to (a) keep the API token
 // server-side, (b) add CORS, (c) route between per-corpus instances by the
 // `source` query field, and (d) translate the AI Search response into the
-// SSE wire shape the docs-search client consumes. The /mcp endpoint
-// (src/mcp.ts) reuses the same AI Search binding for read tools and a
-// FEEDBACK KV namespace (+ optional GITHUB_TOKEN) for write tools.
-
-import { handleMcp } from './mcp.js';
+// SSE wire shape the docs-search client consumes. The docs MCP endpoint
+// lives in its own worker now — see ../nyuchi-docs-mcp-worker.
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -60,19 +56,11 @@ interface AiSearchChunk {
   };
 }
 
-export interface FeedbackStore {
-  put(key: string, value: string): Promise<void>;
-}
-
 export interface Env {
   NYUCHI_DOCS: AiSearchInstance;
   BUNDU_DOCS?: AiSearchInstance;
   TOP_K?: string;
   ALLOWED_ORIGINS?: string;
-  /** KV namespace for MCP feedback + queued issues. */
-  FEEDBACK?: FeedbackStore;
-  /** Optional secret — when set, raise_issue files real GitHub issues. */
-  GITHUB_TOKEN?: string;
 }
 
 const WILDCARD_PATTERNS = [/^https:\/\/[a-z0-9-]+\.vercel\.app$/i];
@@ -155,11 +143,6 @@ export default {
 
     if (req.method === 'POST' && url.pathname === '/chat') {
       return handleChat(req, env, cors);
-    }
-
-    // MCP endpoint — docs.nyuchi.com/mcp routes here (see wrangler.toml)
-    if (url.pathname === '/mcp' || url.pathname === '/mcp/') {
-      return handleMcp(req, env, cors);
     }
 
     return new Response('Not found', { status: 404, headers: cors });

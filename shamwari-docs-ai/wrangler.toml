@@ -24,17 +24,3 @@ instance_name = "nyuchi-docs"
 
 [observability]
 enabled = true
-
-# Serve the MCP endpoint on the docs domain itself. A path route takes
-# precedence over the site worker's custom domain for /mcp* only; the
-# worker also stays reachable at shamwari-docs-ai.nyuchi.workers.dev/mcp.
-routes = [
-  { pattern = "docs.nyuchi.com/mcp*", zone_name = "nyuchi.com" }
-]
-
-# MCP write tools: submit_feedback + queued raise_issue land here.
-# Set the optional GITHUB_TOKEN secret (wrangler secret put GITHUB_TOKEN)
-# to have raise_issue file real GitHub issues on nyuchi/nyuchi-docs.
-[[kv_namespaces]]
-binding = "FEEDBACK"
-id = "9c5af0b28d5c4706840c492b2e3f47e8"
