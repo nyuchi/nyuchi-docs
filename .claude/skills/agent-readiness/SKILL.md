@@ -10,7 +10,8 @@ non-browser clients: if curl gets challenged, agents are blocked.
 
 ```bash
 D=https://docs.nyuchi.com
-W=https://shamwari-docs-ai.nyuchi.workers.dev
+W=https://nyuchi-docs-mcp.nyuchi.workers.dev   # docs MCP worker
+C=https://shamwari-docs-ai.nyuchi.workers.dev   # Ask-AI chat worker
 
 # 1. Machine-readable site surfaces (expect 200, NOT a challenge page)
 curl -s -o /dev/null -w '%{http_code}\n' $D/llms.txt
@@ -24,6 +25,7 @@ curl -s -X POST $D/mcp -H 'Content-Type: application/json' \
 
 # 3. Worker-direct fallback (isolates zone config from worker health)
 curl -s $W/health
+curl -s $C/health
 curl -s -X POST $W/mcp -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | head -c 300

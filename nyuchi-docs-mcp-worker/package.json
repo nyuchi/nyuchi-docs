@@ -1,0 +1,20 @@
+{
+  "name": "nyuchi-docs-mcp-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dedicated Cloudflare Worker for the docs MCP server (docs.nyuchi.com/mcp) — read tools over the nyuchi-docs AI Search corpus, feedback/issue write tools into KV. The npm stdio bridge lives in ../nyuchi-docs-mcp.",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260304.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4",
+    "wrangler": "^4.68.1"
+  }
+}

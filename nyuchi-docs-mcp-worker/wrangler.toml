@@ -1,0 +1,32 @@
+name = "nyuchi-docs-mcp"
+main = "src/worker.ts"
+compatibility_date = "2026-03-27"
+compatibility_flags = ["nodejs_compat"]
+account_id = "125a2dfbc21f76a25c980609609e8218"
+
+[vars]
+TOP_K = "5"
+ALLOWED_ORIGINS = "https://docs.nyuchi.com,https://docs.bundu.org"
+
+# Same AI Search instance the Ask-AI tab uses — read tools ride the
+# existing nyuchi-docs corpus; this worker adds no ingestion of its own.
+[[ai_search]]
+binding = "NYUCHI_DOCS"
+instance_name = "nyuchi-docs"
+
+[observability]
+enabled = true
+
+# Serve the MCP endpoint on the docs domain itself. The worker is also
+# always reachable at nyuchi-docs-mcp.nyuchi.workers.dev/mcp — use that
+# to isolate zone-level issues (see the agent-readiness skill).
+routes = [
+  { pattern = "docs.nyuchi.com/mcp*", zone_name = "nyuchi.com" }
+]
+
+# MCP write tools: submit_feedback + queued raise_issue land here.
+# Set the optional GITHUB_TOKEN secret (wrangler secret put GITHUB_TOKEN)
+# to have raise_issue file real issues on nyuchi/nyuchi-docs.
+[[kv_namespaces]]
+binding = "FEEDBACK"
+id = "9c5af0b28d5c4706840c492b2e3f47e8"

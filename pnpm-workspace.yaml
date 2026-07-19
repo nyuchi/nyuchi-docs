@@ -3,3 +3,4 @@ packages:
   - nyuchi-docs-search
   - shamwari-docs-ai
   - nyuchi-docs-mcp
+  - nyuchi-docs-mcp-worker
