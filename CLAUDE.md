@@ -100,10 +100,14 @@ Per package:
   (`--sl-color-accent: #ffd740` dark / `#7a5c00` light); wordmarks
   render lowercase. Fonts: Noto Sans (body), Noto Serif (display),
   JetBrains Mono (code).
+- The canonical **seven-mineral strip** (cobalt, tanzanite,
+  malachite, gold, terracotta, sodalite, copper) is a VERTICAL 4px
+  strip fixed to the LEFT edge of every page, rendered once in the
+  app-core layout (`site/src/components/PageFrame.astro`, hidden
+  below 480px). It never appears anywhere else — no horizontal
+  variants, no footer strips. Don't reorder or drop minerals.
 - `site/src/components/Footer.astro` is the custom ecosystem footer
-  with the canonical **seven-mineral strip** (cobalt, tanzanite,
-  malachite, gold, terracotta, sodalite, copper). Don't reorder or
-  drop minerals.
+  (wordmark, ecosystem links, legal) — deliberately strip-free.
 - Public assets: `site/public/` (favicon, robots.txt, `llms.txt` —
   the machine-readable site index for LLMs, images).
 - Wordmark is **"Nyuchi Docs"** — leftover Mintlify branding was

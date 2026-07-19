@@ -21,6 +21,7 @@ export default defineConfig({
       ],
       customCss: ['./src/styles/theme.css'],
       components: {
+        PageFrame: './src/components/PageFrame.astro',
         Header: './src/components/Header.astro',
         Footer: './src/components/Footer.astro',
       },

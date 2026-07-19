@@ -1,0 +1,44 @@
+---
+/**
+ * PageFrame override — the app-core shell. Adds the ONE place the
+ * seven-mineral identity strip is allowed to exist: a fixed 4px
+ * VERTICAL strip on the left edge, full viewport height, hidden
+ * below 480px. The strip never appears anywhere else (no horizontal
+ * variants, no footer strips) — this is core-layout doctrine.
+ */
+import Default from '@astrojs/starlight/components/PageFrame.astro';
+---
+
+<div class="mineral-stripe" aria-hidden="true" data-slot="mineral-stripe"></div>
+<Default>
+  <slot name="header" slot="header" />
+  <slot name="sidebar" slot="sidebar" />
+  <slot />
+</Default>
+
+<style>
+  .mineral-stripe {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: 4px;
+    z-index: 9998;
+    display: none;
+    /* Canonical seven minerals, top to bottom, equal sevenths. */
+    background: linear-gradient(
+      to bottom,
+      var(--color-cobalt) 0% 14.2857%,
+      var(--color-tanzanite) 14.2857% 28.5714%,
+      var(--color-malachite) 28.5714% 42.8571%,
+      var(--color-gold) 42.8571% 57.1428%,
+      var(--color-terracotta) 57.1428% 71.4285%,
+      var(--color-sodalite) 71.4285% 85.7142%,
+      var(--color-copper) 85.7142% 100%
+    );
+  }
+  @media (min-width: 480px) {
+    .mineral-stripe {
+      display: block;
+    }
+  }
+</style>
