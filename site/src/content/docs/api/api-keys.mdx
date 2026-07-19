@@ -1,0 +1,53 @@
+---
+title: API keys
+description: Create client ID and secret pairings in the console and use them for programmatic access to the /v1 API.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+API access for scripts, services, and integrations is managed through **API keys**—client ID and secret pairings created in the console. A key authenticates your *application* rather than a person, so it works without a signed-in user and never expires with a session.
+
+## Create a key
+
+1. Sign in to the console at `platform.nyuchi.com` (all console sign-in is WorkOS AuthKit).
+2. Open the API keys area and create a new key.
+3. Copy both values immediately:
+   - **Client ID** — starts with `nyk_`. Identifies the key; safe to log.
+   - **Client secret** — starts with `nys_`. Shown once at creation; store it in a secret manager.
+
+The gateway stores only a hash of the secret. If you lose it, revoke the key and create a new one—there is no recovery.
+
+## Send the key
+
+Two equivalent header forms are accepted on every request:
+
+```bash
+# Pair form
+curl https://api.nyuchi.com/v1/news/articles \
+  -H "X-Client-Id: nyk_..." \
+  -H "X-Client-Secret: nys_..."
+
+# Combined form
+curl https://api.nyuchi.com/v1/news/articles \
+  -H "X-API-Key: nyk_....nys_..."
+```
+
+## Scope
+
+Keys are scoped to the **public** product namespaces (news, weather, commerce, and the other published surfaces). Internal namespaces—admin, pay, and other first-party tooling—reject external keys regardless of the secret; those surfaces are only reachable through the console's server-side proxy.
+
+<Aside type="note">
+  A `403` on a namespace that works with a platform JWT usually means the namespace is internal-only. Check the [API overview](/api/overview) for the namespace list.
+</Aside>
+
+## Keys vs platform JWTs
+
+| Credential | Identifies | Use it for |
+|------------|-----------|------------|
+| Platform JWT (`Authorization: Bearer …`) | A signed-in person (via WorkOS AuthKit) | Acting on behalf of a user |
+| API key (`X-Client-Id`/`X-Client-Secret`) | Your application | Server-to-server calls, cron jobs, integrations |
+
+## Next steps
+
+- Review [security and rate limits](/api/security) before going to production.
+- See [Authentication](/api/authentication) for the user sign-in flow.
