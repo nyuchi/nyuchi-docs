@@ -56,8 +56,21 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Install mcp-publisher
+        # Resolve the release asset via the API instead of guessing the
+        # filename — the naming (x86_64 vs amd64) has drifted between
+        # releases, and a 404 piped straight into tar fails with the
+        # misleading "gzip: stdin: not in gzip format".
         run: |
-          curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m).tar.gz" | tar xz mcp-publisher
+          set -euo pipefail
+          url=$(curl -sSf -H "Authorization: Bearer ${{ github.token }}" \
+            https://api.github.com/repos/modelcontextprotocol/registry/releases/latest \
+            | jq -r '.assets[] | select(.name | test("^mcp-publisher_.*linux_(x86_64|amd64)\\.tar\\.gz$")) | .browser_download_url' \
+            | head -n1)
+          test -n "$url" || { echo "no linux mcp-publisher asset found in latest release"; exit 1; }
+          echo "downloading $url"
+          curl -sSfL "$url" -o mcp-publisher.tar.gz
+          tar xzf mcp-publisher.tar.gz mcp-publisher
+          ./mcp-publisher --version
 
       - name: Publish to the MCP registry
         run: |
