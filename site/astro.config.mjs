@@ -157,6 +157,7 @@ export default defineConfig({
             'kweli/overview',
             'kweli/verification',
             'kweli/cross-app-verification',
+            'kweli/open-data',
             'kweli/data-quality',
             'kweli/design-system',
             'kweli/competitive-audit',
