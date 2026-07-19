@@ -51,7 +51,17 @@ jobs:
 
       - name: Publish to npm
         working-directory: nyuchi-docs-mcp
-        run: npm publish --access public
+        # Skip when this version is already on the registry so a re-run
+        # (e.g. after a failed MCP-registry step) doesn't die on the
+        # npm EPUBLISHCONFLICT before reaching the registry publish.
+        run: |
+          PKG=$(node -p "require('./package.json').name")
+          VER=$(node -p "require('./package.json').version")
+          if npm view "$PKG@$VER" version >/dev/null 2>&1; then
+            echo "$PKG@$VER already published — skipping npm publish"
+          else
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
