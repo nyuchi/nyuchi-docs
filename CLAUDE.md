@@ -100,10 +100,14 @@ Per package:
   (`--sl-color-accent: #ffd740` dark / `#7a5c00` light); wordmarks
   render lowercase. Fonts: Noto Sans (body), Noto Serif (display),
   JetBrains Mono (code).
+- The canonical **seven-mineral strip** (cobalt, tanzanite,
+  malachite, gold, terracotta, sodalite, copper) is a VERTICAL 4px
+  strip fixed to the LEFT edge of every page, rendered once in the
+  app-core layout (`site/src/components/PageFrame.astro`, hidden
+  below 480px). It never appears anywhere else — no horizontal
+  variants, no footer strips. Don't reorder or drop minerals.
 - `site/src/components/Footer.astro` is the custom ecosystem footer
-  with the canonical **seven-mineral strip** (cobalt, tanzanite,
-  malachite, gold, terracotta, sodalite, copper). Don't reorder or
-  drop minerals.
+  (wordmark, ecosystem links, legal) — deliberately strip-free.
 - Public assets: `site/public/` (favicon, robots.txt, `llms.txt` —
   the machine-readable site index for LLMs, images).
 - Wordmark is **"Nyuchi Docs"** — leftover Mintlify branding was
@@ -170,10 +174,9 @@ docs.nyuchi.com (site)
 
 ## Gotchas
 
-- `site/.env.example` points `PUBLIC_SHAMWARI_AI_URL` at
-  `shamwari-docs-ai.nyuchi-com.workers.dev`, while the READMEs use
-  `shamwari-docs-ai.nyuchi.workers.dev` — one of the two is wrong;
-  verify against the deployed worker before relying on either.
+- The deployed worker is `shamwari-docs-ai.nyuchi.workers.dev`
+  (verified live; the old `nyuchi-com` variant in `.env.example` was
+  wrong and has been fixed — don't reintroduce it).
 - Build outputs (`dist/`, `.astro/`, `.wrangler/`, `.svelte-kit/`)
   are gitignored; building `site` in isolation without first
   building `nyuchi-docs-search` fails — use the root/site `build`
@@ -181,5 +184,6 @@ docs.nyuchi.com (site)
 - The README notes the `docs.nyuchi.com` apex may still point at the
   legacy Mintlify-on-Vercel deployment until cutover completes.
 - The sidebar in `astro.config.mjs` and the sections listed in the
-  root README can drift (e.g. Mukoko Weather appears in the sidebar
-  but not the README) — the Astro config is the source of truth.
+  root README can drift — the Astro config is the source of truth.
+  When adding a section, update both (the README list was re-synced
+  to include Kweli and Mukoko Weather).
