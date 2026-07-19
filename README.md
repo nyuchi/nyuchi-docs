@@ -4,20 +4,21 @@ Nyuchi engineering documentation — how things are done at Nyuchi, and how to
 use the Mzizi tools from a Nyuchi project. Published at
 [docs.nyuchi.com](https://docs.nyuchi.com).
 
-This repo is a **pnpm workspace** with three packages:
+This repo is a **pnpm workspace** with these packages:
 
 | Package                | Path                  | What it does                                                                              |
 | ---------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
 | `site`                 | `site/`               | The Astro + [Starlight](https://starlight.astro.build) docs site itself. Ships as a Cloudflare Worker with Static Assets. |
 | `nyuchi-docs-search`   | `nyuchi-docs-search/` | Publishable npm package: cmdk-style search modal + Ask-AI tab for Starlight sites.        |
-| `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker — Ask-AI proxy + the docs MCP server at docs.nyuchi.com/mcp.            |
+| `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker — the Ask-AI chat proxy (SSE).                                          |
+| `nyuchi-docs-mcp-worker` | `nyuchi-docs-mcp-worker/` | Cloudflare Worker `nyuchi-docs-mcp` — the docs MCP server at docs.nyuchi.com/mcp.   |
 
 ## Companion site
 
 [`bundu-labs/bundu-docs`](https://github.com/bundu-labs/bundu-docs) covers the
 Bundu Foundation's outward-facing projects — the Mzizi product, the Ubuntu
 doctrine, and the Bundu brand system. It installs `nyuchi-docs-search` from
-npm and points at the same `shamwari-docs-ai` worker.
+npm and points at the `nyuchi-docs-mcp` worker.
 
 ## Sections (`site/src/content/docs/`)
 
@@ -76,6 +77,10 @@ no `CLOUDFLARE_API_TOKEN` repo secret.
   `https://shamwari-docs-ai.nyuchi.workers.dev`. See
   [`shamwari-docs-ai/README.md`](./shamwari-docs-ai/README.md) for the
   per-corpus AI Search instance setup (managed via REST API).
+- **`nyuchi-docs-mcp`** — root `nyuchi-docs-mcp-worker/`, the docs MCP
+  server. Live at `https://nyuchi-docs-mcp.nyuchi.workers.dev` and routed
+  from `docs.nyuchi.com/mcp*`. Needs its own Workers Builds trigger (root
+  directory `nyuchi-docs-mcp-worker/`).
 
 ## Why pnpm workspace
 

@@ -10,7 +10,8 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "deploy:worker": "pnpm --filter shamwari-docs-ai deploy",
-    "ingest": "pnpm --filter shamwari-docs-ai ingest"
+    "ingest": "pnpm --filter shamwari-docs-ai ingest",
+    "deploy:mcp": "pnpm --filter nyuchi-docs-mcp-worker deploy"
   },
   "devDependencies": {
     "typescript": "^5.6.3"

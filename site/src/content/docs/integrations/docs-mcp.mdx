@@ -67,7 +67,7 @@ curl -s https://docs.nyuchi.com/mcp \
 
 ## Operations
 
-- **Code:** `shamwari-docs-ai/src/mcp.ts` (tests in `tests/mcp.test.ts`);
+- **Code:** `nyuchi-docs-mcp-worker/src/mcp.ts` (tests in `tests/mcp.test.ts`);
   the npm stdio bridge lives in `nyuchi-docs-mcp/`.
 - **Releases:** publish a GitHub release (tag `mcp-vX.Y.Z`) — the
   `publish-mcp.yml` workflow tests the bridge, publishes
@@ -78,7 +78,7 @@ curl -s https://docs.nyuchi.com/mcp \
 - **Routing:** `wrangler.toml` routes `docs.nyuchi.com/mcp*` to the
   worker; the static docs site worker keeps every other path. The
   worker is also reachable at
-  `shamwari-docs-ai.nyuchi.workers.dev/mcp`.
+  `nyuchi-docs-mcp.nyuchi.workers.dev/mcp`.
 - **Feedback triage:** `wrangler kv key list --namespace-id 9c5af0b28d5c4706840c492b2e3f47e8`
   (keys are `feedback:<iso-ts>:<id>` and `issue:<iso-ts>:<id>`).
 - **GitHub issues:** set the optional secret once —

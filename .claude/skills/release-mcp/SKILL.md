@@ -31,7 +31,7 @@ fails the release otherwise. Bump both in the same commit.
 
 ## What the bridge must track
 
-If worker tools changed (`shamwari-docs-ai/src/mcp.ts` — the tool
+If worker tools changed (`nyuchi-docs-mcp-worker/src/mcp.ts` — the tool
 list or schemas), the bridge and the server card
 (`site/public/.well-known/mcp/server-card.json`) must be updated in
 the same release so all three surfaces advertise the same tools:

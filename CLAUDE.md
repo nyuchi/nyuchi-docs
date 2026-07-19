@@ -15,9 +15,10 @@ packages that are shared with the companion repo
 | -------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `site`               | `site/`                | The docs website — Astro 6 + Starlight + Svelte 5. Private.                                                                                                                             |
 | `nyuchi-docs-search` | `nyuchi-docs-search/`  | Publishable npm package (MIT): a Mintlify-style `⌘K`/`Ctrl+K` search modal (Pagefind-backed) with an "Ask AI" tab. Consumed here via `workspace:*` and by `bundu-docs` from the registry — this shared package is the reason the monorepo exists. |
-| `shamwari-docs-ai`   | `shamwari-docs-ai/`    | Cloudflare Worker — thin proxy in front of Cloudflare **AI Search** that powers the Ask-AI tab for both docs sites (CORS, SSE), **plus the docs MCP server at `docs.nyuchi.com/mcp`** (read tools over the same AI Search index; feedback/issue write tools into the `FEEDBACK` KV namespace, optional `GITHUB_TOKEN` secret files real issues). |
+| `shamwari-docs-ai`   | `shamwari-docs-ai/`    | Cloudflare Worker — thin proxy in front of Cloudflare **AI Search** that powers the Ask-AI tab for both docs sites (CORS, SSE). Chat only — the MCP endpoint moved to its own worker. |
+| `nyuchi-docs-mcp-worker` | `nyuchi-docs-mcp-worker/` | Cloudflare Worker `nyuchi-docs-mcp` — **the docs MCP server at `docs.nyuchi.com/mcp`** (read tools over the same AI Search index; feedback/issue write tools into the `FEEDBACK` KV namespace, optional `GITHUB_TOKEN` secret files real issues). Direct URL: `nyuchi-docs-mcp.nyuchi.workers.dev/mcp`. |
 
-A fourth package, `nyuchi-docs-mcp/`, is the published npm stdio
+A further package, `nyuchi-docs-mcp/`, is the published npm stdio
 bridge to the hosted MCP endpoint (MCP registry name
 `io.github.nyuchi/nyuchi-docs`; manifest `server.json` at the repo
 root; released via `.github/workflows/publish-mcp.yml` — npm publish
@@ -42,6 +43,7 @@ pnpm build                 # build the site (builds the search package first)
 pnpm build:all             # pnpm -r build (all packages)
 pnpm test                  # pnpm -r test (search pkg + worker; Vitest)
 pnpm deploy:worker         # wrangler deploy of shamwari-docs-ai
+pnpm deploy:mcp            # wrangler deploy of nyuchi-docs-mcp
 ```
 
 Per package:
@@ -53,6 +55,8 @@ Per package:
 - `shamwari-docs-ai`: `build` (`tsc --noEmit`), `dev`
   (`wrangler dev`, proxies to the live AI Search instance),
   `deploy`, `test`.
+- `nyuchi-docs-mcp-worker`: same script set as `shamwari-docs-ai`;
+  worker name `nyuchi-docs-mcp`.
 
 **Known-broken root scripts — do not "fix" code to satisfy them:**
 
@@ -75,8 +79,11 @@ Per package:
   (`site/wrangler.toml`, `[assets] directory = "./dist"`, no worker
   `main`) → `nyuchi-docs.nyuchi.workers.dev`, custom domain
   `docs.nyuchi.com`.
-- `shamwari-docs-ai` → `shamwari-docs-ai.nyuchi.workers.dev`.
-- The Cloudflare `account_id` is hardcoded in both `wrangler.toml`
+- `shamwari-docs-ai` → `shamwari-docs-ai.nyuchi.workers.dev` (chat).
+- `nyuchi-docs-mcp` → `nyuchi-docs-mcp.nyuchi.workers.dev` +
+  the `docs.nyuchi.com/mcp*` zone route (needs its own Workers
+  Builds trigger, root `nyuchi-docs-mcp-worker/`).
+- The Cloudflare `account_id` is hardcoded in the `wrangler.toml`
   files — intentional, not a secret.
 
 ## The site (`site/`)
@@ -141,10 +148,12 @@ docs.nyuchi.com (site)
 - Worker API: `POST /chat` with
   `{ messages: ChatMessage[], source?: 'nyuchi' | 'bundu' }`,
   responding with SSE frames `citations` / `token` / `done` /
-  `error`; `GET /health`; `POST /mcp` — MCP Streamable HTTP
+  `error`; `GET /health`. The MCP server is the separate
+  `nyuchi-docs-mcp` worker: `POST /mcp` — MCP Streamable HTTP
   (JSON-RPC) with tools `search_docs` / `ask_docs` / `read_page` /
-  `submit_feedback` / `raise_issue` (`src/mcp.ts`, routed from
-  `docs.nyuchi.com/mcp*` via `wrangler.toml` routes; server card at
+  `submit_feedback` / `raise_issue`
+  (`nyuchi-docs-mcp-worker/src/mcp.ts`, routed from
+  `docs.nyuchi.com/mcp*` via its `wrangler.toml`; server card at
   `site/public/.well-known/mcp/server-card.json`, guide at
   `integrations/docs-mcp.mdx`).
 - Worker config (`shamwari-docs-ai/wrangler.toml`): vars `TOP_K`,
