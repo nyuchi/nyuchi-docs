@@ -5,7 +5,7 @@ description: The versioned /v1 gateway, product namespaces, and how to call the 
 
 import { Aside } from '@astrojs/starlight/components';
 
-The Nyuchi API is a single versioned HTTP gateway that fans out across multiple Supabase-backed product databases. Every endpoint lives under a `/v1/<product>/*` namespace, so you can scale, isolate, and meter each product independently while keeping one base URL and one access token.
+The Nyuchi API is a single versioned HTTP gateway. Every endpoint lives under a `/v1/<product>/*` namespace backed by its own product database, so you can scale, isolate, and meter each product independently while keeping one base URL and one set of credentials.
 
 ## Base URL
 
@@ -46,7 +46,9 @@ curl https://api.nyuchi.com/v1/auth/me \
   -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
-The JWT is minted by `/v1/auth/workos/*` (primary) or `/v1/auth/otp/*` (transitional Stytch fallback). Both flows produce the same HS256 token, so downstream code does not need to know which method the user signed in with. See [Authentication](/platform/api/authentication) for the full sign-in flow.
+All user authentication is handled by **WorkOS AuthKit**: the JWT is minted by `/v1/auth/workos/*` after AuthKit sign-in. See [Authentication](/api/authentication) for the full flow.
+
+For programmatic and server-to-server access, use an **API key** instead—a client ID and secret pairing created and managed in the console. See [API keys](/api/api-keys).
 
 Some namespaces are gated by an additional shared secret:
 
@@ -70,5 +72,6 @@ Treat `503` as "feature flag off" rather than as a transient outage—retrying w
 
 ## Next steps
 
-- Sign in with [WorkOS AuthKit](/platform/api/authentication) and exchange the result for a platform JWT.
-- Review [security and rate limits](/platform/api/security) before you go to production.
+- Sign in with [WorkOS AuthKit](/api/authentication) and exchange the result for a platform JWT.
+- Create [API keys](/api/api-keys) in the console for programmatic access.
+- Review [security and rate limits](/api/security) before you go to production.
