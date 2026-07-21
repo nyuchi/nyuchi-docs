@@ -1,18 +1,18 @@
 ---
 title: Mukoko Kweli overview
-description: What Mukoko Kweli is — the public renderer of the Mukoko geographic knowledge graph for Africa and the ecosystem's venue-verification surface.
+description: What Mukoko Kweli is — the Africa Trust Platform, the places-and-verification backbone of the Mukoko geographic knowledge graph.
 sidebar:
   label: Overview
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-[kweli.mukoko.com](https://kweli.mukoko.com) is the **public-facing renderer of the Mukoko geographic knowledge graph for Africa**. Every venue in the graph — a national park, a restaurant, a school, a tech company, an NGO, a landmark, a government office — has exactly one canonical page. That page is the venue's identity to the world: name, type, location with an inline map, hours, photos, operating organization, reviews, trust score, and verification badge.
+[kweli.mukoko.com](https://kweli.mukoko.com) is the **Africa Trust Platform** — the places-and-verification backbone of the Mukoko geographic knowledge graph. It is not a venue app: Kweli owns three trust journeys for the whole ecosystem — **place verification, organization verification, and person verification** — and publicly renders the graph it verifies. Every place in the graph — a national park, a restaurant, a school, a tech company, an NGO, a landmark, a government office — has exactly one canonical page. That page is the place's identity to the world: name, type, location with an inline map, hours, photos, operating organization, reviews, trust score, and verification badge.
 
-_Kweli_ means "truth" in Swahili. The trust score **is** the kweli — it travels with every entity across the whole Mukoko ecosystem. Kweli is also the ecosystem's single venue-verification surface: sibling apps never build their own verification (see [Cross-app verification](/kweli/cross-app-verification/)).
+_Kweli_ means "truth" in Swahili. The trust score **is** the kweli — it travels with every entity across the whole Mukoko ecosystem. Kweli is the ecosystem's single verification surface: sibling apps never build their own verification (see [Cross-app verification](/kweli/cross-app-verification/)). Growing the graph is agentic too — the **fundi-ingestion** Worker (in the Kweli repo, `workers/fundi-ingestion/`) turns regions into tier-0 place and entity records, and Kweli's admin sync submits tasks to it.
 
 <Aside type="note">
-  The user-facing term is always **venue** — broad and entity-type-agnostic, not nightlife-specific. Legacy "bars" naming in some routes is an inherited artifact being refactored away.
+  The canonical term is **place** — the graph's own noun, broad and entity-type-agnostic. "Venue" in some existing copy and component names, like the legacy "bars" routes, is an inherited artifact being refactored away.
 </Aside>
 
 ## Data model
@@ -21,7 +21,7 @@ The graph lives in MongoDB. Every collection `_id` is a **UUID string** (not an 
 
 | Collection | Role |
 |------------|------|
-| `places.places` | The **venue anchor** — 15k+ documents across 21 countries. Name, slug, `placeType` array, address, `geo`, `hierarchy` (country/province), `ownerEntityId`, translations, media. |
+| `places.places` | The **place anchor** — 15k+ documents across 21 countries. Name, slug, `placeType` array, address, `geo`, `hierarchy` (country/province), `ownerEntityId`, translations, media. |
 | `places.placesGeo` | Administrative geography — continent, country, province, city, town, village documents with ISO codes and GeoJSON centroids/boundaries. |
 | `places.categories` | The category taxonomy — 21 categories mapping `categorySlug` → schema.org `@type`(s). |
 | `entity.entities` | The owning **organization** node — every place has an `ownerEntityId` pointing here. |
