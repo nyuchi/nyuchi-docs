@@ -1,6 +1,6 @@
 ---
 title: Cross-app verification
-description: How sibling Mukoko apps (Nhimbe, BushTrade, News, …) verify venues by deep-linking to the Kweli gateway instead of building their own flow.
+description: How sibling Mukoko apps (Nhimbe, BushTrade, News, …) verify places and organizations by deep-linking to the Kweli gateway instead of building their own flow.
 sidebar:
   label: Cross-app how-to
 ---
@@ -8,12 +8,12 @@ sidebar:
 import { Aside } from '@astrojs/starlight/components';
 
 <Aside type="caution">
-  **Never build your own venue verification.** Kweli is the ecosystem's single verification surface. Sibling apps only _read_ `bundu.verificationTier` from the graph and render the mineral badge; anything that changes verification state happens on Kweli.
+  **Never build your own place or organization verification.** Kweli is the ecosystem's single verification surface. Sibling apps only _read_ `bundu.verificationTier` from the graph and render the mineral badge; anything that changes verification state happens on Kweli.
 </Aside>
 
 ## The verify gateway
 
-When a venue on your app needs to prove who it is, deep-link the user to the Kweli gateway:
+When a place or organization on your app needs to prove who it is, deep-link the user to the Kweli gateway:
 
 ```text
 https://kweli.mukoko.com/[locale]/verify?entity=<entityId>
@@ -23,20 +23,20 @@ https://kweli.mukoko.com/[locale]/verify?place=<placeId>&source=<yourapp>
 | Query param | Required | Meaning |
 |-------------|----------|---------|
 | `entity` | no | The `entity.entities` UUID to verify |
-| `place` | no | The `places.places` UUID — the gateway resolves the venue's entity via `ownerEntityId` |
+| `place` | no | The `places.places` UUID — the gateway resolves the place's entity via `ownerEntityId` |
 | `source` | no | Your app's identifier (e.g. `nhimbe`, `bushtrade`) for attribution |
 
-The gateway resolves the venue, shows the current verification tier, the claim action for representatives, and the community vouch panel for everyone else.
+The gateway resolves the place, shows the current verification tier, the claim action for representatives, and the community vouch panel for everyone else.
 
-With **no query params**, `/verify` is a valid entry point rather than a 404: it renders a venue finder (search the graph by name), the signed-in user's owned venues and pending claims, and the tier ladder. Linking bare `/verify` is fine when your app doesn't know the venue's UUID.
+With **no query params**, `/verify` is a valid entry point rather than a 404: it renders a place finder (search the graph by name), the signed-in user's owned places and pending claims, and the tier ladder. Linking bare `/verify` is fine when your app doesn't know the place's UUID.
 
 ## Rendering the badge
 
-Read `bundu.verificationTier` from the venue's graph document and render the mineral-tiered badge (the `nyuchi-verified-badge` contract): 1 Community/Terracotta, 2 Identity/Cobalt, 3 Government/Gold, 4 Licensed/Tanzanite. The badge is **read-only** in your app — see the [tier ladder](/kweli/verification/#the-four-tier-ladder).
+Read `bundu.verificationTier` from the place's graph document and render the mineral-tiered badge (the `nyuchi-verified-badge` contract): 1 Community/Terracotta, 2 Identity/Cobalt, 3 Government/Gold, 4 Licensed/Tanzanite. The badge is **read-only** in your app — see the [tier ladder](/kweli/verification/#the-four-tier-ladder).
 
 ## Example: integrating from Nhimbe
 
-An event on Nhimbe is hosted at a venue. Nhimbe shows the venue's badge and offers a verify CTA when the venue is unverified:
+An event on Nhimbe is hosted at a place. Nhimbe shows the place's badge and offers a verify CTA when the place is unverified:
 
 ```tsx
 // Badge: read-only, straight from the graph document
