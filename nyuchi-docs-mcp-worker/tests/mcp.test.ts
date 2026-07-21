@@ -32,9 +32,25 @@ describe('POST /mcp', () => {
         serverInfo: { name: string };
       };
     };
-    expect(body.result.protocolVersion).toBe('2025-06-18');
+    expect(body.result.protocolVersion).toBe('2025-11-25');
     expect(body.result.capabilities.tools).toBeDefined();
     expect(body.result.serverInfo.name).toBe('nyuchi-docs');
+  });
+
+  it('initialize negotiates: echoes a supported requested version, offers latest otherwise', async () => {
+    const older = await worker.fetch(
+      rpc({ jsonrpc: '2.0', id: 'v1', method: 'initialize', params: { protocolVersion: '2025-06-18' } }),
+      makeEnv()
+    );
+    const olderBody = (await older.json()) as { result: { protocolVersion: string } };
+    expect(olderBody.result.protocolVersion).toBe('2025-06-18');
+
+    const unknown = await worker.fetch(
+      rpc({ jsonrpc: '2.0', id: 'v2', method: 'initialize', params: { protocolVersion: '2019-01-01' } }),
+      makeEnv()
+    );
+    const unknownBody = (await unknown.json()) as { result: { protocolVersion: string } };
+    expect(unknownBody.result.protocolVersion).toBe('2025-11-25');
   });
 
   it('notifications/initialized returns 202 with no body', async () => {

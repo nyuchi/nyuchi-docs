@@ -13,7 +13,11 @@ import {
   type Env,
 } from './worker.js';
 
-const PROTOCOL_VERSION = '2025-06-18';
+// Latest MCP spec revision this server speaks. Initialize negotiates:
+// a supported requested version is echoed back; anything else gets the
+// latest (per the MCP lifecycle spec).
+const PROTOCOL_VERSION = '2025-11-25';
+const SUPPORTED_PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
 const SERVER_INFO = {
   name: 'nyuchi-docs',
   title: 'Nyuchi Docs',
@@ -309,13 +313,17 @@ async function handleMessage(env: Env, msg: JsonRpcRequest): Promise<unknown | n
   if (id === undefined && method?.startsWith('notifications/')) return null;
 
   switch (method) {
-    case 'initialize':
+    case 'initialize': {
+      const requested = typeof params.protocolVersion === 'string' ? params.protocolVersion : '';
       return rpcResult(id, {
-        protocolVersion: PROTOCOL_VERSION,
+        protocolVersion: SUPPORTED_PROTOCOL_VERSIONS.includes(requested)
+          ? requested
+          : PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false } },
         serverInfo: SERVER_INFO,
         instructions: INSTRUCTIONS,
       });
+    }
     case 'ping':
       return rpcResult(id, {});
     case 'tools/list':
