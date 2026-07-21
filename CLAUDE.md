@@ -70,7 +70,15 @@ Per package:
 
 - One GitHub Actions workflow: `.github/workflows/build.yml` —
   push (all branches) + PRs to `main`. Node 22 + pnpm 10.33 →
-  `pnpm install` → `pnpm -r build` → `pnpm -r --if-present run test`.
+  `pnpm install` → `pnpm audit --audit-level=high` →
+  `pnpm -r build` → `pnpm -r --if-present run test`. The audit gate
+  blocks on any critical/high advisory; patched transitive versions
+  are pinned in the root `package.json` `pnpm.overrides`. Two residuals
+  are intentionally left (they can't be fixed without breaking): the
+  `js-yaml` moderate (its only patched line, ≥4.2.0, drops the ESM
+  default export Astro imports) and dev-only lows in wrangler's bundled
+  esbuild. `dependabot.yml` opens weekly grouped version PRs (majors
+  grouped separately so Astro/vitest majors wait for review).
 - **Deploys are NOT GitHub Actions.** Both workers deploy via
   **Cloudflare Workers Builds** (the Cloudflare GitHub App connected
   to `nyuchi/nyuchi-docs`, one build trigger per package root).
