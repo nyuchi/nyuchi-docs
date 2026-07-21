@@ -13,11 +13,12 @@ import {
   type Env,
 } from './worker.js';
 
-// Latest MCP spec revision this server speaks. Initialize negotiates:
-// a supported requested version is echoed back; anything else gets the
-// latest (per the MCP lifecycle spec).
-const PROTOCOL_VERSION = '2025-11-25';
+// MCP spec revisions this server speaks, newest first. Initialize
+// negotiates: a supported requested version is echoed back; anything
+// else gets the latest (per the MCP lifecycle spec). PROTOCOL_VERSION
+// is derived so a spec bump is a one-line change.
 const SUPPORTED_PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
+const PROTOCOL_VERSION = SUPPORTED_PROTOCOL_VERSIONS[0];
 const SERVER_INFO = {
   name: 'nyuchi-docs',
   title: 'Nyuchi Docs',
