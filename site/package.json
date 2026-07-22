@@ -11,15 +11,15 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.39.2",
+    "@astrojs/starlight": "^0.41.3",
     "@astrojs/svelte": "^8.1.1",
     "@bundu/ui": "^0.1.1",
     "astro": "^6.3.7",
     "nyuchi-docs-search": "workspace:*",
-    "sharp": "^0.34.5",
-    "svelte": "^5.0.0"
+    "sharp": "^0.35.3",
+    "svelte": "^5.56.7"
   },
   "devDependencies": {
-    "wrangler": "^4.94.0"
+    "wrangler": "^4.113.0"
   }
 }
