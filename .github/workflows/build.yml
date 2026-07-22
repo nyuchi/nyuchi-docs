@@ -19,5 +19,10 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile=false
+      # Fail the build on any critical/high advisory. Residual moderate
+      # (js-yaml >=4.2.0 drops its ESM default export, breaking the Astro
+      # build) and dev-only lows (wrangler's esbuild) are tracked, not
+      # blocking. Tighten to `moderate` once js-yaml ships an ESM-safe fix.
+      - run: pnpm audit --audit-level=high
       - run: pnpm -r build
       - run: pnpm -r --if-present run test
