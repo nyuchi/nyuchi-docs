@@ -29,7 +29,7 @@ export function starlightDocsSearch(
         updateConfig({
           components: {
             ...(config?.components ?? {}),
-            Search: 'nyuchi-docs-search/Search.astro',
+            Search: '@nyuchi/nyuchi-docs-search/Search.astro',
           },
         });
       },
