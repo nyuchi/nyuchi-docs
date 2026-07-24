@@ -9,7 +9,7 @@ This repo is a **pnpm workspace** with these packages:
 | Package                | Path                  | What it does                                                                              |
 | ---------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
 | `site`                 | `site/`               | The Astro + [Starlight](https://starlight.astro.build) docs site itself. Ships as a Cloudflare Worker with Static Assets. |
-| `nyuchi-docs-search`   | `nyuchi-docs-search/` | Publishable npm package: cmdk-style search modal + Ask-AI tab for Starlight sites.        |
+| `@nyuchi/nyuchi-docs-search`   | `nyuchi-docs-search/` | Publishable npm package: cmdk-style search modal + Ask-AI tab for Starlight sites.        |
 | `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker — the Ask-AI chat proxy (SSE).                                          |
 | `nyuchi-docs-mcp-worker` | `nyuchi-docs-mcp-worker/` | Cloudflare Worker `nyuchi-docs-mcp` — the docs MCP server at docs.nyuchi.com/mcp.   |
 
@@ -17,8 +17,8 @@ This repo is a **pnpm workspace** with these packages:
 
 [`bundu-labs/bundu-docs`](https://github.com/bundu-labs/bundu-docs) covers the
 Bundu Foundation's outward-facing projects — the Mzizi product, the Ubuntu
-doctrine, and the Bundu brand system. It installs `nyuchi-docs-search` from
-npm and points at the `nyuchi-docs-mcp` worker.
+doctrine, and the Bundu brand system. It installs `@nyuchi/nyuchi-docs-search`
+from npm and points at the `nyuchi-docs-mcp` worker.
 
 ## Sections (`site/src/content/docs/`)
 

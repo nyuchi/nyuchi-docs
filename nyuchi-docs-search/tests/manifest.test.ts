@@ -4,7 +4,7 @@ import pkg from '../package.json' with { type: 'json' };
 
 describe('package manifest', () => {
   it('declares the expected entry exports', () => {
-    expect(pkg.name).toBe('nyuchi-docs-search');
+    expect(pkg.name).toBe('@nyuchi/nyuchi-docs-search');
     expect(pkg.svelte).toBe('./dist/index.js');
     expect(pkg.exports['.']).toMatchObject({
       svelte: './dist/index.js',
