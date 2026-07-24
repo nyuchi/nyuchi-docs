@@ -1,5 +1,5 @@
 {
-  "name": "nyuchi-docs-mcp",
+  "name": "@nyuchi/nyuchi-docs-mcp",
   "version": "0.1.0",
   "description": "MCP server for the Nyuchi docs (docs.nyuchi.com) — search, read, ask, send feedback and raise issues. Stdio bridge to the hosted Streamable HTTP endpoint at docs.nyuchi.com/mcp.",
   "license": "MIT",
@@ -34,5 +34,8 @@
     "documentation",
     "nyuchi",
     "docs"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

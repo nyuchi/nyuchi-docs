@@ -13,9 +13,9 @@ Used in production by:
 ## Install
 
 ```sh
-pnpm add nyuchi-docs-search svelte @astrojs/svelte
+pnpm add @nyuchi/nyuchi-docs-search svelte @astrojs/svelte
 # or
-npm install nyuchi-docs-search svelte @astrojs/svelte
+npm install @nyuchi/nyuchi-docs-search svelte @astrojs/svelte
 ```
 
 ## Wire into a Starlight site
@@ -25,7 +25,7 @@ npm install nyuchi-docs-search svelte @astrojs/svelte
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import svelte from '@astrojs/svelte';
-import { starlightDocsSearch } from 'nyuchi-docs-search/plugin';
+import { starlightDocsSearch } from '@nyuchi/nyuchi-docs-search/plugin';
 
 export default defineConfig({
   integrations: [
@@ -68,7 +68,7 @@ You can import individual pieces too:
 
 ```svelte
 <script>
-  import { SearchModal, AiChat } from 'nyuchi-docs-search';
+  import { SearchModal, AiChat } from '@nyuchi/nyuchi-docs-search';
 </script>
 
 <SearchModal aiUrl="https://…" source="nyuchi" />
@@ -84,8 +84,8 @@ Override either in your site's `customCss`.
 
 ```sh
 pnpm install
-pnpm --filter nyuchi-docs-search build
-pnpm --filter nyuchi-docs-search test
+pnpm --filter @nyuchi/nyuchi-docs-search build
+pnpm --filter @nyuchi/nyuchi-docs-search test
 ```
 
 [starlight]: https://starlight.astro.build

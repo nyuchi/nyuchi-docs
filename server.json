@@ -18,7 +18,7 @@
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
-      "identifier": "nyuchi-docs-mcp",
+      "identifier": "@nyuchi/nyuchi-docs-mcp",
       "version": "0.1.0",
       "runtimeHint": "npx",
       "transport": {

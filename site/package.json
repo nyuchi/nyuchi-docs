@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build:deps": "pnpm --filter nyuchi-docs-search build",
+    "build:deps": "pnpm --filter @nyuchi/nyuchi-docs-search build",
     "build": "pnpm run build:deps && astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -15,9 +15,9 @@
     "@astrojs/svelte": "^8.1.1",
     "@bundu/ui": "^0.1.1",
     "astro": "^6.3.7",
-    "nyuchi-docs-search": "workspace:*",
     "sharp": "^0.34.5",
-    "svelte": "^5.0.0"
+    "svelte": "^5.0.0",
+    "@nyuchi/nyuchi-docs-search": "workspace:*"
   },
   "devDependencies": {
     "wrangler": "^4.94.0"

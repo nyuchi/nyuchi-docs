@@ -14,11 +14,12 @@ packages that are shared with the companion repo
 | Package              | Path                   | What it is                                                                                                                                                                              |
 | -------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `site`               | `site/`                | The docs website — Astro 6 + Starlight + Svelte 5. Private.                                                                                                                             |
-| `nyuchi-docs-search` | `nyuchi-docs-search/`  | Publishable npm package (MIT): a Mintlify-style `⌘K`/`Ctrl+K` search modal (Pagefind-backed) with an "Ask AI" tab. Consumed here via `workspace:*` and by `bundu-docs` from the registry — this shared package is the reason the monorepo exists. |
+| `@nyuchi/nyuchi-docs-search` | `nyuchi-docs-search/`  | Publishable npm package (MIT): a Mintlify-style `⌘K`/`Ctrl+K` search modal (Pagefind-backed) with an "Ask AI" tab. Consumed here via `workspace:*` and by `bundu-docs` from the registry — this shared package is the reason the monorepo exists. |
 | `shamwari-docs-ai`   | `shamwari-docs-ai/`    | Cloudflare Worker — thin proxy in front of Cloudflare **AI Search** that powers the Ask-AI tab for both docs sites (CORS, SSE). Chat only — the MCP endpoint moved to its own worker. |
 | `nyuchi-docs-mcp-worker` | `nyuchi-docs-mcp-worker/` | Cloudflare Worker `nyuchi-docs-mcp` — **the docs MCP server at `docs.nyuchi.com/mcp`** (read tools over the same AI Search index; feedback/issue write tools into the `FEEDBACK` KV namespace, optional `GITHUB_TOKEN` secret files real issues). Direct URL: `nyuchi-docs-mcp.nyuchi.workers.dev/mcp`. |
 
-A further package, `nyuchi-docs-mcp/`, is the published npm stdio
+A further package in `nyuchi-docs-mcp/` (npm name
+`@nyuchi/nyuchi-docs-mcp`, bin `nyuchi-docs-mcp`) is the published npm stdio
 bridge to the hosted MCP endpoint (MCP registry name
 `io.github.nyuchi/nyuchi-docs`; manifest `server.json` at the repo
 root; released via `.github/workflows/publish-mcp.yml` — npm publish
