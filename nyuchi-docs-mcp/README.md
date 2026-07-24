@@ -12,13 +12,13 @@ directly.
 ## Use
 
 ```bash
-npx nyuchi-docs-mcp
+npx @nyuchi/nyuchi-docs-mcp
 ```
 
 Claude Code:
 
 ```bash
-claude mcp add nyuchi-docs -- npx nyuchi-docs-mcp
+claude mcp add nyuchi-docs -- npx @nyuchi/nyuchi-docs-mcp
 ```
 
 Or any client config:
@@ -26,7 +26,7 @@ Or any client config:
 ```json
 {
   "mcpServers": {
-    "nyuchi-docs": { "command": "npx", "args": ["nyuchi-docs-mcp"] }
+    "nyuchi-docs": { "command": "npx", "args": ["@nyuchi/nyuchi-docs-mcp"] }
   }
 }
 ```

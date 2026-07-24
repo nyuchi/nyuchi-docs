@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import svelte from '@astrojs/svelte';
-import { starlightDocsSearch } from 'nyuchi-docs-search/plugin';
+import { starlightDocsSearch } from '@nyuchi/nyuchi-docs-search/plugin';
 
 // https://astro.build/config
 export default defineConfig({

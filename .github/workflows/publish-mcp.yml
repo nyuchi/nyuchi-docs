@@ -47,7 +47,7 @@ jobs:
       - name: Install + test
         run: |
           pnpm install --frozen-lockfile
-          pnpm --filter nyuchi-docs-mcp test
+          pnpm --filter @nyuchi/nyuchi-docs-mcp test
 
       - name: Publish to npm
         working-directory: nyuchi-docs-mcp
