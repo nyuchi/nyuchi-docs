@@ -32,7 +32,7 @@ from npm and points at the `nyuchi-docs-mcp` worker.
 - **`integrations/`** — connectors, webhooks, and the docs MCP server.
 - **`identity/`** — WorkOS, `identity.nyuchi.com`, SSO, JWTs.
 - **`console/`** — the Nyuchi Console at `platform.nyuchi.com`.
-- **`mzizi-tools/`** — `mzizi-mcp`, `mzizi-sdk`, `mzizi-skills`.
+- **`mzizi-tools/`** — `mzizi-mcp`, `mzizi-cli`, `mzizi-skills`.
 - **`deployment/`** — Cloudflare, Vercel, and Supabase deployment patterns.
 - **`conventions/`** — PR doctrine, commit doctrine, repo-naming rules.
 
