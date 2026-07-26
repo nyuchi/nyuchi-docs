@@ -1,0 +1,121 @@
+---
+title: Mukoko Events MCP server
+description: Discover and manage community events across Africa from any MCP-capable agent via events.mukoko.com/mcp.
+---
+
+**Mukoko Events** (the platform also branded **Nhimbe** — same thing) exposes
+a task-based [Model Context Protocol](https://modelcontextprotocol.io) server so
+any MCP client — Claude, ChatGPT, IDE agents, custom tooling — can find events,
+look one up, and (signed in) create or manage its own.
+
+The endpoint is **`https://events.mukoko.com/mcp`** (Streamable HTTP transport,
+JSON-RPC 2.0 over `POST`, stateless — no SSE stream and no session handshake).
+
+> **Single endpoint.** The MCP is served **only** at `events.mukoko.com/mcp`.
+> The app is dual-domain (`nhimbe.com` and `events.mukoko.com` both serve it),
+> but there is deliberately **no `nhimbe.com/mcp`** — use exactly the
+> `events.mukoko.com` URL.
+
+The server owns no data. Every tool calls the public Nhimbe app API; the server
+holds no secrets and no database. It is declared on the MCP registry as
+**`com.mukoko/nhimbe-events`**.
+
+## Tools
+
+The tools are *tasks* a person (or their agent) actually wants done, not a thin
+CRUD mirror. Each result carries three layers: **inline HTML** (a carousel for
+several events, a card for one), a plain-text fallback, and machine-readable
+**`structuredContent`** — typed event fields (`id`, `name`, `url`, `startDate`,
+`category`, `city`, `isOnline`, …) so an agent consumes structured data instead
+of scraping the card.
+
+| Tool | Auth | What it does |
+| --- | --- | --- |
+| `events_near_me` | anonymous | Upcoming events near a city |
+| `events_matching_interests` | anonymous | Events matching one or more interests / categories, optionally scoped to a city |
+| `get_event` | anonymous | Look up a single event by id, slug, or short code |
+| `create_event` | WorkOS user | Create an event as the signed-in host |
+| `update_event` | WorkOS user | Edit or manage an event you host (e.g. cancel it) |
+
+### Read vs. write
+
+- **Reads are anonymous** — the three discovery tools need no sign-in.
+- **Writes are gated on a WorkOS bearer token.** `create_event` and
+  `update_event` require the MCP client to present
+  `Authorization: Bearer <WorkOS access token>`. The server forwards it to the
+  app (`POST /api/events`, `PATCH /api/events/:id`), which verifies the token
+  and enforces entity-centric host authorization — the app is the single trust
+  boundary. Without a token the write tools return a clear "sign in" error
+  rather than failing silently.
+
+The OAuth metadata for the write path is advertised at the Nhimbe origin:
+`https://events.mukoko.com/.well-known/oauth-protected-resource` and
+`.../oauth-authorization-server` (WorkOS is the authorization server). The
+human-readable agent guide lives at
+[`events.mukoko.com/auth.md`](https://events.mukoko.com/auth.md).
+
+## Connecting
+
+### Claude Code plugin
+
+The MCP ships as a Claude Code plugin — the server plus two skills
+(`mukoko-events-discovery`, read-only; `mukoko-events-hosting`, authenticated)
+that teach Claude when and how to call the tools. Install it from the Mukoko
+marketplace:
+
+```shell
+/plugin marketplace add nyuchi/mukoko-events-mcp
+/plugin install mukoko-events@mukoko
+/reload-plugins
+```
+
+Then just ask, e.g. *"what events are on in Harare this weekend?"* — the
+discovery skill triggers and calls the MCP.
+
+### ChatGPT connector
+
+Add the same server to ChatGPT as a **custom MCP connector**
+(Settings → Connectors → add a custom connector; some workspaces must enable
+Developer mode first):
+
+- **Name**: `Mukoko Events`
+- **MCP server URL**: `https://events.mukoko.com/mcp`
+- **Authentication**: **No authentication** for the read tools; **OAuth** for
+  the write tools, pointing OAuth discovery at the Nhimbe origin's
+  `/.well-known/*` metadata above.
+
+### Raw MCP endpoint
+
+Any client that speaks Streamable HTTP can connect directly:
+
+```json
+{
+  "mcpServers": {
+    "mukoko-events": {
+      "type": "http",
+      "url": "https://events.mukoko.com/mcp"
+    }
+  }
+}
+```
+
+Or probe it by hand:
+
+```bash
+curl -s https://events.mukoko.com/mcp \
+  -X POST \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+## Notes
+
+- **Transport.** Streamable HTTP, stateless — `POST /mcp` for JSON-RPC; `GET`
+  returns `405` (no server-initiated stream).
+- **Protocol support.** The server is dual-era: the stable legacy revisions
+  (`2025-06-18`, `2025-03-26`, `2024-11-05`, with the `initialize` handshake)
+  plus beta support for the stateless `2026-07-28` revision (`server/discover`,
+  per-request metadata).
+- **Own repository.** The server lives in **`nyuchi/mukoko-events-mcp`** (split
+  out of the Nhimbe app repo); the admin dashboard lives in
+  **`nyuchi/mukoko-events-admin`**. Neither is part of the app request path.
