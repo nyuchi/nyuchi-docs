@@ -29,7 +29,8 @@ from npm and points at the `nyuchi-docs-mcp` worker.
 - **`kweli/`** — Mukoko Kweli product guides: verification, cross-app
   how-to, open data, data quality, design system.
 - **`mukoko-weather/`** — Mukoko Weather user guide and stations.
-- **`integrations/`** — connectors, webhooks, and the docs MCP server.
+- **`integrations/`** — connectors, webhooks, the docs MCP server, and
+  the Mukoko Events MCP server.
 - **`identity/`** — WorkOS, `identity.nyuchi.com`, SSO, JWTs.
 - **`console/`** — the Nyuchi Console at `platform.nyuchi.com`.
 - **`mzizi-tools/`** — `mzizi-mcp`, `mzizi-cli`, `mzizi-skills`.
