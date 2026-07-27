@@ -34,6 +34,29 @@ Two live MCP surfaces read the same Mzizi document store:
 }
 ```
 
+## The component registry
+
+Mzizi ships UI through a **shadcn-compatible registry at `mzizi.dev`**,
+consumed under the `@mzizi` namespace — `mzizi.dev/api/v1/ui/{name}`. The
+`mzizi add` CLI (`@nyuchi/mzizi-cli`, aka *fundi*) and the Mzizi MCP resolver
+both resolve the same source, so a component pulled by the CLI, an agent, or a
+raw `shadcn add` all come from one place.
+
+Component naming is a deliberate **mix**: plain shadcn names for
+framework-standard primitives (`button`, `dialog`, `card`, …) alongside
+custom components prefixed by brand — `nyuchi-`, `bundu-`, or `mzizi-`. The
+prefix signals a brand-specific composite; an unprefixed name is a stock
+shadcn primitive re-served through the registry.
+
+<Aside type="note">
+  **`@mzizi` is not `@bundu/ui`.** The `@mzizi` registry is for **React app**
+  consumers (shadcn-style `add`). `@bundu/ui` is a separate **Astro/marketing
+  kit** — `Hero`/`Section`/`MineralStrip` components plus the shared token CSS
+  and Tailwind preset. This docs site is Astro and legitimately uses `@bundu/ui`
+  for its tokens and theming; it does not consume the `@mzizi` component
+  registry.
+</Aside>
+
 ## What needs to land here
 
 ### `mzizi-mcp`

@@ -143,6 +143,7 @@ export default defineConfig({
                 'integrations/quickstart',
                 'integrations/authentication',
                 'integrations/docs-mcp',
+                'integrations/events-mcp',
               ],
             },
             {
