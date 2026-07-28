@@ -72,6 +72,26 @@ marketplace:
 Then just ask, e.g. *"what events are on in Harare this weekend?"* — the
 discovery skill triggers and calls the MCP.
 
+### Claude (web & desktop)
+
+Add the server as a **custom connector** so the write tools (`create_event`,
+`update_event`) can act as you:
+
+1. Open **Settings → Connectors → Add custom connector**.
+2. Enter the MCP server URL `https://events.mukoko.com/mcp` and click
+   **Connect**.
+3. Claude runs OAuth discovery against the Nhimbe origin's `/.well-known/*`
+   metadata, self-registers, and opens the hosted **WorkOS AuthKit** sign-in.
+   Complete sign-in (email code, password, passkey, MFA or social — whatever is
+   configured on your account).
+4. Once authorized, the connector is available in new chats. The token is reused
+   (and refreshed) on every call — you sign in only once.
+
+The read tools work without sign-in; authorizing simply unlocks hosting. See the
+agent guide at
+[`events.mukoko.com/auth.md`](https://events.mukoko.com/auth.md) for the full
+OAuth 2.1 + PKCE flow.
+
 ### ChatGPT connector
 
 Add the same server to ChatGPT as a **custom MCP connector**
