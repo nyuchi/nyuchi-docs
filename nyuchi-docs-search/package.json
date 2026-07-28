@@ -45,22 +45,21 @@
     "test:watch": "vitest"
   },
   "peerDependencies": {
-    "@astrojs/starlight": "^0.39.0",
-    "svelte": "^5.0.0"
+    "@astrojs/starlight": "^0.39.0 || ^0.41.0",
+    "svelte": "^5.56.8"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@sveltejs/kit": "^2.7.0",
-    "@sveltejs/package": "^2.3.7",
-    "@sveltejs/vite-plugin-svelte": "^5.0.0",
-    "@testing-library/jest-dom": "^6.5.0",
-    "@testing-library/svelte": "^5.2.4",
+    "@sveltejs/kit": "^2.70.1",
+    "@sveltejs/package": "^2.5.8",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/svelte": "^5.4.2",
     "@testing-library/user-event": "^14.5.2",
-    "jsdom": "^25.0.1",
-    "publint": "^0.3.0",
-    "svelte": "^5.0.0",
-    "svelte-check": "^4.0.5",
-    "typescript": "^5.6.3",
+    "jsdom": "^29.1.1",
+    "publint": "^0.3.22",
+    "svelte": "^5.56.8",
+    "svelte-check": "^4.7.3",
+    "typescript": "^6.0.3",
     "vite": "^6.0.0",
     "vitest": "^2.1.4"
   },
