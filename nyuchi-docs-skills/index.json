@@ -1,0 +1,13 @@
+{
+  "$schema": "https://mzizi.dev/schema/skills.json",
+  "name": "nyuchi-docs-skills",
+  "version": "0.1.0",
+  "source": "repo",
+  "skills": [
+    {
+      "name": "using-nyuchi-docs",
+      "file": "skills/using-nyuchi-docs/SKILL.md",
+      "description": "Find answers in the Nyuchi engineering documentation at docs.nyuchi.com — searching it, asking it a question, reading a specific page, and reporting one that is wrong or missing. Covers the MCP endpoint and its five tools, the llms.txt index, in-page search and Ask AI, and how to tell an authoritative page from a stub."
+    }
+  ]
+}

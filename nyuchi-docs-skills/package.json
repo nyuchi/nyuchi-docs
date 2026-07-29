@@ -1,0 +1,26 @@
+{
+  "name": "@nyuchi/nyuchi-docs-skills",
+  "version": "0.1.0",
+  "description": "The public agent skill for docs.nyuchi.com — how a user or an agent searches, asks, reads, and reports problems with the Nyuchi documentation. One skill; the repo's authoring and maintenance skills are internal and deliberately not shipped here.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./index.json",
+    "./index.json": "./index.json",
+    "./skills/*": "./skills/*"
+  },
+  "files": ["index.json", "skills", "README.md"],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nyuchi/nyuchi-docs.git",
+    "directory": "nyuchi-docs-skills"
+  },
+  "homepage": "https://docs.nyuchi.com/tools/",
+  "keywords": ["skills", "agent", "claude", "mcp", "documentation", "nyuchi"],
+  "publishConfig": {
+    "access": "public"
+  }
+}
