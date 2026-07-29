@@ -194,6 +194,10 @@ export default defineConfig({
           items: ['console/overview'],
         },
         {
+          label: 'Tools',
+          items: ['tools'],
+        },
+        {
           label: 'Mzizi Tools',
           items: ['mzizi-tools/overview'],
         },
