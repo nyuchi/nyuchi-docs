@@ -8,6 +8,7 @@
     "build": "pnpm --filter site build",
     "build:all": "pnpm -r build",
     "test": "pnpm -r test",
+    "skills:validate": "node scripts/validate-skills.mjs",
     "lint": "pnpm -r lint",
     "deploy:worker": "pnpm --filter shamwari-docs-ai deploy",
     "ingest": "pnpm --filter shamwari-docs-ai ingest",

@@ -59,26 +59,40 @@ curl -s https://mzizi.dev/api/v1/skills/nyuchi-design   # one skill at runtime
 
 Browse them rendered at [mzizi.dev/skills](https://mzizi.dev/skills).
 
-### `nyuchi-docs` — repo-local skills
+### `@nyuchi/nyuchi-docs-skills` — using these docs
 
-These live in [`nyuchi/nyuchi-docs`](https://github.com/nyuchi/nyuchi-docs)
-under `.claude/skills/` and cover working **on this docs site**. They are not
-published to npm, so the way to get them is to clone the repo — Claude Code
-picks them up automatically when a session runs inside it.
+One public skill, covering how a user or an agent **consumes** this site.
 
-| Skill | Use it when |
+```bash
+npx skills add @nyuchi/nyuchi-docs-skills
+```
+
+| Skill | Covers |
 | --- | --- |
-| `agent-readiness` | Verifying the docs site's agent surfaces after a deploy or Cloudflare change |
-| `docs-drift-audit` | Periodic sweep for sidebar orphans, stale strings, and gotchas that no longer hold |
-| `kweli-docs-sync` | Kweli shipped something user- or agent-visible and the guides need syncing |
-| `mzizi-shell` | Touching the site shell, or replicating it on another Starlight site |
-| `release-mcp` | Cutting a new version of the docs MCP stdio bridge |
+| `using-nyuchi-docs` | Searching, asking, and reading the docs; the MCP endpoint and its five tools; `llms.txt`; in-page `⌘K` search and Ask AI; how to tell an authoritative page from a stub; and how to report a bad one. |
 
-<Aside type="caution">
-  **These five are not distributable today.** Anything reusable outside this
-  repo belongs in `@nyuchi/mzizi-skills` instead; anything genuinely specific to
-  the docs site is correctly repo-local. `mzizi-shell` is the borderline case —
-  it documents a contract another Starlight site would want.
+### Internal — authoring and maintaining this site
+
+Five skills live in [`nyuchi/nyuchi-docs`](https://github.com/nyuchi/nyuchi-docs/tree/main/.claude/skills)
+under `.claude/skills/` and are **deliberately not published**. Each assumes a checkout in front
+of you — repo paths, repo scripts, the ability to open a PR — so shipping them to npm would hand
+consumers instructions they cannot act on. Claude Code loads them automatically for any session
+running inside the repo, which is the audience they have.
+
+| Skill | Kind | Use it when |
+| --- | --- | --- |
+| `docs-drift-audit` | maintain | Sweeping for sidebar orphans, stale strings, and gotchas that no longer hold |
+| `kweli-docs-sync` | maintain | Kweli shipped something user- or agent-visible and the guides need syncing |
+| `agent-readiness` | verify | Probing the agent surfaces after a deploy or a Cloudflare config change |
+| `mzizi-shell` | create | Touching the site shell, or replicating the Mzizi N7 shell contract |
+| `release-mcp` | release | Cutting a new version of the docs MCP stdio bridge |
+
+<Aside type="note">
+  **The rule: consuming is public, producing is internal.** Ask two questions
+  before adding a skill — does it need a checkout (⇒ internal), and is it about
+  the docs or the design system (⇒ `@nyuchi/mzizi-skills`)? A validator enforces
+  the split in CI: a skill present in both homes fails the build, because a
+  duplicated skill drifts.
 </Aside>
 
 ## CLIs
@@ -86,15 +100,17 @@ picks them up automatically when a session runs inside it.
 | CLI | Install | Repo | What it does |
 | --- | --- | --- | --- |
 | `fundi` (`@nyuchi/mzizi-cli`) | `pnpm add -D @nyuchi/mzizi-cli` | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/mzizi-cli) | Explores a project, plans a change against the Mzizi registry, applies it on request. SDK and CLI in one package. |
-| `nyuchi-docs-mcp` | `npx nyuchi-docs-mcp` | [nyuchi-docs](https://github.com/nyuchi/nyuchi-docs/tree/main/nyuchi-docs-mcp) | stdio bridge to the hosted docs MCP, for clients that want a local process rather than an HTTP endpoint. |
+| `nyuchi-docs-mcp` | `npx @nyuchi/nyuchi-docs-mcp` | [nyuchi-docs](https://github.com/nyuchi/nyuchi-docs/tree/main/nyuchi-docs-mcp) | stdio bridge to the hosted docs MCP, for clients that want a local process rather than an HTTP endpoint. |
 
 Full instructions for the Mzizi CLI: [mzizi.dev/cli](https://mzizi.dev/cli).
 
-<Aside type="caution">
-  **The docs bridge is published unscoped.** `nyuchi-docs-mcp` resolves on npm;
-  `@nyuchi/nyuchi-docs-mcp` does not. Every other published tool in the
-  ecosystem uses the `@nyuchi` scope, so this one is the odd one out — worth
-  reconciling so the naming rule holds everywhere.
+<Aside type="note">
+  **The docs bridge moved to the `@nyuchi` scope.** The unscoped
+  `nyuchi-docs-mcp` is deprecated on npm and points at
+  `@nyuchi/nyuchi-docs-mcp`, so the naming rule now holds across every published
+  tool. The scoped package publishes on the next release — until then the
+  deprecation notice names a package that is not up yet, so install the unscoped
+  name if you need it today.
 </Aside>
 
 ## MCP servers
