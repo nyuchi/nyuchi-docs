@@ -19,6 +19,11 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile=false
+      # Offline, zero-dependency: validates the published skills bundle and
+      # enforces the public/internal split (a skill must live in exactly one
+      # home). Cheap, so it runs on every PR rather than only on publish.
+      - run: node scripts/validate-skills.mjs
+
       # Fail the build on any critical/high advisory. Residual moderate
       # (js-yaml >=4.2.0 drops its ESM default export, breaking the Astro
       # build) and dev-only lows (wrangler's esbuild) are tracked, not
