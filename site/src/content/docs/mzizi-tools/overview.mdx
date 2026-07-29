@@ -6,7 +6,9 @@ description: Using mzizi-mcp, mzizi-cli, and mzizi-skills from inside a Nyuchi p
 import { Aside } from '@astrojs/starlight/components';
 
 <Aside type="caution">
-  This section is a stub. Treat it as a TODO list, not a reference.
+  Partly a stub. **Agent skills** below is a reference and current. The
+  `mzizi-mcp` and `mzizi-cli` sections under *What needs to land here* are still
+  a TODO list — don't read them as documentation.
 </Aside>
 
 The Mzizi tooling — `@nyuchi/mzizi-mcp`, `@nyuchi/mzizi-cli` (the fundi agent
@@ -57,6 +59,82 @@ shadcn primitive re-served through the registry.
   registry.
 </Aside>
 
+## Agent skills — `@nyuchi/mzizi-skills`
+
+The design-system and engineering doctrine ships as a public npm package of
+agent skills. Install it into any repo so Claude Code (or Cursor, Copilot,
+Cline, Windsurf) has the doctrine on hand instead of guessing:
+
+```bash
+npx skills add @nyuchi/mzizi-skills
+```
+
+Or take the whole toolchain as a Claude Code plugin — the skills, the `fundi`
+agent, the registry MCP, and the `/mzizi:*` commands in one step:
+
+```
+/plugin marketplace add nyuchi/mzizi-tools
+/plugin install mzizi@mzizi-tools
+```
+
+Nine skills ship in the bundle:
+
+| Skill                    | Reach for it when                                             |
+| ------------------------ | ------------------------------------------------------------- |
+| `nyuchi-design`          | Generating any branded interface — minerals, radius, type      |
+| `bundu-design`           | Cross-brand materials and brand-voice decisions                |
+| `mukoko-design`          | Producing or exporting mukoko visual identity                  |
+| `simplify`               | Before adding a component or style, and during any refactor    |
+| `discoverability`        | A shared link shows no preview, or you're adding a route/site  |
+| `scaffold-component`     | Authoring a new component into the Mzizi registry              |
+| `ecosystem-app-setup`    | Bootstrapping a new ecosystem app against the registry         |
+| `cloudflare-worker-rust` | Building a Worker in Rust with `workers-rs`                    |
+| `mcp-server-cloudflare`  | Adding or changing an MCP Worker                               |
+
+The live list is served from the portal, so read it rather than trusting this
+table to stay current:
+
+```bash
+curl -s https://mzizi.dev/api/v1/skills | jq '.skills[].name'
+```
+
+### Git is the source of truth
+
+Skills are authored in `nyuchi/mzizi-tools` as
+`mzizi-skills/skills/<name>/SKILL.md` — YAML frontmatter carrying `name` and
+`description`, then the body. That bundle is the single home for skill content:
+`mzizi-tools` projects it **into** the Supabase `skills` collection
+(`pnpm skills:sync`, disk → DB), and the portal serves what it finds there via
+`/api/v1/skills*` and MCP `get_skill`.
+
+<Aside type="caution">
+  **Never edit a skill anywhere but the bundle.** Not a copy vendored into a
+  consumer repo, not a `.claude/skills/*.md` file, and not the Supabase row
+  directly — the next `skills:sync` overwrites all three. This reverses the
+  older "authored once in Supabase" model, which broke down precisely because
+  two syncs wrote to the same collection in opposite directions.
+</Aside>
+
+### Changing a skill
+
+1. Open a PR against `nyuchi/mzizi-tools` editing
+   `mzizi-skills/skills/<name>/SKILL.md`.
+2. Adding a skill? Also add an `index.json` entry (`name`, `file`,
+   `description`) — consumers read the index, so an unlisted skill is invisible.
+3. Bump the version in **both** `mzizi-skills/package.json` and `index.json`;
+   they move in lockstep.
+4. Run `pnpm skills:validate` from the repo root. It is offline and needs no
+   credentials, and it catches the whole class of packaging mistakes: version
+   drift between the two files, an index entry pointing at a missing file,
+   frontmatter `name` disagreeing with the index, an unlisted skill directory,
+   or an `exports` map that would make consumers silently fall back to built-in
+   defaults.
+5. Merge to `main`. `publish-mzizi-skills.yml` validates and publishes to npm
+   with provenance. The workflow checks the registry first, so **a merge without
+   a version bump publishes nothing** — bump the version or nothing ships.
+6. An operator runs `pnpm skills:sync` (needs the Supabase service-role key) to
+   project the change into the registry surface.
+
 ## What needs to land here
 
 ### `mzizi-mcp`
@@ -77,15 +155,19 @@ shadcn primitive re-served through the registry.
 
 ### `mzizi-skills`
 
-- The skill library shape, where Nyuchi-specific skills live, how they're
-  registered.
-- The contribution flow: from a one-off prompt to a versioned skill.
-- Testing skills locally before publishing.
+Covered above — install, the nine skills, and the authoring flow. Still open:
+
+- Whether Nyuchi-specific skills (ones no external consumer would want) belong
+  in the shared bundle or in a per-repo `.claude/skills/`.
+- How to exercise a skill locally before publishing, beyond
+  `pnpm skills:validate`'s structural checks.
 
 ## Cross-links
 
 - [`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools) — the
   monorepo.
+- [`@nyuchi/mzizi-skills`](https://www.npmjs.com/package/@nyuchi/mzizi-skills)
+  — the published skills bundle; source under `mzizi-skills/skills/`.
 - [bundu-docs › Mzizi architecture](https://docs.bundu.org/mzizi/architecture/overview/)
   — the upstream architecture reference.
 - [bundu-docs › Mzizi registry](https://docs.bundu.org/mzizi/architecture/registry/)

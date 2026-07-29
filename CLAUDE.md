@@ -18,6 +18,21 @@ packages that are shared with the companion repo
 | `shamwari-docs-ai`   | `shamwari-docs-ai/`    | Cloudflare Worker — thin proxy in front of Cloudflare **AI Search** that powers the Ask-AI tab for both docs sites (CORS, SSE). Chat only — the MCP endpoint moved to its own worker. |
 | `nyuchi-docs-mcp-worker` | `nyuchi-docs-mcp-worker/` | Cloudflare Worker `nyuchi-docs-mcp` — **the docs MCP server at `docs.nyuchi.com/mcp`** (read tools over the same AI Search index; feedback/issue write tools into the `FEEDBACK` KV namespace, optional `GITHUB_TOKEN` secret files real issues). Direct URL: `nyuchi-docs-mcp.nyuchi.workers.dev/mcp`. |
 
+**Skills live in two homes, and the split is a rule.**
+`nyuchi-docs-skills/` (npm `@nyuchi/nyuchi-docs-skills`) is the **public**
+bundle — one skill, `using-nyuchi-docs`, covering how a user or agent
+*consumes* this site (search, ask, read, the MCP endpoint, `llms.txt`,
+spotting a stub, reporting a bad page). `.claude/skills/` holds the
+**internal** five for *producing* it (`docs-drift-audit`,
+`kweli-docs-sync`, `agent-readiness`, `mzizi-shell`, `release-mcp`);
+those are never published because each assumes a checkout — repo paths,
+repo scripts, opening a PR. **Consuming is public, producing is
+internal.** `node scripts/validate-skills.mjs` (root `pnpm
+skills:validate`, and a step in `build.yml`) enforces it: version
+lockstep, well-formed frontmatter in both homes, and a hard failure if a
+skill appears in both. See `.claude/skills/README.md` and
+`nyuchi-docs-skills/README.md`.
+
 A further package in `nyuchi-docs-mcp/` (npm name
 `@nyuchi/nyuchi-docs-mcp`, bin `nyuchi-docs-mcp`) is the published npm stdio
 bridge to the hosted MCP endpoint (MCP registry name
@@ -43,6 +58,7 @@ pnpm dev                   # site dev server → http://localhost:4321
 pnpm build                 # build the site (builds the search package first)
 pnpm build:all             # pnpm -r build (all packages)
 pnpm test                  # pnpm -r test (search pkg + worker; Vitest)
+pnpm skills:validate       # offline gate: skills bundle + the public/internal split
 pnpm deploy:worker         # wrangler deploy of shamwari-docs-ai
 pnpm deploy:mcp            # wrangler deploy of nyuchi-docs-mcp
 ```

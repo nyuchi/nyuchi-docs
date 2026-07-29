@@ -1,0 +1,167 @@
+---
+title: Nyuchi tools directory
+description: Every skill, CLI, and MCP server across the Nyuchi and Bundu repos — what it is, where it lives, and how to install it.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The core directory for Nyuchi tooling. Three kinds of thing live here — **agent
+skills** (doctrine an assistant loads), **CLIs** (things you run), and **MCP
+servers** (live data an assistant queries) — and each entry says which repo owns
+it and how to get it.
+
+<Aside type="note">
+  Counts and versions are deliberately absent from the tables below. They drift
+  the moment anything ships, so each row links to the live source instead. For
+  the Mzizi skill list as the registry currently holds it, call
+  `curl -s https://mzizi.dev/api/v1/skills`.
+</Aside>
+
+## Agent skills
+
+### `@nyuchi/mzizi-skills` — the published bundle
+
+The design-system and engineering doctrine for the whole ecosystem. Owned by
+[`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools), authored in git
+under `mzizi-skills/skills/<name>/SKILL.md`, published to npm, and projected
+into the Mzizi registry so the same bodies serve over HTTP and MCP.
+
+```bash
+# every skill, as files in .claude/skills/
+npx skills add @nyuchi/mzizi-skills
+```
+
+```
+# or the whole toolchain as a Claude Code plugin
+/plugin marketplace add nyuchi/mzizi-tools
+/plugin install mzizi@mzizi-tools
+```
+
+| Skill | Use it when | Source |
+| --- | --- | --- |
+| `nyuchi-design` | Generating any branded interface — minerals, radius, type stack | [SKILL.md](https://github.com/nyuchi/mzizi-tools/blob/main/mzizi-skills/skills/nyuchi-design/SKILL.md) |
+| `bundu-design` | Cross-brand materials and brand-voice decisions | [SKILL.md](https://github.com/nyuchi/mzizi-tools/blob/main/mzizi-skills/skills/bundu-design/SKILL.md) |
+| `mukoko-design` | Producing or exporting mukoko visual identity | [SKILL.md](https://github.com/nyuchi/mzizi-tools/blob/main/mzizi-skills/skills/mukoko-design/SKILL.md) |
+| `simplify` | Before adding a component or style, and during any refactor | [SKILL.md](https://github.com/nyuchi/mzizi-tools/blob/main/mzizi-skills/skills/simplify/SKILL.md) |
+| `discoverability` | A shared link shows no preview, or you're adding a route or site | [SKILL.md](https://github.com/nyuchi/mzizi-tools/blob/main/mzizi-skills/skills/discoverability/SKILL.md) |
+| `scaffold-component` | Authoring a new component into the Mzizi registry | [SKILL.md](https://github.com/nyuchi/mzizi-tools/blob/main/mzizi-skills/skills/scaffold-component/SKILL.md) |
+| `ecosystem-app-setup` | Bootstrapping a new ecosystem app against the registry | [SKILL.md](https://github.com/nyuchi/mzizi-tools/blob/main/mzizi-skills/skills/ecosystem-app-setup/SKILL.md) |
+| `cloudflare-worker-rust` | Building a Worker in Rust with `workers-rs` | [SKILL.md](https://github.com/nyuchi/mzizi-tools/blob/main/mzizi-skills/skills/cloudflare-worker-rust/SKILL.md) |
+| `mcp-server-cloudflare` | Adding or changing an MCP Worker | [SKILL.md](https://github.com/nyuchi/mzizi-tools/blob/main/mzizi-skills/skills/mcp-server-cloudflare/SKILL.md) |
+
+Three ways to reach the same body, depending on what you're doing:
+
+```bash
+npx skills add @nyuchi/mzizi-skills          # files on disk, offline
+curl -s https://mzizi.dev/api/v1/skills/nyuchi-design   # one skill at runtime
+# or over MCP: list_skills / get_skill against https://mcp.mzizi.dev/mcp
+```
+
+Browse them rendered at [mzizi.dev/skills](https://mzizi.dev/skills).
+
+### `@nyuchi/nyuchi-docs-skills` — using these docs
+
+One public skill, covering how a user or an agent **consumes** this site.
+
+```bash
+npx skills add @nyuchi/nyuchi-docs-skills
+```
+
+| Skill | Covers |
+| --- | --- |
+| `using-nyuchi-docs` | Searching, asking, and reading the docs; the MCP endpoint and its five tools; `llms.txt`; in-page `⌘K` search and Ask AI; how to tell an authoritative page from a stub; and how to report a bad one. |
+
+### Internal — authoring and maintaining this site
+
+Five skills live in [`nyuchi/nyuchi-docs`](https://github.com/nyuchi/nyuchi-docs/tree/main/.claude/skills)
+under `.claude/skills/` and are **deliberately not published**. Each assumes a checkout in front
+of you — repo paths, repo scripts, the ability to open a PR — so shipping them to npm would hand
+consumers instructions they cannot act on. Claude Code loads them automatically for any session
+running inside the repo, which is the audience they have.
+
+| Skill | Kind | Use it when |
+| --- | --- | --- |
+| `docs-drift-audit` | maintain | Sweeping for sidebar orphans, stale strings, and gotchas that no longer hold |
+| `kweli-docs-sync` | maintain | Kweli shipped something user- or agent-visible and the guides need syncing |
+| `agent-readiness` | verify | Probing the agent surfaces after a deploy or a Cloudflare config change |
+| `mzizi-shell` | create | Touching the site shell, or replicating the Mzizi N7 shell contract |
+| `release-mcp` | release | Cutting a new version of the docs MCP stdio bridge |
+
+<Aside type="note">
+  **The rule: consuming is public, producing is internal.** Ask two questions
+  before adding a skill — does it need a checkout (⇒ internal), and is it about
+  the docs or the design system (⇒ `@nyuchi/mzizi-skills`)? A validator enforces
+  the split in CI: a skill present in both homes fails the build, because a
+  duplicated skill drifts.
+</Aside>
+
+## CLIs
+
+| CLI | Install | Repo | What it does |
+| --- | --- | --- | --- |
+| `fundi` (`@nyuchi/mzizi-cli`) | `pnpm add -D @nyuchi/mzizi-cli` | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/mzizi-cli) | Explores a project, plans a change against the Mzizi registry, applies it on request. SDK and CLI in one package. |
+| `nyuchi-docs-mcp` | `npx @nyuchi/nyuchi-docs-mcp` | [nyuchi-docs](https://github.com/nyuchi/nyuchi-docs/tree/main/nyuchi-docs-mcp) | stdio bridge to the hosted docs MCP, for clients that want a local process rather than an HTTP endpoint. |
+
+Full instructions for the Mzizi CLI: [mzizi.dev/cli](https://mzizi.dev/cli).
+
+<Aside type="note">
+  **The docs bridge moved to the `@nyuchi` scope.** The unscoped
+  `nyuchi-docs-mcp` is deprecated on npm and points at
+  `@nyuchi/nyuchi-docs-mcp`, so the naming rule now holds across every published
+  tool. The scoped package publishes on the next release — until then the
+  deprecation notice names a package that is not up yet, so install the unscoped
+  name if you need it today.
+</Aside>
+
+## MCP servers
+
+| Server | Endpoint | Repo | Auth | Serves |
+| --- | --- | --- | --- | --- |
+| `mzizi-mcp` | `https://mcp.mzizi.dev/mcp` | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/mzizi-mcp) | WorkOS Connect OAuth PKCE (free signup) | The Mzizi registry — components, tokens, architecture, doctrine, skills |
+| Mzizi portal | `https://mzizi.dev/mcp` | [mzizi](https://github.com/nyuchi/design-portal) | none (anon read) | The canonical document-route MCP inside the portal |
+| `nyuchi-docs-mcp` | `https://docs.nyuchi.com/mcp` | [nyuchi-docs](https://github.com/nyuchi/nyuchi-docs/tree/main/nyuchi-docs-mcp-worker) | none for reads | This docs corpus — search, ask, read, plus feedback and issue write tools |
+| `bushtrade-mcp` | Worker + stdio bin | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/bushtrade-mcp) | WorkOS Connect OAuth PKCE | Agentic commerce — task-driven UCP/AP2 verbs |
+| `fundi-tester` | `https://tester.fundi.nyuchi.dev` | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/fundi) | WorkOS M2M + forwarded user token | The fundi self-healing agent. Internal; `private: true`, never published |
+
+Two are listed in the public MCP registry: `io.github.nyuchi/mzizi-mcp` and
+`io.github.nyuchi/nyuchi-docs`.
+
+### Adding an MCP server to a client
+
+```json
+{
+  "mcpServers": {
+    "mzizi": { "type": "http", "url": "https://mcp.mzizi.dev/mcp" },
+    "nyuchi-docs": { "type": "http", "url": "https://docs.nyuchi.com/mcp" }
+  }
+}
+```
+
+### Inspecting one
+
+Use the official inspector rather than hand-rolling JSON-RPC:
+
+```bash
+npx @modelcontextprotocol/inspector --web <command-or-url>
+```
+
+Note the argument order the launcher wants — **mode flag, then target, then
+options** — and that OAuth-gated endpoints answer an unauthenticated
+`tools/list` with `401`, so point it at a local stdio bin or a `wrangler dev`
+instance instead of production:
+
+```bash
+# inside mzizi-tools
+pnpm --filter @nyuchi/mzizi-mcp inspect       # web UI over the stdio bin
+pnpm --filter @nyuchi/mzizi-mcp inspect:cli   # tools/list as JSON
+```
+
+## Adding a tool to this directory
+
+1. Publish it under the `@nyuchi` npm scope with
+   `publishConfig.access: "public"`, or document why it stays private.
+2. If it's a reusable agent skill, put it in `@nyuchi/mzizi-skills` rather than
+   a repo-local `.claude/skills/` — that's what makes it installable.
+3. If it's an MCP server, register it (`io.github.nyuchi/<name>`) and give it a
+   `server.json` whose version stays in lockstep with `package.json`.
+4. Add a row above. Link the source; don't paste a version number.
