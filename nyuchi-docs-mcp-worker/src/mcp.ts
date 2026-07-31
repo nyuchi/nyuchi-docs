@@ -12,6 +12,12 @@ import {
   type ChatMessage,
   type Env,
 } from './worker.js';
+import { getInternalPaths, isInternalPath } from './auth.js';
+
+export interface CallerAuth {
+  authorized: boolean;
+  subject?: string;
+}
 
 // MCP spec revisions this server speaks, newest first. Initialize
 // negotiates: a supported requested version is echoed back; anything
@@ -147,11 +153,36 @@ async function callSearch(env: Env, query: string, topK: number) {
   return normaliseCitations(res.chunks ?? []);
 }
 
-async function toolSearchDocs(env: Env, params: Record<string, unknown>): Promise<ToolResult> {
+// Best-effort: AI Search's index is built by crawling the public site, and
+// the crawler gets the same OIDC gate any other unauthenticated visitor
+// does, so an internal page landing in this index at all would already be
+// a bug elsewhere. This filter is the belt-and-suspenders backstop, not
+// the actual access-control boundary — don't rely on it alone.
+async function filterCitations<T extends { url: string }>(
+  citations: T[],
+  auth: CallerAuth
+): Promise<T[]> {
+  if (auth.authorized) return citations;
+  const internalPaths = await getInternalPaths(DOCS_ORIGIN);
+  if (internalPaths.length === 0) return citations;
+  return citations.filter((c) => {
+    try {
+      return !isInternalPath(internalPaths, new URL(c.url, DOCS_ORIGIN).pathname);
+    } catch {
+      return true;
+    }
+  });
+}
+
+async function toolSearchDocs(
+  env: Env,
+  params: Record<string, unknown>,
+  auth: CallerAuth
+): Promise<ToolResult> {
   const query = str(params, 'query');
   if (!query) return textResult('search_docs: query is required', true);
   const topK = Math.min(Math.max(Number(params.top_k) || Number(env.TOP_K ?? '5'), 1), 10);
-  const hits = await callSearch(env, query, topK);
+  const hits = await filterCitations(await callSearch(env, query, topK), auth);
   if (hits.length === 0) return textResult(`No documentation matches for "${query}".`);
   const lines = hits.map(
     (h) => `${h.index}. ${h.title}\n   ${h.url}${h.snippet ? `\n   ${h.snippet}` : ''}`
@@ -159,7 +190,11 @@ async function toolSearchDocs(env: Env, params: Record<string, unknown>): Promis
   return textResult(lines.join('\n\n'));
 }
 
-async function toolAskDocs(env: Env, params: Record<string, unknown>): Promise<ToolResult> {
+async function toolAskDocs(
+  env: Env,
+  params: Record<string, unknown>,
+  auth: CallerAuth
+): Promise<ToolResult> {
   const question = str(params, 'question');
   if (!question) return textResult('ask_docs: question is required', true);
   const messages: ChatMessage[] = [{ role: 'user', content: question }];
@@ -173,7 +208,7 @@ async function toolAskDocs(env: Env, params: Record<string, unknown>): Promise<T
     instance.chatCompletions(opts),
   ]);
   const answer = chatRes.choices?.[0]?.message?.content ?? '';
-  const sources = normaliseCitations(searchRes.chunks ?? [])
+  const sources = (await filterCitations(normaliseCitations(searchRes.chunks ?? []), auth))
     .map((c) => `[${c.index}] ${c.title} — ${c.url}`)
     .join('\n');
   if (!answer) return textResult('The docs assistant returned no answer for that question.', true);
@@ -214,14 +249,30 @@ function htmlToText(html: string): string {
     .trim();
 }
 
-async function toolReadPage(params: Record<string, unknown>): Promise<ToolResult> {
+async function toolReadPage(
+  env: Env,
+  params: Record<string, unknown>,
+  auth: CallerAuth
+): Promise<ToolResult> {
   const raw = str(params, 'path');
   if (!raw) return textResult('read_page: path is required', true);
   const url = resolveDocsUrl(raw);
   if (!url) return textResult(`read_page: only ${DOCS_ORIGIN} pages can be read`, true);
-  const res = await fetch(url.toString(), {
-    headers: { 'user-agent': 'nyuchi-docs-mcp/1.0' },
-  });
+
+  const internalPaths = await getInternalPaths(DOCS_ORIGIN);
+  const internal = isInternalPath(internalPaths, url.pathname);
+  if (internal && !auth.authorized) {
+    return textResult(
+      `read_page: ${url.pathname} is internal-only. Provide a valid Authorization: Bearer <WorkOS token> to read it.`,
+      true
+    );
+  }
+
+  const headers: Record<string, string> = { 'user-agent': 'nyuchi-docs-mcp/1.0' };
+  if (internal && auth.authorized && env.INTERNAL_FETCH_KEY) {
+    headers['x-internal-fetch-key'] = env.INTERNAL_FETCH_KEY;
+  }
+  const res = await fetch(url.toString(), { headers });
   if (!res.ok) return textResult(`read_page: ${url.pathname} responded ${res.status}`, true);
   const text = htmlToText(await res.text());
   const clipped =
@@ -290,14 +341,19 @@ async function toolRaiseIssue(env: Env, params: Record<string, unknown>): Promis
   return textResult(`Issue queued for the docs team (ref ${key}).`);
 }
 
-async function callTool(env: Env, name: string, args: Record<string, unknown>): Promise<ToolResult> {
+async function callTool(
+  env: Env,
+  name: string,
+  args: Record<string, unknown>,
+  auth: CallerAuth
+): Promise<ToolResult> {
   switch (name) {
     case 'search_docs':
-      return toolSearchDocs(env, args);
+      return toolSearchDocs(env, args, auth);
     case 'ask_docs':
-      return toolAskDocs(env, args);
+      return toolAskDocs(env, args, auth);
     case 'read_page':
-      return toolReadPage(args);
+      return toolReadPage(env, args, auth);
     case 'submit_feedback':
       return toolSubmitFeedback(env, args);
     case 'raise_issue':
@@ -307,7 +363,11 @@ async function callTool(env: Env, name: string, args: Record<string, unknown>): 
   }
 }
 
-async function handleMessage(env: Env, msg: JsonRpcRequest): Promise<unknown | null> {
+async function handleMessage(
+  env: Env,
+  msg: JsonRpcRequest,
+  auth: CallerAuth
+): Promise<unknown | null> {
   const { id, method, params = {} } = msg;
 
   // Notifications (no id) get no response body.
@@ -333,7 +393,7 @@ async function handleMessage(env: Env, msg: JsonRpcRequest): Promise<unknown | n
       const name = typeof params.name === 'string' ? params.name : '';
       const args = (params.arguments ?? {}) as Record<string, unknown>;
       try {
-        return rpcResult(id, await callTool(env, name, args));
+        return rpcResult(id, await callTool(env, name, args, auth));
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'tool execution failed';
         return rpcResult(id, textResult(`${name}: ${msg}`, true));
@@ -347,7 +407,8 @@ async function handleMessage(env: Env, msg: JsonRpcRequest): Promise<unknown | n
 export async function handleMcp(
   req: Request,
   env: Env,
-  cors: Record<string, string>
+  cors: Record<string, string>,
+  auth: CallerAuth
 ): Promise<Response> {
   const jsonHeaders = { 'content-type': 'application/json', ...cors };
 
@@ -369,7 +430,7 @@ export async function handleMcp(
   }
 
   const messages = Array.isArray(parsed) ? (parsed as JsonRpcRequest[]) : [parsed as JsonRpcRequest];
-  const responses = (await Promise.all(messages.map((m) => handleMessage(env, m)))).filter(
+  const responses = (await Promise.all(messages.map((m) => handleMessage(env, m, auth)))).filter(
     (r): r is Record<string, unknown> => r !== null
   );
 
