@@ -1,0 +1,11 @@
+{
+  "internalPaths": [
+    "/deployment/agentgateway/",
+    "/deployment/overview/",
+    "/mzizi-tools/a2a/",
+    "/mzizi-tools/dna-helix/",
+    "/mzizi-tools/overview/",
+    "/mzizi-tools/registry-health/",
+    "/tools/"
+  ]
+}
