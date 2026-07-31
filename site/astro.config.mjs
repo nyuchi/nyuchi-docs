@@ -199,7 +199,12 @@ export default defineConfig({
         },
         {
           label: 'Mzizi Tools',
-          items: ['mzizi-tools/overview'],
+          items: [
+            'mzizi-tools/overview',
+            'mzizi-tools/dna-helix',
+            'mzizi-tools/registry-health',
+            'mzizi-tools/a2a',
+          ],
         },
         {
           label: 'Deployment',

@@ -1,0 +1,125 @@
+---
+title: The Mzizi DNA double helix
+description: The frontend architecture Mzizi actually serves — nodes on two backbones held by cross-cutting rungs. No axes, no outliers, no 3D.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Mzizi's frontend architecture is the **DNA double helix**: two entwined
+backbones — an **engineering** strand set and a **meaning** strand set — held
+together by cross-cutting **rungs**. Every element in the model carries a
+`type`:
+
+| `type` | What it is |
+| --- | --- |
+| **node** | A functional unit sitting on exactly one strand |
+| **strand** | A backbone grouping that nodes belong to |
+| **rung** | A base pair bridging both backbones, bound to no single strand |
+
+<Aside type="danger">
+  **There are no axes, no outliers, no 3D and no X/Y/Z.** If you find a Mzizi
+  surface describing "the horizontal axis", "the depth dimension", or "outlier
+  nodes", you have found retired vocabulary — not a second valid model. The
+  correct response is that the surface stops answering, not that it answers
+  differently. Some tools still serve it; see
+  [registry health](/mzizi-tools/registry-health/).
+</Aside>
+
+## Node numbers are labels, not a sequence
+
+`N9` is not "above" `N8`, and `N11` is not the top. The numbers are stable
+identifiers, nothing more. Two consequences worth internalising:
+
+- **Nothing consumes the model in numeric order.** A node reads from the strand
+  below it *on the same backbone*; a rung bridges both and is never imported by
+  a node.
+- **The node set is never capped.** More nodes will be added. Any code, prompt,
+  schema, or prose that hardcodes an upper bound is wrong the moment the next
+  one lands — which is exactly how the registry's `p_node` argument came to hide
+  a node that existed. Read the live set instead:
+
+```bash
+# every node and rung, as the registry currently holds them
+# (over MCP, against https://mcp.mzizi.dev/mcp)
+get_node_documents(p_collection="documentation-architecture-nodes")
+```
+
+## The live set
+
+Read from `documentation-architecture-nodes` on 2026-07-31. This is a snapshot
+for orientation, **not the contract** — the collection is.
+
+### Nodes (on a strand)
+
+| # | `sub_label` | Strand · backbone | Covenant |
+| --- | --- | --- | --- |
+| 1 | `tokens` | swappable · engineering | Design decisions are data, not code. |
+| 2 | `primitive` | core-guarantee · engineering | A primitive does one thing well. |
+| 3 | `brand` | shipped · engineering | A brand component is a primitive with Ubuntu in it. |
+| 4 | `safety` | core-guarantee · engineering | Nothing harmful reaches the user. |
+| 5 | `resilience` | core-guarantee · engineering | Failure in one part never breaks the whole. |
+| 6 | `pages` | shipped · engineering | A page is a composition, not an implementation. |
+| 7 | `shell` | shipped · engineering | The shell holds the product. |
+| 8 | `assurance` | core-guarantee · engineering | What breaks is seen before users feel it. |
+
+### Rungs (cross-cutting, `strand: null`)
+
+| # | `sub_label` | Covenant | Who owns it |
+| --- | --- | --- | --- |
+| 9 | `fundi` | Failure is a learning event, not a user-facing incident. | [`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools) — the `fundi-tester` worker |
+| 10 | `documentation` | The system documents itself. | This site, plus [docs.bundu.org](https://docs.bundu.org) |
+| 11 | `discovery` | If the machine can't see it, it doesn't exist. | Per-site: OG images, JSON-LD, `llms.txt`, `robots`, MCP server cards |
+
+Rungs are why this site exists at all: **N10 is documentation and N11 is
+discovery**, and both are architecture rather than afterthoughts. A page with no
+preview image and no structured data fails N11 the same way an unvalidated input
+fails N4.
+
+## The strands
+
+Six strands, three per backbone, read from
+`documentation-architecture-strands`:
+
+| Strand | Backbone | Covenant | Carries |
+| --- | --- | --- | --- |
+| `core-guarantee` | engineering | The guarantees travel unchanged, always. | Accessibility, data, resilience, observability, safety, primitives — the fixed contract |
+| `shipped` | engineering | In the box, but free to evolve. | Brand, pages, shell — in the box, no permanence promise |
+| `swappable` | engineering | Fork along the seams, not everywhere. | Tokens, icon library, framework — the only defined fork seams |
+| `spine` | engineering | What makes the parts one body. | The harness — the pre-wiring that makes strands one framework, not a parts list |
+| `genetic-code` | meaning | The sequence everything is read from. | Ubuntu principles + Bundu conventions — instruction to the framework, not documentation about it |
+| `transcription` | meaning | Doctrine is data, not tribal knowledge. | Every convention and decision as queryable documents, served over MCP |
+
+The `core-guarantee` covenant is the load-bearing one for adopters: an
+accessibility layer you can switch off is a suggestion, not a guarantee. The
+`swappable` strand is its complement — you fork tokens, icons, and framework,
+and inherit everything else unchanged.
+
+## Rules that follow from the shape
+
+1. A node consumes from the strand below it **on the same backbone** — never
+   sideways, never upward.
+2. Rungs bridge both backbones and are **never imported by a node**.
+3. **N1 is the only node allowed to define CSS values.** Everything else reads
+   `var()`.
+4. **N6 pages never hardcode a button, card, or SVG** — a page is pure
+   composition of N2 and N3.
+5. N3 destructures `{ log, motion, LiveRegion }` from the harness; **N2 never
+   touches the harness**.
+
+<Aside type="note">
+  **This is the *frontend* model.** Mzizi also serves a data architecture
+  (principles, data layer, pipeline, sovereignty). They are different models
+  with different vocabularies — never conflate the two, and never quote a count
+  from one while describing the other.
+</Aside>
+
+## Where the model is authoritative
+
+| Question | Ask |
+| --- | --- |
+| The live node and rung set | `get_node_documents(p_collection="documentation-architecture-nodes")` |
+| The live strand set | `get_node_documents(p_collection="documentation-architecture-strands")` |
+| Which node a component sits on | `get_component` / `list_components` |
+| Per-node component weight | `get_node_counts` — but read [registry health](/mzizi-tools/registry-health/) first; it under-reports |
+
+Prose — including this page — drifts. The collections do not.

@@ -1,0 +1,155 @@
+---
+title: Mzizi registry health
+description: What the 64 registry tools actually return — which are broken, which serve retired data, and which to trust. Current known state, not an aspiration.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`mzizi-mcp` builds its tool catalogue at startup by reading the
+`mcp_tool_registry` table, so **a registry edit changes the served surface with
+no code change**. That is the design's strength and its exposure: a tool can be
+perfectly well-formed and still answer nothing, and nothing in CI will go red.
+
+This page records what the tools actually return. It is deliberately unflattering,
+because a surface that looks healthy while teaching agents things that are no
+longer true is worse than an outage — with an outage, at least you know.
+
+<Aside type="note">
+  **Verified 2026-07-31** by enumerating the catalogue with `mcp_describe` and
+  then *calling* the tools through the live public MCP. A schema proves nothing
+  about whether the thing behind it answers. The upstream findings document is
+  [`docs/registry-doctrine-drift.md`](https://github.com/nyuchi/mzizi-tools/blob/main/docs/registry-doctrine-drift.md)
+  in `nyuchi/mzizi-tools`; re-run the sweep there with `pnpm audit:doctrine`
+  (read-only, safe against production).
+</Aside>
+
+## The catalogue
+
+**64 tools**, as verified on 2026-07-31:
+
+| Cut | Composition |
+| --- | --- |
+| `tool_kind` | 54 read · 9 write · **1 action** (`run_accessibility_audit`) |
+| `stability` | 19 stable · 19 evolving · 14 live · 12 frozen |
+| `requires_first_party` | **0** — the first-party gate exists in code, but no row uses it |
+
+Categories: `a11y`, `ai`, `architecture`, `auth`, `brand`, `chaos`, `component`,
+`doctrine`, `documents`, `fundi`, `governance`, `meta`, `observability`,
+`quality`, `release`, `resolver`, `skills`, `system`.
+
+Most write-kind tools are **filtered out of the anonymous public surface**. The
+exceptions are three append-only feedback sinks, which is how public feedback
+reaches the fundi self-healing loop at all.
+
+## Genuinely broken — 2 of 64
+
+| Tool | Observed |
+| --- | --- |
+| `get_architecture` | Returns `{"rows": []}`. The flagship architecture tool answers nothing. |
+| `resolver_edge` | `Edge Function returned a non-2xx status code` — fails even on its own `path=health` liveness sub-path. |
+
+Neither failure is subtle once you call it, and neither is visible if you only
+read `tools/list`.
+
+## Serves retired or hollow data
+
+These answer, which is the problem. An agent has no way to tell a confident wrong
+answer from a right one.
+
+| Tool | What's wrong |
+| --- | --- |
+| `get_axes_summary` | Serves the **retired axis model** — four rows (`horizontal` / `vertical` / `depth` / `outlier`) with every `node_count` and `component_count` at `0`. Retired vocabulary *and* dead joins. |
+| `get_system_health` | **The same axis block is embedded inside the readiness probe.** Also self-reports `version: "4.1.2"` while its own `system.doctrineVersion` says `4.1.4` — two version lines disagreeing in one payload. |
+| `get_node_counts` | Returns 8 rows while its own description promises "each of the ten ecosystem nodes (N1 to N10)". The counts are honest; the description is not, and the cap it implies does not exist. |
+| `get_system_counts` → `byDnaRole` | Reports `core` / `machinery` / `documentation` as if they were strands. `core` should be `core-guarantee`; `machinery` and `documentation` are not strands at all; `spine` and `transcription` never appear. |
+| `list_framework_descriptors` | 12 descriptors, but most carry `primitive_count: 0` — registered intent, not working surface. |
+| `list_skills` | Returns **8** skills; git ships **9**. See [the skills gap](#the-skills-gap) below. |
+
+<Aside type="danger">
+  **`get_system_health` is the one that matters most.** It is the only tool on
+  this list an agent hits while *orienting itself* rather than while asking about
+  architecture — so it teaches the retired axis model to callers who never asked
+  about architecture at all. If you are wiring a readiness check, read `status`
+  and ignore the `architecture` key entirely.
+</Aside>
+
+## What the correct model is
+
+Nodes on an engineering backbone and a meaning backbone, held by cross-cutting
+rungs. **No axes, no outliers, no 3D, no X/Y/Z** — see [the DNA double
+helix](/mzizi-tools/dna-helix/).
+
+The fix for anything axis-shaped is that it **stops answering**, not that it
+answers differently. Rewiring the `axis_*` columns to carry strands was
+considered upstream and rejected for a good reason: a field named `axis_geometry`
+returning a strand looks correct and teaches the wrong model to every consumer
+downstream. **Absence is the correct state here, not repair.**
+
+Retirement goes through `mcp_tool_registry.enabled = false`, which the server
+reads.
+
+## `stability` is not a usable signal
+
+The `stability` column is enum `frozen` / `stable` / `evolving` / `live` — there
+is **no `deprecated` member**, and the server never selects the column, so
+nothing an operator writes there reaches a client.
+
+It is also actively misleading: the two most broken tools in the registry,
+`get_architecture` and `get_axes_summary`, are both marked **`frozen`**. Read
+`frozen` as "abandoned", not "stable contract", and do not gate anything on it.
+
+## The skills gap
+
+`list_skills` returns 8; the git bundle ships 9. `discoverability` has no
+database row at all, and several of the bodies that *do* exist are
+pre-migration — one still instructs agents to run a CLI command that no longer
+exists under that name.
+
+**This is a sync gap, not a content gap.** Git is the source of truth and git is
+already correct; the database is behind. The fix is an operator running
+`pnpm skills:sync` in `nyuchi/mzizi-tools` — never editing a `SKILL.md` back
+toward the database. See [skills](/mzizi-tools/overview/#agent-skills).
+
+Until that sync lands, **prefer the npm bundle over the registry** when you need
+skill bodies:
+
+```bash
+npx skills add @nyuchi/mzizi-skills   # 9 skills, current
+```
+
+## Reading the surface honestly
+
+Of 64 tools: **2 are broken**, **6 more answer with retired or hollow data**, and
+the remaining read tools that were probed returned real, current data. So the
+surface is mostly sound.
+
+"Mostly" is doing real work in that sentence, though, because the failures
+cluster in exactly the tools an agent reaches for **first** to orient itself:
+`get_architecture`, `get_system_health`, `get_node_counts`, `list_skills`. A tool
+that is wrong on your first call costs more than one that is wrong on your
+fiftieth.
+
+### If you are consuming the registry today
+
+| Want | Do |
+| --- | --- |
+| The architecture model | `get_node_documents(p_collection="documentation-architecture-nodes")` — not `get_architecture`, not `get_axes_summary` |
+| A readiness check | `get_system_health` → read `status`; ignore the `architecture` key |
+| Skill bodies | `npx skills add @nyuchi/mzizi-skills`, or the `SKILL.md` files in git |
+| Component documents | `get_component` / `list_components` / `read_documents` — these are sound |
+| Whether a tool works | Call it. `stability` will not tell you. |
+
+### If you are fixing it
+
+Every item lives in the Mzizi database, so clearing them needs a migration with
+write credentials — except skill bodies, which are git-owned and are fixed in
+`nyuchi/mzizi-tools` then projected with `pnpm skills:sync`.
+
+`pnpm audit:doctrine` re-checks the whole class on demand: retired vocabulary
+across tool descriptions and instruction bodies, tools answering empty when they
+should not, hollow all-zero count rows, any upper bound on a node argument, and
+**axis-shaped keys anywhere in a response payload, nested included** — the last
+being the only check that catches `get_system_health`, which a description scan
+cannot see. There is a `audit:doctrine:strict` variant that exits non-zero on any
+finding; it belongs in CI **after** these findings are cleared, not before, or it
+just trains everyone to ignore a red check.
