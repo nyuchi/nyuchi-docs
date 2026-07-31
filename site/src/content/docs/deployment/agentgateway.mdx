@@ -69,20 +69,42 @@ localhost-only unless `ADMIN_ADDR` is explicitly set.
 
 ## Deploying
 
-The `nyuchi/agentgateway` Vercel project (team `nyuchi`) was created with
-`vercel link` and deployed with `vercel deploy --prod` — it is **not
-Git-connected**, so a push to the repo does not trigger a build. Redeploy by
-hand:
+The `nyuchi/agentgateway` Vercel project (team `nyuchi`) is **Git-connected**
+— production branch `main` — so a push to `main` auto-builds
+`Dockerfile.vercel` and deploys; other branches get preview deployments.
+
+The project was created without the dashboard, in three API/CLI calls (no
+manual clicking):
 
 ```sh
-vercel link --scope nyuchi --project agentgateway   # once, per checkout
-vercel deploy --prod --scope nyuchi
+vercel link --scope nyuchi --project agentgateway --yes   # create + link the project
+vercel deploy --prod --scope nyuchi                        # first deploy, before Git was wired up
+vercel git connect https://github.com/nyuchi/agentgateway --scope nyuchi
 ```
+
+`vercel git connect` is the CLI wrapper around the (undocumented, but
+stable — it's what the CLI itself calls) linking endpoint:
+
+```sh
+curl -X POST "https://api.vercel.com/v9/projects/agentgateway/link?teamId=<team id>" \
+  -H "Authorization: Bearer $VERCEL_TOKEN" \
+  -d '{"type":"github","repo":"nyuchi/agentgateway"}'
+```
+
+It only works because the Vercel GitHub App is already installed for the
+`nyuchi` org (shared with every other Vercel-hosted Nyuchi project) — there's
+no API call that installs the GitHub App itself, that's a one-time dashboard
+step done long before this project existed.
+
+<Aside type="caution">
+  Linking doesn't retroactively deploy. As of this page, `main` on
+  `nyuchi/agentgateway` doesn't have `Dockerfile.vercel` yet — it's still only
+  on the branch this doc shipped from. The first Git-triggered build happens
+  when that PR merges to `main`.
+</Aside>
 
 Vercel rebuilds and re-pushes the image to the Vercel Container Registry on
 every deploy that touches `Dockerfile.vercel` or the files it `COPY`s.
-Connecting the GitHub repo (Vercel dashboard → Settings → Git) would make
-this automatic on push — not done yet.
 
 ### Domain
 
