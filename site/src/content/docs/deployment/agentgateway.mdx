@@ -12,6 +12,8 @@ using Vercel's [container image support](https://vercel.com/docs/functions/conta
 a `Dockerfile.vercel` at the repo root deploys straight to a Vercel Function,
 no separate container host needed.
 
+Live at **`mcp.nyuchi.com`**.
+
 ## Why Vercel, not a standalone Docker host
 
 Vercel Functions can now run OCI-compatible container images directly: a
@@ -67,13 +69,32 @@ localhost-only unless `ADMIN_ADDR` is explicitly set.
 
 ## Deploying
 
+The `nyuchi/agentgateway` Vercel project (team `nyuchi`) was created with
+`vercel link` and deployed with `vercel deploy --prod` — it is **not
+Git-connected**, so a push to the repo does not trigger a build. Redeploy by
+hand:
+
 ```sh
-vercel deploy       # one-off deploy
-# or push to the Git-connected branch — Vercel builds Dockerfile.vercel automatically
+vercel link --scope nyuchi --project agentgateway   # once, per checkout
+vercel deploy --prod --scope nyuchi
 ```
 
 Vercel rebuilds and re-pushes the image to the Vercel Container Registry on
 every deploy that touches `Dockerfile.vercel` or the files it `COPY`s.
+Connecting the GitHub repo (Vercel dashboard → Settings → Git) would make
+this automatic on push — not done yet.
+
+### Domain
+
+`mcp.nyuchi.com` is a `CNAME` to `cname.vercel-dns.com` in the `nyuchi.com`
+Cloudflare zone (DNS-only, not proxied — Vercel terminates TLS and issues its
+own certificate for the domain). Added to the project with:
+
+```sh
+curl -X POST "https://api.vercel.com/v10/projects/agentgateway/domains?teamId=<team id>" \
+  -H "Authorization: Bearer $VERCEL_TOKEN" \
+  -d '{"name":"mcp.nyuchi.com"}'
+```
 
 ## Limits worth knowing
 
