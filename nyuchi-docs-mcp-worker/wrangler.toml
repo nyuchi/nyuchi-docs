@@ -15,6 +15,12 @@ routes = [
 [vars]
 TOP_K = "5"
 ALLOWED_ORIGINS = "https://docs.nyuchi.com,https://docs.bundu.org"
+# The "Nyuchi Docs" WorkOS Connect OAuth Application's issuer — used only
+# to verify a caller's own bearer token (src/auth.ts), never to originate
+# a login flow itself. Not a secret: an OIDC issuer URL is public by
+# design (it's how discovery/JWKS work), but keep it in sync with the
+# same value the site worker uses.
+WORKOS_ISSUER = "https://identity.nyuchi.com"
 
 # Same AI Search instance the Ask-AI tab uses — read tools ride the
 # existing nyuchi-docs corpus; this worker adds no ingestion of its own.
@@ -31,3 +37,11 @@ enabled = true
 [[kv_namespaces]]
 binding = "FEEDBACK"
 id = "9c5af0b28d5c4706840c492b2e3f47e8"
+
+# Secret (wrangler secret put INTERNAL_FETCH_KEY): shared with
+# nyuchi-docs's site worker. Once this worker has verified a caller's own
+# bearer token (WORKOS_ISSUER above), it sends this key on the internal
+# fetch for read_page so that already-authorized read skips the site's
+# browser OIDC flow. Any long random string; must match on both workers.
+# Unset on either side = internal reads degrade to "always denied" rather
+# than an open bypass.

@@ -14,6 +14,7 @@
 // file real GitHub issues on nyuchi/nyuchi-docs).
 
 import { handleMcp } from './mcp.js';
+import { verifyBearerAuth } from './auth.js';
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -68,6 +69,10 @@ export interface Env {
   FEEDBACK?: FeedbackStore;
   /** Optional secret — when set, raise_issue files real GitHub issues. */
   GITHUB_TOKEN?: string;
+  /** WorkOS issuer used to verify a caller's own bearer token (see src/auth.ts). Unset = every caller is treated as unauthenticated (public-only). */
+  WORKOS_ISSUER?: string;
+  /** Shared with nyuchi-docs's site worker — sent on internal-page fetches once a caller is verified, so the read skips the browser OIDC flow. */
+  INTERNAL_FETCH_KEY?: string;
 }
 
 const WILDCARD_PATTERNS = [/^https:\/\/[a-z0-9-]+\.vercel\.app$/i];
@@ -139,7 +144,8 @@ export default {
     }
 
     if (url.pathname === '/mcp' || url.pathname === '/mcp/') {
-      return handleMcp(req, env, cors);
+      const auth = await verifyBearerAuth(req, env.WORKOS_ISSUER);
+      return handleMcp(req, env, cors, auth);
     }
 
     return new Response('Not found', { status: 404, headers: cors });
