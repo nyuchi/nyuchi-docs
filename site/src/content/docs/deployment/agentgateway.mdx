@@ -55,26 +55,84 @@ agentgateway's own default gateway listener is `3000`, so `vercel.json` pins
 }
 ```
 
-The admin UI (normally `15000`) is **explicitly disabled** —
-`config.adminAddr: "off"` in `config.yaml`:
+The dedicated admin port (normally `15000`) is **disabled outright** —
+`config.adminAddr: "off"` in `config.yaml`. agentgateway has no built-in
+auth on that port (`adminAddr` only controls *where* it binds, never *how*
+it authenticates), and its own default, if left unset, is `localhost:15000`
+— meaning that server would run inside the container regardless of whether
+Vercel ever routes to it. Vercel only forwarding one port isn't access
+control; it's incidental.
+
+Instead the admin **UI** is exposed on the same gateway listener as
+everything else, gated by a real login — see the next section.
 
 ```yaml filename="config.yaml"
 config:
   adminAddr: "off"
 ```
 
+## Admin UI, gated by WorkOS OIDC
+
+The `ui` block attaches the admin UI to the `default` gateway (port `3000`
+— same one Vercel forwards) and requires a browser OIDC login before
+serving anything:
+
+```yaml filename="config.yaml"
+ui:
+  policies:
+    oidc:
+      issuer: ${WORKOS_ISSUER}
+      clientId: ${WORKOS_CLIENT_ID}
+      clientSecret: ${WORKOS_CLIENT_SECRET}
+      redirectURI: https://mcp.nyuchi.com/oauth/callback
+```
+
+The `${WORKOS_*}` tokens are **not** placeholders we substitute — agentgateway
+resolves `$VAR`/`${VAR}` natively from its own process environment at
+startup, scanning the whole config file. That's confirmed the hard way: an
+earlier revision of this setup tried routing secrets through a hand-rolled
+`envsubst` entrypoint in a custom `debian:bookworm-slim` image (because the
+official image is [Chainguard](https://www.chainguard.dev/) distroless — no
+shell), and a stray literal `${WORKOS_*}` left in a *comment* made
+agentgateway try to look up an env var literally named `WORKOS_*` and refuse
+to boot. Once that surfaced agentgateway's native substitution, the whole
+custom-image detour turned out to be unnecessary — the official
+`cr.agentgateway.dev/agentgateway:v1.4.1` image handles this fine on its own.
+
+The OIDC identity is a **WorkOS Connect OAuth Application** (first-party,
+confidential — not Public, since agentgateway exchanges the code
+server-side), created in the "Nyuchi Identity" WorkOS project's Production
+environment. This is the same pattern `mzizi-mcp` and `bushtrade-mcp`
+already use for gating internal services against the same identity pool —
+not a plain AuthKit Application (single product's own end-user clients) and
+not an M2M app (no human user in an OIDC browser-redirect flow).
+
+**Four Vercel project env vars are required** (`WORKOS_CLIENT_SECRET` and
+`OIDC_COOKIE_SECRET` marked Encrypted), across Production and Preview scopes:
+
+| Var | Value |
+| --- | --- |
+| `WORKOS_ISSUER` | The Connect OAuth Application's issuer, e.g. `https://identity.nyuchi.com` |
+| `WORKOS_CLIENT_ID` | Its Client ID |
+| `WORKOS_CLIENT_SECRET` | Its Client Secret |
+| `OIDC_COOKIE_SECRET` | 64 hex chars (`openssl rand -hex 32`) — a 32-byte AES-256-GCM key |
+
 <Aside type="caution">
-  agentgateway has **no built-in authentication on the admin UI/API** —
-  `adminAddr` only controls where it binds, never how (or whether) it
-  authenticates. Its own default, if you don't set it at all, is
-  `localhost:15000` — meaning that server runs inside the container either
-  way. Vercel only forwarding one port to the container is not access
-  control; it's incidental. `"off"` is the only setting that actually turns
-  the admin surface off, and it's the only one that belongs in a
-  deployment fronted by a public custom domain. agentgateway's standalone
-  Docker docs describe running it over `ADMIN_ADDR=0.0.0.0:15000` for local
-  inspection — that's fine on your own machine, never here.
+  `OIDC_COOKIE_SECRET` is **not** a `config.yaml` field at all — agentgateway
+  reads it directly from its process environment, unconditionally, the
+  moment any `oidc` policy exists anywhere in the config. Skip it and
+  agentgateway refuses to boot with `OIDC_COOKIE_SECRET is required when
+  oidc is configured` — confirmed against the agentgateway source
+  (`crates/agentgateway/src/config.rs`), not just the docs. It must decode
+  to exactly 32 bytes; anything else is a boot-time hard failure too.
 </Aside>
+
+With the OIDC policy active, agentgateway redirects **every unauthenticated
+request that doesn't match a more specific route** — including `/`, not
+just `/ui/*` — to the WorkOS login. That's expected: `/` isn't matched by
+any `routes` entry, so it falls under the same gateway the `ui` policy
+protects. `/docs/mcp` is unaffected because it's an explicit route matched
+first.
 
 ## Namespaces: one gateway, many MCP servers
 
