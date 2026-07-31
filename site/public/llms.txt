@@ -34,14 +34,26 @@
 - [Connectors](https://docs.nyuchi.com/integrations/connectors/crm): CRM, data warehouse, messaging.
 - [Webhooks & events](https://docs.nyuchi.com/integrations/webhooks/configure): Configure, event types, retry policies.
 
+## Products
+
+- [Mukoko Kweli](https://docs.nyuchi.com/kweli/overview): The Africa Trust Platform — places, organizations, and verification.
+- [Mukoko Weather](https://docs.nyuchi.com/mukoko-weather/user-guide): Weather intelligence user guide and station network.
+
 ## Identity & Console
 
 - [Identity](https://docs.nyuchi.com/identity/overview): Authentication and identity across the platform.
 - [Console](https://docs.nyuchi.com/console/overview): The Nyuchi Console (platform.nyuchi.com).
 
+## Tools
+
+- [Tools directory](https://docs.nyuchi.com/tools): Every agent skill, CLI, and MCP server across the Nyuchi and Bundu repos — what it is, which repo owns it, how to install it.
+
 ## Mzizi Tools
 
-- [Overview](https://docs.nyuchi.com/mzizi-tools/overview): The Mzizi consumer tooling — mzizi-mcp, mzizi-cli (the fundi agent), mzizi-skills, and the Mzizi MCP quick start. The Mzizi design system itself lives at mzizi.dev.
+- [Overview](https://docs.nyuchi.com/mzizi-tools/overview): The Mzizi consumer tooling — mzizi-mcp, mzizi-cli (the fundi agent), mzizi-skills, auth-by-audience, and the skills authoring flow. The Mzizi design system itself lives at mzizi.dev.
+- [The DNA double helix](https://docs.nyuchi.com/mzizi-tools/dna-helix): The architecture Mzizi serves — nodes on an engineering and a meaning backbone, held by cross-cutting rungs (fundi, documentation, discovery). No axes, no outliers, no 3D. Node numbers are labels, not a sequence, and the node set is never capped.
+- [Registry health](https://docs.nyuchi.com/mzizi-tools/registry-health): What the 64 Mzizi registry MCP tools actually return — which are broken, which serve retired data, which to trust.
+- [A2A](https://docs.nyuchi.com/mzizi-tools/a2a): Design (not yet shipped) for mzizi-mcp delegating long-running security, chaos, and accessibility runs to the fundi agent as A2A tasks rather than blocking MCP tool calls.
 
 ## Deployment & Conventions
 
