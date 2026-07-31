@@ -1,69 +1,144 @@
 ---
 title: Mzizi tools overview
-description: Using mzizi-mcp, mzizi-cli, and mzizi-skills from inside a Nyuchi project.
+description: Using mzizi-mcp, mzizi-cli, and mzizi-skills from inside a Nyuchi project — endpoints, install commands, auth, and the authoring flow.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-<Aside type="caution">
-  Partly a stub. **Agent skills** below is a reference and current. The
-  `mzizi-mcp` and `mzizi-cli` sections under *What needs to land here* are still
-  a TODO list — don't read them as documentation.
-</Aside>
-
 The Mzizi tooling — `@nyuchi/mzizi-mcp`, `@nyuchi/mzizi-cli` (the fundi agent
-SDK + CLI, in the monorepo's `mzizi-cli/` directory), and
-`@nyuchi/mzizi-skills` — is governed by the Bundu Foundation and operated by
-Nyuchi as part of the open Mzizi project, and consumed by every Nyuchi
-codebase. This section documents *how Nyuchi uses them*; the upstream
-reference lives in [bundu-docs](https://docs.bundu.org).
+SDK + CLI), and `@nyuchi/mzizi-skills` — is governed by the Bundu Foundation,
+operated by Nyuchi as part of the open Mzizi project, and consumed by every
+Nyuchi codebase. It all lives in one monorepo,
+[`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools).
 
-## Quick start — connecting to the MCP
+This section documents *how Nyuchi uses them*. Upstream product reference lives
+in [bundu-docs](https://docs.bundu.org).
 
-Two live MCP surfaces read the same Mzizi document store:
+| Also in this section | Covers |
+| --- | --- |
+| [The DNA double helix](/mzizi-tools/dna-helix/) | The architecture model Mzizi actually serves — nodes, strands, rungs |
+| [Registry health](/mzizi-tools/registry-health/) | Which of the 64 registry tools work, which serve retired data |
+| [A2A](/mzizi-tools/a2a/) | How long-running runs will be delegated to fundi. Design, not shipped |
 
-- `https://mzizi.dev/mcp` — the portal's canonical document-route MCP
-  (components, collections, database status).
-- `https://mcp.mzizi.dev/mcp` — the standalone `mzizi-mcp` Cloudflare Worker;
-  registry-driven (~60 tools from `mcp_tool_registry`) behind a free Connect
-  OAuth signup gate.
+## The packages
+
+| Package | Version | Ships as |
+| --- | --- | --- |
+| [`@nyuchi/mzizi-mcp`](https://www.npmjs.com/package/@nyuchi/mzizi-mcp) | `0.5.0-beta.6` | Cloudflare Worker at `mcp.mzizi.dev` + an npm stdio bin |
+| [`@nyuchi/mzizi-cli`](https://www.npmjs.com/package/@nyuchi/mzizi-cli) | `0.4.0-beta.1` (last stable `0.3.0`) | npm — SDK + the `fundi` bin |
+| [`@nyuchi/mzizi-skills`](https://www.npmjs.com/package/@nyuchi/mzizi-skills) | `0.5.0` | npm — 9 skills, data only |
+| `@nyuchi/fundi-tester` | `0.2.0` | Cloudflare Worker only. `private: true` — **never published to npm** |
+| `@nyuchi/bushtrade-mcp` | `0.2.0` | Cloudflare Worker + stdio bin. Not on npm yet; ships manually |
+| `@nyuchi/mzizi-console-app` | `0.2.0-beta.1` | Svelte mini-app for the Console. Not on npm yet; ships manually |
+
+Versions read from the npm registry and the monorepo on 2026-07-31. Per-package
+semver: every commit touching a tool is a patch, every merged PR lands a minor,
+and an open PR carries an `X.Y.0-beta.N` pre-release of that next minor — which
+is why the two live tools currently report betas.
+
+## `mzizi-mcp` — the registry MCP
+
+Two live MCP surfaces read the same Mzizi document store, and the difference
+matters:
+
+| Endpoint | What it is | Auth |
+| --- | --- | --- |
+| `https://mcp.mzizi.dev/mcp` | The standalone `mzizi-mcp` Cloudflare Worker. **64 tools**, built at startup from the `mcp_tool_registry` table | WorkOS Connect OAuth PKCE — free signup |
+| `https://mzizi.dev/mcp` | The portal's canonical document-route MCP — components, collections, database status | none (anon read) |
+
+The worker is **registry-driven**: it reads the tool catalogue from the database
+at startup and dispatches each tool by its `kind` — a SQL function, an edge
+function, or a table select. Adding a tool is a database edit, not a code change.
+Two CORE tools are defined in code rather than the registry
+(`list_collections`, `get_database_status`), plus `fundi_status` when the fundi
+worker is configured.
+
+Connect a client:
 
 ```json
 {
   "mcpServers": {
-    "mzizi": { "type": "url", "url": "https://mzizi.dev/mcp" }
+    "mzizi": { "type": "http", "url": "https://mcp.mzizi.dev/mcp" }
   }
 }
 ```
 
-## The component registry
+An unauthenticated `tools/list` against `mcp.mzizi.dev/mcp` returns
+`401 invalid_token` — that is the gate working, not an outage. It also means
+production is not a usable target for scripted inspection; point the official
+inspector at the local stdio bin or a `wrangler dev` instance instead.
 
-Mzizi ships UI through a **shadcn-compatible registry at `mzizi.dev`**,
-consumed under the `@mzizi` namespace — `mzizi.dev/api/v1/ui/{name}`. The
-`mzizi add` CLI (`@nyuchi/mzizi-cli`, aka *fundi*) and the Mzizi MCP resolver
-both resolve the same source, so a component pulled by the CLI, an agent, or a
-raw `shadcn add` all come from one place.
+The server is listed on the public MCP registry as
+**`io.github.nyuchi/mzizi-mcp`**.
 
-Component naming is a deliberate **mix**: plain shadcn names for
-framework-standard primitives (`button`, `dialog`, `card`, …) alongside
-custom components prefixed by brand — `nyuchi-`, `bundu-`, or `mzizi-`. The
-prefix signals a brand-specific composite; an unprefixed name is a stock
-shadcn primitive re-served through the registry.
-
-<Aside type="note">
-  **`@mzizi` is not `@bundu/ui`.** The `@mzizi` registry is for **React app**
-  consumers (shadcn-style `add`). `@bundu/ui` is a separate **Astro/marketing
-  kit** — `Hero`/`Section`/`MineralStrip` components plus the shared token CSS
-  and Tailwind preset. This docs site is Astro and legitimately uses `@bundu/ui`
-  for its tokens and theming; it does not consume the `@mzizi` component
-  registry.
+<Aside type="caution">
+  **Read [registry health](/mzizi-tools/registry-health/) before you trust a
+  tool.** Of the 64, two are broken and six more answer with retired or hollow
+  data — and they cluster in the tools an agent reaches for first to orient
+  itself. The `stability` column will not warn you; it marks both broken tools
+  `frozen`.
 </Aside>
 
-## Agent skills — `@nyuchi/mzizi-skills`
+## `mzizi-cli` — the fundi agent
 
-The design-system and engineering doctrine ships as a public npm package of
-agent skills. Install it into any repo so Claude Code (or Cursor, Copilot,
-Cline, Windsurf) has the doctrine on hand instead of guessing:
+One npm package, `@nyuchi/mzizi-cli`, containing both the SDK and a CLI whose bin
+is named **`fundi`**.
+
+```bash
+pnpm add -D @nyuchi/mzizi-cli
+```
+
+Three verbs, plus session commands:
+
+| Command | Needs | Does |
+| --- | --- | --- |
+| `fundi explore` | nothing — offline | Reads a small set of disk markers (`package.json`, `tsconfig.json`, `app/globals.css`, `tailwind.config.*`, `components.json`) and prints a project snapshot. No model call. |
+| `fundi plan <goal...>` | `ANTHROPIC_API_KEY` + sign-in | Plans the minimal Mzizi-aligned edits. **Read-only** — prints the steps as a dry run and writes nothing. |
+| `fundi chat <message...>` | `ANTHROPIC_API_KEY` + sign-in | One-shot chat scoped to Mzizi doctrine. |
+| `fundi login [--token <jwt>]` | — | Saves a WorkOS access token for the gated `mzizi-mcp`. |
+| `fundi logout` / `fundi whoami` | — | Clears, or reports, the saved identity. |
+
+Environment the CLI reads (the SDK itself is deliberately env-agnostic — wiring
+env into options is the caller's job):
+
+| Variable | Default |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | required for `plan` and `chat` |
+| `MZIZI_MCP_URL` | `https://mcp.mzizi.dev/mcp` |
+| `MZIZI_MODEL` | `claude-sonnet-4-6` |
+| `WORKOS_ACCESS_TOKEN` | alternative to `fundi login` |
+
+As a library:
+
+```ts
+import { createFundi } from '@nyuchi/mzizi-cli';
+
+const fundi = await createFundi({
+  projectRoot: process.cwd(),
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY!,
+  mcpUrl: process.env.MZIZI_MCP_URL,   // optional
+  model: process.env.MZIZI_MODEL,      // optional
+});
+
+const snapshot = await fundi.explore();
+const plan = await fundi.plan('add the Mzizi token layer and a button', snapshot);
+await plan.apply({ dryRun: true });
+```
+
+Two safety properties worth knowing before you point it at a repo:
+
+- **Planning is read-only.** The agent has six tools; `write_file` and
+  `run_shell` are blocked during planning and only reachable through
+  `plan.apply({ dryRun: false })`.
+- **Everything is sandboxed to `projectRoot`.** Any path that escapes it is
+  rejected — neither the planner nor the apply phase can read or write outside
+  the project.
+
+## Agent skills
+
+The design-system and engineering doctrine ships as a public npm package of agent
+skills. Install it into any repo so Claude Code (or Cursor, Copilot, Cline,
+Windsurf) has the doctrine on hand instead of guessing:
 
 ```bash
 npx skills add @nyuchi/mzizi-skills
@@ -77,43 +152,71 @@ agent, the registry MCP, and the `/mzizi:*` commands in one step:
 /plugin install mzizi@mzizi-tools
 ```
 
-Nine skills ship in the bundle:
+**Nine skills** ship in `0.5.0`:
 
-| Skill                    | Reach for it when                                             |
+| Skill | Reach for it when |
 | ------------------------ | ------------------------------------------------------------- |
-| `nyuchi-design`          | Generating any branded interface — minerals, radius, type      |
-| `bundu-design`           | Cross-brand materials and brand-voice decisions                |
-| `mukoko-design`          | Producing or exporting mukoko visual identity                  |
-| `simplify`               | Before adding a component or style, and during any refactor    |
-| `discoverability`        | A shared link shows no preview, or you're adding a route/site  |
-| `scaffold-component`     | Authoring a new component into the Mzizi registry              |
-| `ecosystem-app-setup`    | Bootstrapping a new ecosystem app against the registry         |
-| `cloudflare-worker-rust` | Building a Worker in Rust with `workers-rs`                    |
-| `mcp-server-cloudflare`  | Adding or changing an MCP Worker                               |
+| `nyuchi-design` | Generating any branded interface — minerals, radius, type |
+| `bundu-design` | Cross-brand materials and brand-voice decisions |
+| `mukoko-design` | Producing or exporting mukoko visual identity |
+| `simplify` | Before adding a component or style, and during any refactor |
+| `discoverability` | A shared link shows no preview, or you're adding a route/site |
+| `scaffold-component` | Authoring a new component into the Mzizi registry |
+| `ecosystem-app-setup` | Bootstrapping a new ecosystem app against the registry |
+| `cloudflare-worker-rust` | Building a Worker in Rust with `workers-rs` |
+| `mcp-server-cloudflare` | Adding or changing an MCP Worker |
 
-The live list is served from the portal, so read it rather than trusting this
-table to stay current:
+The last four were migrated out of the database and out of the `nyuchi/mzizi`
+repo during the `0.5.0` cycle, so git is now the single home for every Mzizi
+skill. Their retired references were corrected on the way in.
 
-```bash
-curl -s https://mzizi.dev/api/v1/skills | jq '.skills[].name'
-```
+<Aside type="caution">
+  **The registry currently serves 8 of the 9, and some bodies are behind git.**
+  `discoverability` has no database row yet. Git is right and the database is
+  behind — so prefer the npm bundle until an operator runs `pnpm skills:sync`.
+  Details in [registry health](/mzizi-tools/registry-health/#the-skills-gap).
+</Aside>
 
 ### Git is the source of truth
 
 Skills are authored in `nyuchi/mzizi-tools` as
 `mzizi-skills/skills/<name>/SKILL.md` — YAML frontmatter carrying `name` and
-`description`, then the body. That bundle is the single home for skill content:
-`mzizi-tools` projects it **into** the Supabase `skills` collection
-(`pnpm skills:sync`, disk → DB), and the portal serves what it finds there via
-`/api/v1/skills*` and MCP `get_skill`.
+`description`, then the body — and listed in `mzizi-skills/index.json`. That
+bundle is the single home for skill content: `mzizi-tools` projects it **into**
+the Mzizi `skills` collection (`pnpm skills:sync`, disk → DB), and the portal
+serves what it finds there via `/api/v1/skills*` and MCP `get_skill`.
 
-<Aside type="caution">
+<Aside type="danger">
   **Never edit a skill anywhere but the bundle.** Not a copy vendored into a
-  consumer repo, not a `.claude/skills/*.md` file, and not the Supabase row
-  directly — the next `skills:sync` overwrites all three. This reverses the
-  older "authored once in Supabase" model, which broke down precisely because
-  two syncs wrote to the same collection in opposite directions.
+  consumer repo, not a `.claude/skills/*.md` file, and not the database row
+  directly — the next `skills:sync` overwrites all three. This reverses the older
+  "authored once in Supabase" model, which broke down precisely because two syncs
+  wrote to the same collection in opposite directions.
 </Aside>
+
+### The sync writes through RLS, as `authenticated`
+
+This is the part people get wrong, so it is worth stating plainly.
+
+`skills:sync` authenticates as the `authenticated` role by minting a short-lived
+JWT via OAuth 2.0 `client_credentials` against the WorkOS **M2M application** —
+the same issuer Supabase Third-Party Auth trusts. Row-level policies then decide
+what the sync may write.
+
+**There is deliberately no service-role path.** The earlier implementation used a
+service-role key and bypassed RLS entirely; that was removed on purpose. No key
+outranks the policies.
+
+Two headers do two different jobs, and conflating them is the classic failure:
+
+| Header | Carries | Determines |
+| --- | --- | --- |
+| `apikey` | the publishable (anon) key | which **project** |
+| `Authorization` | `Bearer <M2M JWT>` | which **role** RLS evaluates |
+
+Sending the anon key as both can only ever be the anon role, which is read-only
+here. **A `401` or `403` on write is RLS declining — fix the policy, do not reach
+for a service-role key to get around it.**
 
 ### Changing a skill
 
@@ -124,50 +227,111 @@ Skills are authored in `nyuchi/mzizi-tools` as
 3. Bump the version in **both** `mzizi-skills/package.json` and `index.json`;
    they move in lockstep.
 4. Run `pnpm skills:validate` from the repo root. It is offline and needs no
-   credentials, and it catches the whole class of packaging mistakes: version
-   drift between the two files, an index entry pointing at a missing file,
-   frontmatter `name` disagreeing with the index, an unlisted skill directory,
-   or an `exports` map that would make consumers silently fall back to built-in
-   defaults.
-5. Merge to `main`. `publish-mzizi-skills.yml` validates and publishes to npm
-   with provenance. The workflow checks the registry first, so **a merge without
-   a version bump publishes nothing** — bump the version or nothing ships.
-6. An operator runs `pnpm skills:sync` (needs the Supabase service-role key) to
-   project the change into the registry surface.
+   credentials — which is exactly why it, and not the drift check, gates the
+   publish workflow: a missing secret must never be the reason a broken bundle
+   ships. It catches version drift between the two files, an index entry pointing
+   at a missing file, frontmatter `name` disagreeing with the index, an unlisted
+   skill directory, and an `exports` map that would make consumers silently fall
+   back to built-in defaults.
+5. Merge to `main`. `publish-mzizi-skills.yml` validates and publishes to npm.
+   The workflow checks the registry first, so **a merge without a version bump
+   publishes nothing** — bump the version or nothing ships.
+6. An operator runs `pnpm skills:sync` to project the change into the registry
+   surface. That step needs the WorkOS M2M credentials, not a service-role key.
 
-## What needs to land here
+<Aside type="note">
+  The publish workflows run plain `pnpm publish --access public`, **without
+  `--provenance`**. npm refuses a provenance publish whose source repository is
+  private, and it fails late — the tarball builds and the statement is signed
+  before the final request is rejected, so the logs read like a success right up
+  to the error. The flag comes back in one line if the repo ever goes public.
+</Aside>
 
-### `mzizi-mcp`
+## Auth by audience
 
-- The MCP server we run locally and in CI, the tools it exposes, and how to
-  configure Claude Code / other MCP clients to talk to it.
-- Token handling, registry lookups, and the offline cache.
-- Common workflows: scaffolding a new mini-app, validating component
-  back-links, running the registry health check.
+Every gated surface in the toolchain answers two separate questions, and the
+answers come from different systems. Getting this split right is the difference
+between a design that scales and one that quietly leaks a secret into a CLI.
 
-### `mzizi-cli` (`mzizi-cli/` directory)
+**Authentication — how the caller proves identity:**
 
-- Install + minimum-viable usage from a Nyuchi project.
-- The auth helpers (Nyuchi JWT verification, org-scoped clients).
-- The data helpers (typed resource clients, pagination, error envelopes).
-- The UI helpers (Mzizi-aware fetch hooks, error-boundary glue).
-- Versioning policy — when we pin, when we float.
+| Surface kind | Mechanism | Examples |
+| --- | --- | --- |
+| Public / customer | **WorkOS Connect OAuth PKCE** — public client, no secret. Always a Worker; each public MCP has its own Connect app | `mzizi-mcp`, `bushtrade-mcp` |
+| Internal staff / machine | **WorkOS M2M** (client credentials). Only Workers hold the secret | fundi `/admin/*` |
 
-### `mzizi-skills`
+**Entitlement — what the caller may do:**
 
-Covered above — install, the nine skills, and the authoring flow. Still open:
+- **Public / customer** → a **UCP commerce subscription**. Per-user tags do not
+  scale to public consumption.
+- **Internal** → **scopes on the M2M token** (`fundi:admin`, and the planned
+  `fundi:security` / `fundi:chaos`). These are token scopes, not per-user tags.
 
-- Whether Nyuchi-specific skills (ones no external consumer would want) belong
-  in the shared bundle or in a per-repo `.claude/skills/`.
-- How to exercise a skill locally before publishing, beyond
-  `pnpm skills:validate`'s structural checks.
+The fundi worker is a **resource server with no interactive login at all**. It
+validates two things on `/admin/*`: an inbound M2M token, *and* a forwarded
+end-user token in `X-Fundi-User-Token` so it only ever acts for a real signed-in
+user. Cron, queue, webhook, and health routes bypass that gate because they are
+not user-triggered.
+
+<Aside type="danger">
+  **The CLI is not a sanctioned fundi caller and never holds the M2M secret.** It
+  reaches fundi *through* `mzizi-mcp`: you authenticate to `mzizi-mcp` with
+  Connect OAuth, and `mzizi-mcp` — which holds the M2M secret as a Worker secret
+  — mints the token and proxies the call. `fundi_status` is that entrypoint.
+</Aside>
+
+When you add a gated surface, ask one question: staff/machine (→ M2M + a claim
+scope) or public/customer (→ Connect OAuth PKCE + a UCP subscription)? Never gate
+a public or paid surface with a per-user tag, and never ship an M2M secret in a
+CLI.
+
+## The component registry
+
+Mzizi ships UI through a **shadcn-compatible registry at `mzizi.dev`**, consumed
+under the `@mzizi` namespace — `mzizi.dev/api/v1/ui/{name}`. The `fundi` CLI and
+the Mzizi MCP resolver both resolve the same source, so a component pulled by the
+CLI, by an agent, or by a raw `shadcn add` all come from one place.
+
+```bash
+npx shadcn@latest add https://mzizi.dev/api/v1/ui/button
+```
+
+Component naming is a deliberate **mix**: plain shadcn names for
+framework-standard primitives (`button`, `dialog`, `card`, …) alongside custom
+components prefixed by brand — `nyuchi-`, `bundu-`, or `mzizi-`. The prefix
+signals a brand-specific composite; an unprefixed name is a stock shadcn
+primitive re-served through the registry.
+
+<Aside type="note">
+  **`@mzizi` is not `@bundu/ui`.** The `@mzizi` registry is for **React app**
+  consumers (shadcn-style `add`). `@bundu/ui` is a separate **Astro/marketing
+  kit** — `Hero`/`Section`/`MineralStrip` components plus the shared token CSS
+  and Tailwind preset. This docs site is Astro and legitimately uses `@bundu/ui`
+  for its tokens and theming; it does not consume the `@mzizi` component
+  registry.
+</Aside>
+
+## Still unwritten
+
+Honest gaps rather than a promise:
+
+- Nyuchi-specific workflows against `mzizi-mcp` — scaffolding a new mini-app,
+  validating component back-links, running the registry health check as part of
+  a release.
+- How to exercise a skill locally before publishing, beyond `pnpm
+  skills:validate`'s structural checks.
+- Whether Nyuchi-specific skills (ones no external consumer would want) belong in
+  the shared bundle or in a per-repo `.claude/skills/`.
+- `@nyuchi/mzizi-console-app` integration from the Console side — it is still
+  pre-1.0 and ships manually.
 
 ## Cross-links
 
-- [`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools) — the
-  monorepo.
-- [`@nyuchi/mzizi-skills`](https://www.npmjs.com/package/@nyuchi/mzizi-skills)
-  — the published skills bundle; source under `mzizi-skills/skills/`.
+- [`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools) — the monorepo.
+- [`@nyuchi/mzizi-skills`](https://www.npmjs.com/package/@nyuchi/mzizi-skills) —
+  the published skills bundle; source under `mzizi-skills/skills/`.
+- [Nyuchi tools directory](/tools/) — every skill, CLI, and MCP server across the
+  Nyuchi and Bundu repos.
 - [bundu-docs › Mzizi architecture](https://docs.bundu.org/mzizi/architecture/overview/)
   — the upstream architecture reference.
 - [bundu-docs › Mzizi registry](https://docs.bundu.org/mzizi/architecture/registry/)
