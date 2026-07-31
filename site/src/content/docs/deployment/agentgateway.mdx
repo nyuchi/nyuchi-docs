@@ -1,0 +1,189 @@
+---
+title: Agent Gateway on Vercel
+description: How nyuchi/agentgateway ships as a Docker container on Vercel using Dockerfile.vercel and container image support.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+[`nyuchi/agentgateway`](https://github.com/nyuchi/agentgateway) is the agent
+gateway all Nyuchi agents route through. It runs the
+[agentgateway](https://agentgateway.dev) Docker image and ships to Vercel
+using Vercel's [container image support](https://vercel.com/docs/functions/container-images) —
+a `Dockerfile.vercel` at the repo root deploys straight to a Vercel Function,
+no separate container host needed.
+
+Live at **`mcp.nyuchi.com`**.
+
+## Why Vercel, not a standalone Docker host
+
+Vercel Functions can now run OCI-compatible container images directly: a
+`Dockerfile.vercel` (or `Containerfile.vercel`) at the project root is
+auto-detected, built, and pushed to the Vercel Container Registry on deploy.
+Functions scale to zero and bill on **Active CPU** — only while the container
+is actually handling a request — which fits a gateway that mostly idles
+between agent calls. `vercel dev` builds and runs the same image locally
+(needs the `docker` CLI and daemon).
+
+## Repo layout
+
+| File | Does |
+| --- | --- |
+| `Dockerfile.vercel` | `FROM cr.agentgateway.dev/agentgateway:v1.4.1`, copies in `config.yaml`, runs `agentgateway -f /config.yaml` |
+| `config.yaml` | Gateway listener plus one `routes` entry per namespaced MCP server |
+| `vercel.json` | Sets `PORT=3000` |
+
+```docker filename="Dockerfile.vercel"
+FROM cr.agentgateway.dev/agentgateway:v1.4.1
+
+COPY config.yaml /config.yaml
+
+CMD ["-f", "/config.yaml"]
+```
+
+## Port resolution
+
+A Vercel Function running a container image forwards traffic to a single
+port — `80` by default, overridable with the `PORT` environment variable.
+agentgateway's own default gateway listener is `3000`, so `vercel.json` pins
+`PORT` to `3000` to match:
+
+```json filename="vercel.json"
+{
+  "env": {
+    "PORT": "3000"
+  }
+}
+```
+
+The admin UI (normally `15000`) has **no bind address in `config.yaml`**, so
+it's simply not reachable — Vercel only forwards the one port anyway, and
+this matches agentgateway's own default of keeping the admin UI
+localhost-only unless `ADMIN_ADDR` is explicitly set.
+
+<Aside type="note">
+  agentgateway's standalone Docker docs describe running the admin UI over
+  `ADMIN_ADDR=0.0.0.0:15000` for local inspection. Don't set that in the
+  Vercel deployment — there's no way to reach a second port on a Function,
+  and there's no reason to widen the admin surface for a hosted deploy.
+</Aside>
+
+## Namespaces: one gateway, many MCP servers
+
+This is the actual point of running an API gateway in front of the Nyuchi
+agents: one domain, one path prefix per backend MCP server, instead of a
+different worker hostname for each one. agentgateway's `mcp` backend type is
+protocol-aware — it terminates the MCP session itself and re-issues calls to
+the target, rather than doing a raw reverse proxy — so `routes` in
+`config.yaml` just maps a `pathPrefix` to a target `host`:
+
+```yaml filename="config.yaml"
+routes:
+  - name: docs-mcp
+    matches:
+      - path:
+          pathPrefix: /docs/mcp
+    backends:
+      - mcp:
+          targets:
+            - name: nyuchi-docs-mcp
+              mcp:
+                host: https://nyuchi-docs-mcp.nyuchi.workers.dev/mcp
+```
+
+That puts [`nyuchi-docs-mcp`](/integrations/docs-mcp/) at
+**`mcp.nyuchi.com/docs/mcp`**, still reachable directly at
+`docs.nyuchi.com/mcp` and `nyuchi-docs-mcp.nyuchi.workers.dev/mcp` — the
+gateway is an additional front door, not a replacement:
+
+```sh
+curl -X POST https://mcp.nyuchi.com/docs/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"probe","version":"0.0.1"}}}'
+```
+
+Every request past `initialize` needs the `Mcp-Session-Id` the gateway hands
+back — that's agentgateway enforcing normal MCP session semantics, not a
+routing bug. Add another Nyuchi agent's MCP server the same way: a new
+`routes` entry, a new namespace.
+
+<Aside type="note">
+  Before adding a route, test it against a **preview deployment**, not
+  production — push to a branch, hit the `*.vercel.app` preview URL (you'll
+  need to temporarily clear the project's `ssoProtection` via the API to curl
+  it unauthenticated, then restore it), and only promote to `mcp.nyuchi.com`
+  once it responds correctly. A malformed `routes` entry is a config error
+  agentgateway has to survive at boot — verify on a throwaway URL first.
+</Aside>
+
+## Deploying
+
+The `nyuchi/agentgateway` Vercel project (team `nyuchi`) is **Git-connected**
+— production branch `main` — so a push to `main` auto-builds
+`Dockerfile.vercel` and deploys; other branches get preview deployments.
+
+The project was created without the dashboard, in three API/CLI calls (no
+manual clicking):
+
+```sh
+vercel link --scope nyuchi --project agentgateway --yes   # create + link the project
+vercel deploy --prod --scope nyuchi                        # first deploy, before Git was wired up
+vercel git connect https://github.com/nyuchi/agentgateway --scope nyuchi
+```
+
+`vercel git connect` is the CLI wrapper around the (undocumented, but
+stable — it's what the CLI itself calls) linking endpoint:
+
+```sh
+curl -X POST "https://api.vercel.com/v9/projects/agentgateway/link?teamId=<team id>" \
+  -H "Authorization: Bearer $VERCEL_TOKEN" \
+  -d '{"type":"github","repo":"nyuchi/agentgateway"}'
+```
+
+It only works because the Vercel GitHub App is already installed for the
+`nyuchi` org (shared with every other Vercel-hosted Nyuchi project) — there's
+no API call that installs the GitHub App itself, that's a one-time dashboard
+step done long before this project existed.
+
+<Aside type="caution">
+  Linking doesn't retroactively deploy. As of this page, `main` on
+  `nyuchi/agentgateway` doesn't have `Dockerfile.vercel` yet — it's still only
+  on the branch this doc shipped from. The first Git-triggered build happens
+  when that PR merges to `main`.
+</Aside>
+
+Vercel rebuilds and re-pushes the image to the Vercel Container Registry on
+every deploy that touches `Dockerfile.vercel` or the files it `COPY`s.
+
+### Domain
+
+`mcp.nyuchi.com` is a `CNAME` to `cname.vercel-dns.com` in the `nyuchi.com`
+Cloudflare zone (DNS-only, not proxied — Vercel terminates TLS and issues its
+own certificate for the domain). Added to the project with:
+
+```sh
+curl -X POST "https://api.vercel.com/v10/projects/agentgateway/domains?teamId=<team id>" \
+  -H "Authorization: Bearer $VERCEL_TOKEN" \
+  -d '{"name":"mcp.nyuchi.com"}'
+```
+
+## Limits worth knowing
+
+- **Secure Compute and Static IPs don't work with custom container images
+  yet.** Don't route anything through this gateway that assumes a fixed
+  egress IP.
+- **Scale-to-zero**: an instance with no traffic for 5 minutes in production
+  (30 seconds in preview) is torn down. A scaled-down instance gets
+  `SIGTERM` with a 30-second grace period before a hard kill.
+- **One process, one port.** agentgateway's own multi-port model (proxy +
+  MCP + admin) collapses to whatever `config.yaml` binds to the single port
+  Vercel forwards — there's no way to expose a second port from the same
+  Function.
+
+## Cross-links
+
+- [`nyuchi/agentgateway`](https://github.com/nyuchi/agentgateway) — the repo.
+- [agentgateway.dev docs](https://agentgateway.dev/docs/standalone/latest/) —
+  upstream configuration reference (gateways, listeners, backends).
+- [Vercel: Container Images](https://vercel.com/docs/functions/container-images) —
+  the underlying Vercel feature.

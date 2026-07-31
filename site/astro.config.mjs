@@ -208,7 +208,7 @@ export default defineConfig({
         },
         {
           label: 'Deployment',
-          items: ['deployment/overview'],
+          items: ['deployment/overview', 'deployment/agentgateway'],
         },
         {
           label: 'Conventions',
