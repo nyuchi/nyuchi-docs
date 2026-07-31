@@ -29,7 +29,7 @@ between agent calls. `vercel dev` builds and runs the same image locally
 | File | Does |
 | --- | --- |
 | `Dockerfile.vercel` | `FROM cr.agentgateway.dev/agentgateway:v1.4.1`, copies in `config.yaml`, runs `agentgateway -f /config.yaml` |
-| `config.yaml` | Gateway listener config — currently just the proxy port. Routes/backends for individual agents land here as they come online |
+| `config.yaml` | Gateway listener plus one `routes` entry per namespaced MCP server |
 | `vercel.json` | Sets `PORT=3000` |
 
 ```docker filename="Dockerfile.vercel"
@@ -65,6 +65,55 @@ localhost-only unless `ADMIN_ADDR` is explicitly set.
   `ADMIN_ADDR=0.0.0.0:15000` for local inspection. Don't set that in the
   Vercel deployment — there's no way to reach a second port on a Function,
   and there's no reason to widen the admin surface for a hosted deploy.
+</Aside>
+
+## Namespaces: one gateway, many MCP servers
+
+This is the actual point of running an API gateway in front of the Nyuchi
+agents: one domain, one path prefix per backend MCP server, instead of a
+different worker hostname for each one. agentgateway's `mcp` backend type is
+protocol-aware — it terminates the MCP session itself and re-issues calls to
+the target, rather than doing a raw reverse proxy — so `routes` in
+`config.yaml` just maps a `pathPrefix` to a target `host`:
+
+```yaml filename="config.yaml"
+routes:
+  - name: docs-mcp
+    matches:
+      - path:
+          pathPrefix: /docs/mcp
+    backends:
+      - mcp:
+          targets:
+            - name: nyuchi-docs-mcp
+              mcp:
+                host: https://nyuchi-docs-mcp.nyuchi.workers.dev/mcp
+```
+
+That puts [`nyuchi-docs-mcp`](/integrations/docs-mcp/) at
+**`mcp.nyuchi.com/docs/mcp`**, still reachable directly at
+`docs.nyuchi.com/mcp` and `nyuchi-docs-mcp.nyuchi.workers.dev/mcp` — the
+gateway is an additional front door, not a replacement:
+
+```sh
+curl -X POST https://mcp.nyuchi.com/docs/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"probe","version":"0.0.1"}}}'
+```
+
+Every request past `initialize` needs the `Mcp-Session-Id` the gateway hands
+back — that's agentgateway enforcing normal MCP session semantics, not a
+routing bug. Add another Nyuchi agent's MCP server the same way: a new
+`routes` entry, a new namespace.
+
+<Aside type="note">
+  Before adding a route, test it against a **preview deployment**, not
+  production — push to a branch, hit the `*.vercel.app` preview URL (you'll
+  need to temporarily clear the project's `ssoProtection` via the API to curl
+  it unauthenticated, then restore it), and only promote to `mcp.nyuchi.com`
+  once it responds correctly. A malformed `routes` entry is a config error
+  agentgateway has to survive at boot — verify on a throwaway URL first.
 </Aside>
 
 ## Deploying
