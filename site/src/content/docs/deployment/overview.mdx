@@ -9,11 +9,13 @@ import { Aside } from '@astrojs/starlight/components';
   This section is a stub. Treat it as a TODO list, not a reference.
 </Aside>
 
-Nyuchi runs production workloads on three substrates: **Cloudflare** (edge,
+Nyuchi runs production workloads on four substrates: **Cloudflare** (edge,
 Workers, R2, D1, KV, Hyperdrive), **Vercel** (Next.js apps and the public
-marketing surface), and **Supabase** (Postgres, Auth-adjacent storage, edge
-functions where Cloudflare isn't the right fit). This section captures the
-patterns we've already paid for so a new project doesn't reinvent them.
+marketing surface), **Supabase** (Postgres, Auth-adjacent storage, edge
+functions where Cloudflare isn't the right fit), and **Fly.io** (long-running
+Docker containers that need real multi-service control, not a single
+serverless Function). This section captures the patterns we've already paid
+for so a new project doesn't reinvent them.
 
 ## What needs to land here
 
@@ -32,9 +34,16 @@ patterns we've already paid for so a new project doesn't reinvent them.
 - The Next.js version we standardise on and the App Router conventions.
 - Image / asset handling, edge runtime choices.
 - How we wire `docs.nyuchi.com` and `platform.nyuchi.com` once DNS is set up.
-- Docker container images on Vercel Functions — see
-  [Agent Gateway on Vercel](/deployment/agentgateway/) for the pattern we
-  use to ship `nyuchi/agentgateway` as a `Dockerfile.vercel` image.
+
+### Fly.io
+
+- Multi-service Docker apps that outgrow a single serverless Function port
+  — see [Agent Gateway on Fly.io](/deployment/agentgateway/) for
+  `nyuchi/agentgateway`: dedicated IPs, Fly-managed Let's Encrypt certs,
+  and why it moved off Vercel's container image support (one port is fine
+  until you need a second one that also has to be reachable).
+- Fly Volumes for anything that needs to survive a redeploy — the ephemeral
+  root filesystem gotcha is called out on that page; not yet solved there.
 
 ### Supabase
 
