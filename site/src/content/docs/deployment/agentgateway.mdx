@@ -29,7 +29,7 @@ between agent calls. `vercel dev` builds and runs the same image locally
 | File | Does |
 | --- | --- |
 | `Dockerfile.vercel` | `FROM cr.agentgateway.dev/agentgateway:v1.4.1`, copies in `config.yaml`, runs `agentgateway -f /config.yaml` |
-| `config.yaml` | Gateway listener plus one `routes` entry per namespaced MCP server |
+| `config.yaml` | `config.adminAddr: "off"`, the gateway listener, plus one `routes` entry per namespaced MCP server |
 | `vercel.json` | Sets `PORT=3000` |
 
 ```docker filename="Dockerfile.vercel"
@@ -55,16 +55,25 @@ agentgateway's own default gateway listener is `3000`, so `vercel.json` pins
 }
 ```
 
-The admin UI (normally `15000`) has **no bind address in `config.yaml`**, so
-it's simply not reachable — Vercel only forwards the one port anyway, and
-this matches agentgateway's own default of keeping the admin UI
-localhost-only unless `ADMIN_ADDR` is explicitly set.
+The admin UI (normally `15000`) is **explicitly disabled** —
+`config.adminAddr: "off"` in `config.yaml`:
 
-<Aside type="note">
-  agentgateway's standalone Docker docs describe running the admin UI over
-  `ADMIN_ADDR=0.0.0.0:15000` for local inspection. Don't set that in the
-  Vercel deployment — there's no way to reach a second port on a Function,
-  and there's no reason to widen the admin surface for a hosted deploy.
+```yaml filename="config.yaml"
+config:
+  adminAddr: "off"
+```
+
+<Aside type="caution">
+  agentgateway has **no built-in authentication on the admin UI/API** —
+  `adminAddr` only controls where it binds, never how (or whether) it
+  authenticates. Its own default, if you don't set it at all, is
+  `localhost:15000` — meaning that server runs inside the container either
+  way. Vercel only forwarding one port to the container is not access
+  control; it's incidental. `"off"` is the only setting that actually turns
+  the admin surface off, and it's the only one that belongs in a
+  deployment fronted by a public custom domain. agentgateway's standalone
+  Docker docs describe running it over `ADMIN_ADDR=0.0.0.0:15000` for local
+  inspection — that's fine on your own machine, never here.
 </Aside>
 
 ## Namespaces: one gateway, many MCP servers
@@ -145,11 +154,11 @@ It only works because the Vercel GitHub App is already installed for the
 no API call that installs the GitHub App itself, that's a one-time dashboard
 step done long before this project existed.
 
-<Aside type="caution">
-  Linking doesn't retroactively deploy. As of this page, `main` on
-  `nyuchi/agentgateway` doesn't have `Dockerfile.vercel` yet — it's still only
-  on the branch this doc shipped from. The first Git-triggered build happens
-  when that PR merges to `main`.
+<Aside type="note">
+  Linking doesn't retroactively deploy — the first Git-triggered build only
+  fires on the next push to `main` *after* linking. That happened here: the
+  PR that added `Dockerfile.vercel` merged to `main`, and Vercel picked it
+  up and built automatically, no manual `vercel deploy` needed from then on.
 </Aside>
 
 Vercel rebuilds and re-pushes the image to the Vercel Container Registry on
