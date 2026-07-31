@@ -11,9 +11,11 @@ servers** (live data an assistant queries) — and each entry says which repo ow
 it and how to get it.
 
 <Aside type="note">
-  Counts and versions are deliberately absent from the tables below. They drift
-  the moment anything ships, so each row links to the live source instead. For
-  the Mzizi skill list as the registry currently holds it, call
+  **Versions below were read from the npm registry on 2026-07-31** and are a
+  snapshot, not a contract — every row links to the live source. Where a package
+  is not on npm, the table says so rather than guessing. For the Mzizi skill list
+  as the registry currently holds it (which is currently *behind* git — see
+  [registry health](/mzizi-tools/registry-health/#the-skills-gap)), call
   `curl -s https://mzizi.dev/api/v1/skills`.
 </Aside>
 
@@ -25,6 +27,11 @@ The design-system and engineering doctrine for the whole ecosystem. Owned by
 [`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools), authored in git
 under `mzizi-skills/skills/<name>/SKILL.md`, published to npm, and projected
 into the Mzizi registry so the same bodies serve over HTTP and MCP.
+
+**Published at [`0.5.0`](https://www.npmjs.com/package/@nyuchi/mzizi-skills),
+carrying 9 skills.** The bundle is data-only — no build step, no runtime
+dependencies — so `pnpm skills:validate` (an offline structural check), not a
+test suite, is what gates the publish.
 
 ```bash
 # every skill, as files in .claude/skills/
@@ -58,6 +65,15 @@ curl -s https://mzizi.dev/api/v1/skills/nyuchi-design   # one skill at runtime
 ```
 
 Browse them rendered at [mzizi.dev/skills](https://mzizi.dev/skills).
+
+<Aside type="caution">
+  **The npm bundle is ahead of the registry right now.** git ships 9 skills; the
+  registry serves 8 (`discoverability` has no row yet) and some bodies are
+  pre-migration. Git is the source of truth and is correct — the database is
+  behind, pending an operator running `pnpm skills:sync`. Prefer `npx skills add`
+  until it lands. Writes in that sync go through RLS as `authenticated` using a
+  WorkOS M2M-minted JWT; there is deliberately no service-role path.
+</Aside>
 
 ### `@nyuchi/nyuchi-docs-skills` — using these docs
 
@@ -97,12 +113,16 @@ running inside the repo, which is the audience they have.
 
 ## CLIs
 
-| CLI | Install | Repo | What it does |
+| CLI | Install | npm | What it does |
 | --- | --- | --- | --- |
-| `fundi` (`@nyuchi/mzizi-cli`) | `pnpm add -D @nyuchi/mzizi-cli` | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/mzizi-cli) | Explores a project, plans a change against the Mzizi registry, applies it on request. SDK and CLI in one package. |
-| `nyuchi-docs-mcp` | `npx @nyuchi/nyuchi-docs-mcp` | [nyuchi-docs](https://github.com/nyuchi/nyuchi-docs/tree/main/nyuchi-docs-mcp) | stdio bridge to the hosted docs MCP, for clients that want a local process rather than an HTTP endpoint. |
+| `fundi` (bin of [`@nyuchi/mzizi-cli`](https://www.npmjs.com/package/@nyuchi/mzizi-cli)) | `pnpm add -D @nyuchi/mzizi-cli` | `0.4.0-beta.1` (last stable `0.3.0`) | Explores a project, plans a change against the Mzizi registry, applies it on request. SDK and CLI in one package; source in [`mzizi-cli/`](https://github.com/nyuchi/mzizi-tools/tree/main/mzizi-cli). |
+| `nyuchi-docs-mcp` | `npx @nyuchi/nyuchi-docs-mcp` | scoped name not yet published | stdio bridge to the hosted docs MCP, for clients that want a local process rather than an HTTP endpoint. Source in [`nyuchi-docs-mcp/`](https://github.com/nyuchi/nyuchi-docs/tree/main/nyuchi-docs-mcp). |
 
-Full instructions for the Mzizi CLI: [mzizi.dev/cli](https://mzizi.dev/cli).
+The `fundi` bin has three verbs — `explore` (offline, no key), `plan <goal>`
+(read-only dry run), `chat <message>` — plus `login` / `logout` / `whoami` for
+the WorkOS token the gated `mzizi-mcp` needs. `plan` and `chat` additionally
+require `ANTHROPIC_API_KEY`. See [Mzizi tools ›
+`mzizi-cli`](/mzizi-tools/overview/#mzizi-cli--the-fundi-agent).
 
 <Aside type="note">
   **The docs bridge moved to the `@nyuchi` scope.** The unscoped
@@ -117,14 +137,29 @@ Full instructions for the Mzizi CLI: [mzizi.dev/cli](https://mzizi.dev/cli).
 
 | Server | Endpoint | Repo | Auth | Serves |
 | --- | --- | --- | --- | --- |
-| `mzizi-mcp` | `https://mcp.mzizi.dev/mcp` | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/mzizi-mcp) | WorkOS Connect OAuth PKCE (free signup) | The Mzizi registry — components, tokens, architecture, doctrine, skills |
+| `mzizi-mcp` | `https://mcp.mzizi.dev/mcp` | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/mzizi-mcp) | WorkOS Connect OAuth PKCE (free signup) | The Mzizi registry — **64 tools** built at startup from `mcp_tool_registry`: components, tokens, architecture, doctrine, skills. Also an npm stdio bin, `0.5.0-beta.6` |
 | Mzizi portal | `https://mzizi.dev/mcp` | [mzizi](https://github.com/nyuchi/design-portal) | none (anon read) | The canonical document-route MCP inside the portal |
 | `nyuchi-docs-mcp` | `https://docs.nyuchi.com/mcp` | [nyuchi-docs](https://github.com/nyuchi/nyuchi-docs/tree/main/nyuchi-docs-mcp-worker) | none for reads | This docs corpus — search, ask, read, plus feedback and issue write tools |
-| `bushtrade-mcp` | Worker + stdio bin | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/bushtrade-mcp) | WorkOS Connect OAuth PKCE | Agentic commerce — task-driven UCP/AP2 verbs |
-| `fundi-tester` | `https://tester.fundi.nyuchi.dev` | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/fundi) | WorkOS M2M + forwarded user token | The fundi self-healing agent. Internal; `private: true`, never published |
+| `bushtrade-mcp` | Cloudflare Worker + stdio bin | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/bushtrade-mcp) | WorkOS Connect OAuth PKCE | Agentic commerce — 12 task-driven UCP/AP2 verbs. `0.2.0` in-repo; **not on npm yet**, ships manually |
+| `fundi-tester` | `https://tester.fundi.nyuchi.dev` | [mzizi-tools](https://github.com/nyuchi/mzizi-tools/tree/main/fundi) | WorkOS M2M **plus** a forwarded `X-Fundi-User-Token` | The fundi self-healing agent. Internal only: `private: true`, deploys as a Cloudflare Worker and is **never published to npm** |
 
 Two are listed in the public MCP registry: `io.github.nyuchi/mzizi-mcp` and
 `io.github.nyuchi/nyuchi-docs`.
+
+An unauthenticated `tools/list` against `https://mcp.mzizi.dev/mcp` answers
+`401 invalid_token` — that is the Connect OAuth gate working, not an outage.
+
+<Aside type="caution">
+  **Two of the 64 Mzizi registry tools are broken and six more serve retired
+  data** as of 2026-07-31 — and they cluster in the tools an agent calls first to
+  orient itself. Read [registry health](/mzizi-tools/registry-health/) before
+  building on the surface.
+</Aside>
+
+fundi is next in line to become an **A2A** peer rather than only an MCP
+dependency, so that long security, chaos, and accessibility runs stop being
+modelled as blocking tool calls. That work is designed but
+[not yet shipped](/mzizi-tools/a2a/).
 
 ### Adding an MCP server to a client
 
@@ -164,4 +199,5 @@ pnpm --filter @nyuchi/mzizi-mcp inspect:cli   # tools/list as JSON
    a repo-local `.claude/skills/` — that's what makes it installable.
 3. If it's an MCP server, register it (`io.github.nyuchi/<name>`) and give it a
    `server.json` whose version stays in lockstep with `package.json`.
-4. Add a row above. Link the source; don't paste a version number.
+4. Add a row above. Link the source *and* the npm page. If you quote a version,
+   date it — an undated version number reads as current forever.
