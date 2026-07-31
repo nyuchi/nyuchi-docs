@@ -1,0 +1,190 @@
+---
+title: A2A — delegating long runs to fundi
+description: Why mzizi-mcp will hand security, chaos, and accessibility runs to the fundi agent over A2A instead of blocking an MCP tool call. Design, not yet shipped.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+  **Design, not yet shipped.** Nothing on this page is callable today. Stage 1
+  (the fundi agent card and `POST /a2a`) is in flight; the `mzizi-mcp` bridge
+  tools do not exist yet. The source of truth is
+  [`docs/a2a-fundi.md`](https://github.com/nyuchi/mzizi-tools/blob/main/docs/a2a-fundi.md)
+  in `nyuchi/mzizi-tools`. Read this to understand where the toolchain is going,
+  not to integrate against it.
+</Aside>
+
+## MCP and A2A answer different questions
+
+They are not competing choices, and picking one is not the decision in front of
+you.
+
+| Protocol | Models | Shape |
+| --- | --- | --- |
+| **MCP** | agent → **tools** | synchronous request / response |
+| **A2A** | agent → **agent** | a **task** with a lifecycle |
+
+`mzizi-mcp` is an MCP server: a catalogue of read tools over the Mzizi registry,
+each answering in one round trip. That is exactly the right shape for
+`get_component` — you ask, you get the document, you are done.
+
+It is the wrong shape for *"run a security scan"* or *"inject chaos and report"*.
+Those are **long-running, stateful, and streaming**: minutes of work, progress
+through states, partial results, and a caller who may want to cancel.
+
+**Adding `run_security_test` as one more MCP tool is the obvious-looking move
+and it is wrong.** A synchronous JSON-RPC response held open for the duration of
+a run times out, gives the caller no progress, and cannot be cancelled. The tool
+would look correct in `tools/list` and fail in practice.
+
+A2A exists for precisely this: a **task** is submitted, gets an id, moves
+through a lifecycle, streams updates, and produces artifacts.
+
+```
+submitted → working → input-required → completed | failed | canceled
+```
+
+fundi is already an agent — it has a Durable Object, a cron, and a queue. It
+should be addressable as one.
+
+**So: MCP stays for the registry reads; A2A carries delegated work.**
+
+## Topology
+
+```
+   MCP client (Claude, Claude Code, the fundi CLI)
+        │  MCP  (tools/call — synchronous)
+        ▼
+   mzizi-mcp  ── the MCP↔A2A bridge; holds the M2M secret
+        │  A2A  (JSON-RPC: message/send, tasks/get, message/stream)
+        ▼
+   fundi-tester  ── A2A server; task state in the FundiAgent Durable Object
+        │
+        ├─ security scan
+        ├─ chaos injection      → record_chaos_event
+        ├─ accessibility audit
+        └─ heal issue           → the self-healing loop
+```
+
+The transport is not new plumbing. `mzizi-mcp/src/fundi-client.ts` already mints
+an M2M client-credentials token and forwards the signed-in user's token; the
+existing `fundi_status` tool uses it today against fundi's `/admin/whoami`. An
+A2A client is a thin layer over that same call.
+
+## The agent card
+
+Served at `/.well-known/agent-card.json` on the fundi worker, **unauthenticated**
+— discovery must not require a token, even though every skill does. The card is
+the machine-readable twin of what fundi is allowed to do: `protocolVersion`,
+`name`, `url`, `capabilities`, `securitySchemes`, and a `skills` array
+(`security-scan`, `chaos-run`, `a11y-audit`, `heal-issue`).
+
+Two constraints on the card that are easy to get wrong:
+
+- **The card cannot fully express fundi's auth, and must say so in prose.**
+  `securitySchemes` covers the M2M half. The second factor — a forwarded
+  end-user token — has no standard slot in the A2A card, so it belongs in the
+  card's `description`. An agent presenting only an M2M token will be rejected,
+  and it should learn that from the card rather than from a `401`.
+- **Never claim `streaming: true` before `message/stream` works.** The card is a
+  contract other agents plan against. An unimplemented capability is worse than
+  an absent one.
+
+## The endpoint, and the submit-and-poll shape
+
+`POST /a2a` — JSON-RPC 2.0, behind the same gate as `/admin/*`. Methods land in
+this order: `message/send`, `tasks/get`, `tasks/cancel`, then `message/stream`
+(SSE), then push notifications over the existing queue. `tasks/cancel` is not
+optional — these runs are expensive.
+
+The bridge surfaces tasks as MCP tools, and the shape *is* the design:
+
+| MCP tool (planned) | A2A call | Returns |
+| --- | --- | --- |
+| `fundi_submit_test` | `message/send` | `taskId` + state, **immediately** |
+| `fundi_task_status` | `tasks/get` | state + artifacts |
+| `fundi_cancel_task` | `tasks/cancel` | final state |
+
+**`fundi_submit_test` never waits for the run to finish.** It returns a task id
+and the caller polls `fundi_task_status`, which is cheap, cancellable, and
+legible. An MCP tool call that blocks for minutes is the failure mode this whole
+design exists to avoid.
+
+Annotations have to stay honest: submit is **not** read-only and **not**
+idempotent (`openWorldHint: true` — it reaches another service); status is
+read-only and idempotent; cancel is not read-only.
+
+These three are **code tools, not registry rows.** They dispatch to another
+agent rather than to a SQL function, edge function, or table, so they do not fit
+the registry's dispatch model — the same category as the existing `fundi_status`.
+Do not add an `a2a` kind to `mcp_tool_registry` to make them fit.
+
+Task state lives in the **`FundiAgent` Durable Object**: single-threaded
+consistency per task and a natural home for streaming. There is deliberately no
+Supabase task table.
+
+## Auth — no new scheme, just new scopes
+
+A2A changes the wire format, not the audience. fundi remains an **internal
+machine surface**, so the [auth-by-audience
+split](/mzizi-tools/overview/#auth-by-audience) holds unchanged:
+
+1. **A WorkOS M2M token** (client credentials), minted by the shared fundi M2M
+   app. Only Workers ever hold that secret.
+2. **A forwarded end-user token** in `X-Fundi-User-Token`, so fundi only ever
+   acts on behalf of a real signed-in user.
+
+Both are required on `/a2a`. Routes that already bypass the gate stay bypassed
+(cron, queue, webhook, health) and `/.well-known/agent-card.json` joins that
+list — `/a2a` does not.
+
+New per-capability scopes sit alongside the existing `fundi:admin`:
+**`fundi:security`** and **`fundi:chaos`**. Splitting them is the point — a
+caller allowed to run an accessibility audit is not thereby allowed to inject
+faults into production.
+
+<Aside type="danger">
+  **The CLI never holds the M2M secret.** `@nyuchi/mzizi-cli` reaches fundi
+  *through* `mzizi-mcp`, exactly as it does for `fundi_status` today. A2A creates
+  no reason to change that. Equally: **A2A must not become a second write path
+  around RLS** — task side effects go through the same `authenticated` RPCs under
+  the same row-level policies as everything else.
+</Aside>
+
+## How it fits the self-healing loop
+
+A2A is a new **entry point** to the existing loop, not a parallel one.
+
+- A **chaos** task writes `record_chaos_event`; a real runtime error writes
+  `record_observability_event`. That split is preserved — deliberately injected
+  faults are chaos, genuine failures are observability.
+- A **security** task's findings become `fundi_issues` rows, so they enter the
+  same watcher → heal → draft-PR path as everything else, with the human gate
+  before merge intact.
+- Emitters authenticate as `authenticated` with an M2M-minted JWT, so RLS still
+  governs every write. Never a service-role key.
+
+## First migration candidate
+
+`run_accessibility_audit` — verified on 2026-07-31 as the **only** `action`-kind
+tool in the registry (the other 63 are 54 read and 9 write). It computes rather
+than reads, it is non-destructive, and it is the natural first skill to move off
+a synchronous MCP action.
+
+`resolver_edge` is explicitly **not** a candidate: it currently returns non-2xx
+even on its own liveness sub-path. Fix or retire it first — do not carry a broken
+tool into a new protocol. See [registry
+health](/mzizi-tools/registry-health/).
+
+## Staged build
+
+| Stage | Scope | Status |
+| --- | --- | --- |
+| 1 | fundi agent card + `POST /a2a` with `message/send` / `tasks/get` / `tasks/cancel` | in flight |
+| 2 | `mzizi-mcp` A2A client + the three bridge tools | not started |
+| 3 | `a11y-audit` wired end to end; retire the synchronous `run_accessibility_audit` | not started |
+| 4 | `security-scan` + `chaos-run`, scoped `fundi:security` / `fundi:chaos` | not started |
+| 5 | `message/stream` (SSE) + push notifications over the existing queue | not started |
+
+Stages 1 and 2 are independently useful: once the card and `tasks/get` exist,
+`mzizi-mcp` can delegate before any new skill is implemented.

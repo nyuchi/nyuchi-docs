@@ -33,7 +33,10 @@ from npm and points at the `nyuchi-docs-mcp` worker.
   the Mukoko Events MCP server.
 - **`identity/`** — WorkOS, `identity.nyuchi.com`, SSO, JWTs.
 - **`console/`** — the Nyuchi Console at `platform.nyuchi.com`.
-- **`mzizi-tools/`** — `mzizi-mcp`, `mzizi-cli`, `mzizi-skills`.
+- **`tools/`** — the cross-repo tools directory: every skill, CLI, and MCP
+  server across the Nyuchi and Bundu repos.
+- **`mzizi-tools/`** — `mzizi-mcp`, `mzizi-cli`, `mzizi-skills`, the DNA
+  double-helix architecture, registry health, and the A2A design.
 - **`deployment/`** — Cloudflare, Vercel, and Supabase deployment patterns.
 - **`conventions/`** — PR doctrine, commit doctrine, repo-naming rules.
 
