@@ -1,114 +1,133 @@
 ---
-title: Agent Gateway on Vercel
-description: How nyuchi/agentgateway ships as a Docker container on Vercel using Dockerfile.vercel and container image support.
+title: Agent Gateway on Fly.io
+description: How nyuchi/agentgateway ships as a Docker container on Fly.io, fronted by WorkOS OIDC, at fundi.nyuchi.com.
+visibility: internal
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
 [`nyuchi/agentgateway`](https://github.com/nyuchi/agentgateway) is the agent
 gateway all Nyuchi agents route through. It runs the
-[agentgateway](https://agentgateway.dev) Docker image and ships to Vercel
-using Vercel's [container image support](https://vercel.com/docs/functions/container-images) —
-a `Dockerfile.vercel` at the repo root deploys straight to a Vercel Function,
-no separate container host needed.
+[agentgateway](https://agentgateway.dev) Docker image on **Fly.io**
+(app `agentgateway`, org `nyuchi-web-services`, region `iad`).
 
-Live at **`mcp.nyuchi.com`**.
+Live at **`fundi.nyuchi.com`**.
 
-## Why Vercel, not a standalone Docker host
-
-Vercel Functions can now run OCI-compatible container images directly: a
-`Dockerfile.vercel` (or `Containerfile.vercel`) at the project root is
-auto-detected, built, and pushed to the Vercel Container Registry on deploy.
-Functions scale to zero and bill on **Active CPU** — only while the container
-is actually handling a request — which fits a gateway that mostly idles
-between agent calls. `vercel dev` builds and runs the same image locally
-(needs the `docker` CLI and daemon).
+<Aside type="caution">
+  **This page previously described a Vercel deployment at `mcp.nyuchi.com`.**
+  That's retired — the Vercel project, its deployments, and its domain
+  attachment were all deleted when the gateway moved to Fly.io for full
+  multi-service control. `mcp.nyuchi.com` currently resolves nowhere. See
+  "History" below for why.
+</Aside>
 
 ## Repo layout
 
 | File | Does |
 | --- | --- |
-| `Dockerfile.vercel` | `FROM cr.agentgateway.dev/agentgateway:v1.4.1`, copies in `config.yaml`, runs `agentgateway -f /config.yaml` |
-| `config.yaml` | `config.adminAddr: "off"`, the gateway listener, plus one `routes` entry per namespaced MCP server |
-| `vercel.json` | Sets `PORT=3000` |
+| `Dockerfile.vercel` | `FROM cr.agentgateway.dev/agentgateway:v1.4.1`, copies in `config.yaml` with `--chown=65532:65532` (see below), runs `agentgateway -f /config.yaml`. Named `.vercel` for historical reasons — `fly.toml`'s `[build]` block still points at this exact filename. |
+| `config.yaml` | `config.adminAddr: "off"`, the single gateway listener, one `routes` entry per namespaced MCP server, the `ui` OIDC policy |
+| `fly.toml` | One `[[services]]` block, one port (`3000` internal → `80`/`443` external) |
 
 ```docker filename="Dockerfile.vercel"
 FROM cr.agentgateway.dev/agentgateway:v1.4.1
 
-COPY config.yaml /config.yaml
+COPY --chown=65532:65532 config.yaml /config.yaml
 
 CMD ["-f", "/config.yaml"]
 ```
 
-## Port resolution
+<Aside type="note">
+  **The `--chown` matters.** The base image is
+  [Chainguard](https://www.chainguard.dev/) distroless and runs as the
+  nonroot UID `65532`. A plain `COPY` leaves `/config.yaml` root-owned, so
+  the admin UI's live config edits — adding an MCP server, changing a
+  port, anything through "Enable MCP" and similar flows — fail with
+  `Permission denied (os error 13)` trying to save. `--chown` matches the
+  file to the user that actually runs the process.
+</Aside>
 
-A Vercel Function running a container image forwards traffic to a single
-port — `80` by default, overridable with the `PORT` environment variable.
-agentgateway's own default gateway listener is `3000`, so `vercel.json` pins
-`PORT` to `3000` to match:
+## One port, on purpose
 
-```json filename="vercel.json"
-{
-  "env": {
-    "PORT": "3000"
-  }
-}
+`fly.toml` declares exactly one `[[services]]` block, port `3000` internal,
+forwarded externally on `80` (redirects to `443`) and `443`:
+
+```toml filename="fly.toml"
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
 ```
 
-The dedicated admin port (normally `15000`) is **disabled outright** —
-`config.adminAddr: "off"` in `config.yaml`. agentgateway has no built-in
-auth on that port (`adminAddr` only controls *where* it binds, never *how*
-it authenticates), and its own default, if left unset, is `localhost:15000`
-— meaning that server would run inside the container regardless of whether
-Vercel ever routes to it. Vercel only forwarding one port isn't access
-control; it's incidental.
+An earlier revision added a *second* `[[services]]` block exposing the
+admin UI on its own port, `15000`. It was reverted: verified working over
+Fly's internal WireGuard network, but the TLS handshake on `15000` reset
+from every public-internet path tested. **OIDC is what actually gates the
+UI, not the port** — a second exposed port bought no security and cost
+real reachability. The base gateway on `443` now serves the proxy, the
+namespaced MCP routes, and the OIDC-gated UI together.
 
-Instead the admin **UI** is exposed on the same gateway listener as
-everything else, gated by a real login — see the next section.
+<Aside type="caution">
+  **Adding a port through the admin UI is internal-only unless `fly.toml`
+  also opens it.** Defining a new gateway on some port inside `config.yaml`
+  makes agentgateway listen on it inside the container; Fly's edge only
+  forwards ports actually declared in `fly.toml`. Given the `15000`
+  experience above, be deliberate about adding another exposed port —
+  test reachability from more than one network before relying on it.
+</Aside>
+
+## Admin UI, gated by WorkOS OIDC
+
+The `ui` block has no explicit `gateways:` key, so it falls back to the
+`default` gateway — same port as everything else — and requires a browser
+OIDC login before serving anything:
 
 ```yaml filename="config.yaml"
 config:
   adminAddr: "off"
-```
 
-## Admin UI, gated by WorkOS OIDC
-
-The `ui` block attaches the admin UI to the `default` gateway (port `3000`
-— same one Vercel forwards) and requires a browser OIDC login before
-serving anything:
-
-```yaml filename="config.yaml"
 ui:
   policies:
     oidc:
       issuer: ${WORKOS_ISSUER}
       clientId: ${WORKOS_CLIENT_ID}
       clientSecret: ${WORKOS_CLIENT_SECRET}
-      redirectURI: https://mcp.nyuchi.com/oauth/callback
+      redirectURI: https://fundi.nyuchi.com/oauth/callback
 ```
+
+`config.adminAddr` stays `"off"` — agentgateway's dedicated admin port has
+no built-in auth at all (`adminAddr` only controls *where* it binds, never
+*how* it authenticates).
 
 The `${WORKOS_*}` tokens are **not** placeholders we substitute — agentgateway
 resolves `$VAR`/`${VAR}` natively from its own process environment at
 startup, scanning the whole config file. That's confirmed the hard way: an
-earlier revision of this setup tried routing secrets through a hand-rolled
-`envsubst` entrypoint in a custom `debian:bookworm-slim` image (because the
-official image is [Chainguard](https://www.chainguard.dev/) distroless — no
-shell), and a stray literal `${WORKOS_*}` left in a *comment* made
-agentgateway try to look up an env var literally named `WORKOS_*` and refuse
-to boot. Once that surfaced agentgateway's native substitution, the whole
-custom-image detour turned out to be unnecessary — the official
-`cr.agentgateway.dev/agentgateway:v1.4.1` image handles this fine on its own.
+earlier revision tried routing secrets through a hand-rolled `envsubst`
+entrypoint in a custom `debian:bookworm-slim` image, and a stray literal
+`${WORKOS_*}` left in a *comment* made agentgateway try to look up an env
+var literally named `WORKOS_*` and refuse to boot. Once that surfaced
+agentgateway's native substitution, the custom-image detour turned out to
+be unnecessary.
 
 The OIDC identity is a **WorkOS Connect OAuth Application** (first-party,
 confidential — not Public, since agentgateway exchanges the code
 server-side), created in the "Nyuchi Identity" WorkOS project's Production
-environment. This is the same pattern `mzizi-mcp` and `bushtrade-mcp`
-already use for gating internal services against the same identity pool —
-not a plain AuthKit Application (single product's own end-user clients) and
-not an M2M app (no human user in an OIDC browser-redirect flow).
+environment — the same pattern `mzizi-mcp` and `bushtrade-mcp` use for
+gating internal services against the same identity pool.
 
-**Four Vercel project env vars are required** (`WORKOS_CLIENT_SECRET` and
-`OIDC_COOKIE_SECRET` marked Encrypted), across Production and Preview scopes:
+**Four secrets, set with `flyctl secrets set`, not written to `config.yaml`
+or committed to git:**
 
 | Var | Value |
 | --- | --- |
@@ -122,26 +141,40 @@ not an M2M app (no human user in an OIDC browser-redirect flow).
   reads it directly from its process environment, unconditionally, the
   moment any `oidc` policy exists anywhere in the config. Skip it and
   agentgateway refuses to boot with `OIDC_COOKIE_SECRET is required when
-  oidc is configured` — confirmed against the agentgateway source
-  (`crates/agentgateway/src/config.rs`), not just the docs. It must decode
-  to exactly 32 bytes; anything else is a boot-time hard failure too.
+  oidc is configured`. It must decode to exactly 32 bytes; anything else is
+  a boot-time hard failure too.
+</Aside>
+
+<Aside type="danger">
+  **The WorkOS Connect app's allowed redirect-URI list is set manually in
+  the WorkOS dashboard — nothing in this repo enforces it.** When the
+  domain moved from `mcp.nyuchi.com` to `fundi.nyuchi.com`, `config.yaml`'s
+  `redirectURI` was updated in the same commit, but the WorkOS-side
+  allow-list wasn't — login broke until that was fixed by hand in the
+  dashboard. If this gateway ever moves domains again, update both places.
 </Aside>
 
 With the OIDC policy active, agentgateway redirects **every unauthenticated
 request that doesn't match a more specific route** — including `/`, not
-just `/ui/*` — to the WorkOS login. That's expected: `/` isn't matched by
-any `routes` entry, so it falls under the same gateway the `ui` policy
-protects. `/docs/mcp` is unaffected because it's an explicit route matched
-first.
+just `/ui/*` — to the WorkOS login. `/docs/mcp` is unaffected because it's
+an explicit route matched first.
+
+### Config durability
+
+Fly machines have an ephemeral root filesystem. The `--chown` fix above
+makes the admin UI's live saves to `/config.yaml` *succeed*, but nothing
+currently backs that file with a Fly Volume — any edit made through the UI
+is lost on the next `flyctl deploy` or machine restart, both of which
+revert to whatever's baked into the image. Durable UI-driven config editing
+needs a volume-backed config path; not done yet.
 
 ## Namespaces: one gateway, many MCP servers
 
-This is the actual point of running an API gateway in front of the Nyuchi
-agents: one domain, one path prefix per backend MCP server, instead of a
-different worker hostname for each one. agentgateway's `mcp` backend type is
-protocol-aware — it terminates the MCP session itself and re-issues calls to
-the target, rather than doing a raw reverse proxy — so `routes` in
-`config.yaml` just maps a `pathPrefix` to a target `host`:
+The actual point of running an API gateway in front of the Nyuchi agents:
+one domain, one path prefix per backend MCP server, instead of a different
+worker hostname for each one. agentgateway's `mcp` backend type is
+protocol-aware — it terminates the MCP session itself, rather than doing a
+raw reverse proxy:
 
 ```yaml filename="config.yaml"
 routes:
@@ -158,99 +191,68 @@ routes:
 ```
 
 That puts [`nyuchi-docs-mcp`](/integrations/docs-mcp/) at
-**`mcp.nyuchi.com/docs/mcp`**, still reachable directly at
+**`fundi.nyuchi.com/docs/mcp`**, still reachable directly at
 `docs.nyuchi.com/mcp` and `nyuchi-docs-mcp.nyuchi.workers.dev/mcp` — the
 gateway is an additional front door, not a replacement:
 
 ```sh
-curl -X POST https://mcp.nyuchi.com/docs/mcp \
+curl -X POST https://fundi.nyuchi.com/docs/mcp \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"probe","version":"0.0.1"}}}'
 ```
 
 Every request past `initialize` needs the `Mcp-Session-Id` the gateway hands
-back — that's agentgateway enforcing normal MCP session semantics, not a
-routing bug. Add another Nyuchi agent's MCP server the same way: a new
-`routes` entry, a new namespace.
-
-<Aside type="note">
-  Before adding a route, test it against a **preview deployment**, not
-  production — push to a branch, hit the `*.vercel.app` preview URL (you'll
-  need to temporarily clear the project's `ssoProtection` via the API to curl
-  it unauthenticated, then restore it), and only promote to `mcp.nyuchi.com`
-  once it responds correctly. A malformed `routes` entry is a config error
-  agentgateway has to survive at boot — verify on a throwaway URL first.
-</Aside>
+back. Add another Nyuchi agent's MCP server the same way: a new `routes`
+entry, a new namespace, `flyctl deploy`.
 
 ## Deploying
 
-The `nyuchi/agentgateway` Vercel project (team `nyuchi`) is **Git-connected**
-— production branch `main` — so a push to `main` auto-builds
-`Dockerfile.vercel` and deploys; other branches get preview deployments.
-
-The project was created without the dashboard, in three API/CLI calls (no
-manual clicking):
+There's no CI/CD wired up yet — every deploy so far has been manual from a
+checkout:
 
 ```sh
-vercel link --scope nyuchi --project agentgateway --yes   # create + link the project
-vercel deploy --prod --scope nyuchi                        # first deploy, before Git was wired up
-vercel git connect https://github.com/nyuchi/agentgateway --scope nyuchi
+flyctl deploy -a agentgateway --local-only
 ```
 
-`vercel git connect` is the CLI wrapper around the (undocumented, but
-stable — it's what the CLI itself calls) linking endpoint:
+`--local-only` builds with the local Docker daemon instead of Fly's remote
+(Depot) builder. That matters in some sandboxed/proxied environments where
+the remote builder's gRPC connection can't be tunneled through an HTTP
+proxy — it isn't required from a normal machine with unrestricted network
+access, but it's the flag that got a build through when the remote builder
+timed out with a TLS handshake failure.
 
-```sh
-curl -X POST "https://api.vercel.com/v9/projects/agentgateway/link?teamId=<team id>" \
-  -H "Authorization: Bearer $VERCEL_TOKEN" \
-  -d '{"type":"github","repo":"nyuchi/agentgateway"}'
-```
+### Networking
 
-It only works because the Vercel GitHub App is already installed for the
-`nyuchi` org (shared with every other Vercel-hosted Nyuchi project) — there's
-no API call that installs the GitHub App itself, that's a one-time dashboard
-step done long before this project existed.
+- **Domain**: `fundi.nyuchi.com` — Cloudflare DNS (`nyuchi.com` zone),
+  `A`/`AAAA` records to the app's dedicated IPs, plus `_fly-ownership` and
+  `_acme-challenge` records, following the same pattern already used for
+  `api.nyuchi.com` and `auth.nyuchi.com`.
+- **Dedicated IPs**: IPv4 (**$2/mo**) and IPv6 — `flyctl ips list -a agentgateway`.
+  Fly requires a dedicated IP once an app runs more than one `[[services]]`
+  block; kept even after collapsing back to one, since it's already
+  allocated and paid for.
+- **TLS**: Let's Encrypt, issued and managed by Fly
+  (`flyctl certs list/check/add -a agentgateway`).
 
-<Aside type="note">
-  Linking doesn't retroactively deploy — the first Git-triggered build only
-  fires on the next push to `main` *after* linking. That happened here: the
-  PR that added `Dockerfile.vercel` merged to `main`, and Vercel picked it
-  up and built automatically, no manual `vercel deploy` needed from then on.
-</Aside>
+## History
 
-Vercel rebuilds and re-pushes the image to the Vercel Container Registry on
-every deploy that touches `Dockerfile.vercel` or the files it `COPY`s.
-
-### Domain
-
-`mcp.nyuchi.com` is a `CNAME` to `cname.vercel-dns.com` in the `nyuchi.com`
-Cloudflare zone (DNS-only, not proxied — Vercel terminates TLS and issues its
-own certificate for the domain). Added to the project with:
-
-```sh
-curl -X POST "https://api.vercel.com/v10/projects/agentgateway/domains?teamId=<team id>" \
-  -H "Authorization: Bearer $VERCEL_TOKEN" \
-  -d '{"name":"mcp.nyuchi.com"}'
-```
-
-## Limits worth knowing
-
-- **Secure Compute and Static IPs don't work with custom container images
-  yet.** Don't route anything through this gateway that assumes a fixed
-  egress IP.
-- **Scale-to-zero**: an instance with no traffic for 5 minutes in production
-  (30 seconds in preview) is torn down. A scaled-down instance gets
-  `SIGTERM` with a 30-second grace period before a hard kill.
-- **One process, one port.** agentgateway's own multi-port model (proxy +
-  MCP + admin) collapses to whatever `config.yaml` binds to the single port
-  Vercel forwards — there's no way to expose a second port from the same
-  Function.
+Shipped on **Vercel** first — `Dockerfile.vercel` running as a Vercel
+Function via [container image support](https://vercel.com/docs/functions/container-images),
+admin UI folded into the single port Vercel forwards, domain
+`mcp.nyuchi.com`. Migrated to **Fly.io** for full multi-service control.
+The Vercel project, its domain attachment, and all its deployments were
+deleted after the migration; `mcp.nyuchi.com` was retired in favor of
+`fundi.nyuchi.com`. Two detours along the way, both reverted: a standalone
+`debian:bookworm-slim` + `envsubst` entrypoint (unnecessary — agentgateway
+substitutes env vars into its own config natively), and a dedicated
+admin-UI port on `15000` (unreachable from the public internet from every
+network tested).
 
 ## Cross-links
 
 - [`nyuchi/agentgateway`](https://github.com/nyuchi/agentgateway) — the repo.
 - [agentgateway.dev docs](https://agentgateway.dev/docs/standalone/latest/) —
   upstream configuration reference (gateways, listeners, backends).
-- [Vercel: Container Images](https://vercel.com/docs/functions/container-images) —
-  the underlying Vercel feature.
+- [Fly.io: Container Images / Machines](https://fly.io/docs/machines/) —
+  the underlying Fly.io deployment model.
