@@ -23,8 +23,16 @@ import { INTERNAL_PATHS } from './internal-paths.generated.js';
 export interface Env {
   ASSETS: Fetcher;
   WORKOS_CLIENT_ID: string;
-  WORKOS_CLIENT_SECRET: string;
   WORKOS_ISSUER: string;
+  /**
+   * Optional: only present for a confidential Connect app. The app this
+   * gate actually uses — WorkOS's shared "Nyuchi Internal Tools" app,
+   * `clientConfidentiality: "Public"` — has no client secret at all
+   * (PKCE is the whole story for a public client); omit this var
+   * entirely rather than setting it empty. Kept optional, not deleted,
+   * so a future confidential app swap doesn't need a code change too.
+   */
+  WORKOS_CLIENT_SECRET?: string;
   /** Shared secret nyuchi-docs-mcp-worker sends to bypass the browser flow for callers it has already authorized itself. */
   INTERNAL_FETCH_KEY?: string;
 }
@@ -128,17 +136,19 @@ async function handleCallback(env: Env, req: Request, url: URL): Promise<Respons
     return new Response('Login state mismatch — possible CSRF, try again.', { status: 400 });
   }
 
+  const tokenParams: Record<string, string> = {
+    grant_type: 'authorization_code',
+    client_id: env.WORKOS_CLIENT_ID,
+    code,
+    code_verifier: saved.verifier,
+    redirect_uri: `${url.origin}${CALLBACK_PATH}`,
+  };
+  if (env.WORKOS_CLIENT_SECRET) tokenParams.client_secret = env.WORKOS_CLIENT_SECRET;
+
   const tokenRes = await fetch(`${env.WORKOS_ISSUER}/oauth2/token`, {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'authorization_code',
-      client_id: env.WORKOS_CLIENT_ID,
-      client_secret: env.WORKOS_CLIENT_SECRET,
-      code,
-      code_verifier: saved.verifier,
-      redirect_uri: `${url.origin}${CALLBACK_PATH}`,
-    }),
+    body: new URLSearchParams(tokenParams),
   });
   if (!tokenRes.ok) {
     return new Response(`Login failed exchanging code: ${tokenRes.status}`, { status: 502 });
