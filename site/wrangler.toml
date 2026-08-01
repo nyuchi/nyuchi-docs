@@ -17,11 +17,20 @@ not_found_handling = "404-page"
 [observability]
 enabled = true
 
-# Secrets (wrangler secret put, not committed):
-#   WORKOS_CLIENT_ID, WORKOS_CLIENT_SECRET, WORKOS_ISSUER — the "Nyuchi
-#     Docs" WorkOS Connect OAuth Application, redirect URI
-#     https://docs.nyuchi.com/oauth/callback registered in its dashboard.
-#   INTERNAL_FETCH_KEY — shared with nyuchi-docs-mcp-worker so it can
-#     read internal pages on behalf of a caller it has already
-#     authorized itself, bypassing the browser OIDC flow. Any long
-#     random string; must match on both workers.
+# Uses the shared "Nyuchi Internal Tools" WorkOS Connect app (same one
+# other internal tools/MCP surfaces use), not a dedicated "Nyuchi Docs"
+# app — client_01KVTX0V2K1VM3PSC0DJ9VZWTV, clientConfidentiality: Public,
+# so there's no client secret (src/worker/gate.ts treats
+# WORKOS_CLIENT_SECRET as optional for exactly this reason — PKCE is the
+# whole story for a public client). Neither of these is sensitive: the
+# client ID is exposed in the browser's redirect URL anyway, and an OIDC
+# issuer is public by design. redirect_uri
+# https://docs.nyuchi.com/oauth/callback is registered on that app.
+[vars]
+WORKOS_CLIENT_ID = "client_01KVTX0V2K1VM3PSC0DJ9VZWTV"
+WORKOS_ISSUER = "https://identity.nyuchi.com"
+
+# Secret (wrangler secret put INTERNAL_FETCH_KEY): shared with
+# nyuchi-docs-mcp-worker so it can read internal pages on behalf of a
+# caller it has already authorized itself, bypassing the browser OIDC
+# flow. Any long random string; must match on both workers.
