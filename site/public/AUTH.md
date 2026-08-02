@@ -1,12 +1,14 @@
 # Nyuchi API — Authentication (agent reference)
 
-> Raw markdown, meant to be fetched directly by agents (`curl
-> https://docs.nyuchi.com/AUTH.md`) rather than rendered in a browser. The
-> canonical, human-rendered version of this content lives at
+> This file is pulled through from `nyuchi/api-gateway`'s `docs/AUTH.md` —
+> served live at `https://api.nyuchi.com/AUTH.md` — by
+> `site/scripts/sync-auth-md.mjs` on every docs build. **Don't hand-edit
+> this file**; it gets overwritten at build time. Edit `docs/AUTH.md` in
+> `nyuchi/api-gateway` instead — this committed copy only exists as the
+> fallback used if that build-time fetch fails. Rendered prose versions of
+> the same content live at
 > [docs.nyuchi.com/api/authentication](https://docs.nyuchi.com/api/authentication)
-> and [docs.nyuchi.com/api/api-keys](https://docs.nyuchi.com/api/api-keys) —
-> this file exists so an agent building against `api.nyuchi.com` doesn't have
-> to parse HTML to get the integration steps right.
+> and [docs.nyuchi.com/api/api-keys](https://docs.nyuchi.com/api/api-keys).
 
 ## Two credential types
 
