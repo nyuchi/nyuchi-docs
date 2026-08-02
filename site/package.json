@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build:deps": "pnpm --filter @nyuchi/nyuchi-docs-search build",
     "generate:internal-paths": "node scripts/generate-internal-paths.mjs",
-    "build": "pnpm run build:deps && pnpm run generate:internal-paths && astro build",
+    "sync:auth-md": "node scripts/sync-auth-md.mjs",
+    "build": "pnpm run build:deps && pnpm run generate:internal-paths && pnpm run sync:auth-md && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
