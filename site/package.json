@@ -12,7 +12,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.41.4",
+    "@astrojs/starlight": "^0.41.6",
     "@astrojs/svelte": "^9.0.1",
     "@bundu/ui": "^0.1.1",
     "astro": "^7.1.4",
@@ -22,7 +22,7 @@
     "@nyuchi/nyuchi-docs-search": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260726.1",
-    "wrangler": "^4.114.0"
+    "@cloudflare/workers-types": "^5.20260801.1",
+    "wrangler": "^4.118.0"
   }
 }
