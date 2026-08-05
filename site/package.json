@@ -16,7 +16,7 @@
     "@astrojs/svelte": "^9.0.1",
     "@bundu/ui": "^0.1.1",
     "astro": "^7.1.4",
-    "jose": "^5.9.6",
+    "jose": "^6.2.7",
     "sharp": "^0.34.5",
     "svelte": "^5.56.8",
     "@nyuchi/nyuchi-docs-search": "workspace:*"
