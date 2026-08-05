@@ -41,9 +41,7 @@ Limits are enforced per client IP. When you exceed a limit you get `429 Too Many
 | Scope | Limit |
 |-------|-------|
 | Default for any endpoint | 60 requests / minute |
-| `POST /v1/auth/otp/email/send` and `…/verify` | 10 requests / minute |
-| `POST /v1/auth/otp/sms/send` and `…/verify` | 5 requests / minute |
-| `POST /v1/auth/exchange` and `/v1/auth/refresh` | 30 requests / minute |
+| `GET /v1/auth/workos/{login,callback,logout}` | 30 requests / minute |
 
 <Aside type="tip">
   Server-side jobs that fan out across many users should batch through a single internal worker so they hit the per-IP bucket once, not once per user.
