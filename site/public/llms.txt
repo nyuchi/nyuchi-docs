@@ -18,6 +18,7 @@
 
 - [API overview](https://docs.nyuchi.com/api/overview): The versioned /v1 gateway and product namespaces.
 - [Authentication](https://docs.nyuchi.com/api/authentication): WorkOS AuthKit sign-in and the platform JWT.
+- [Authentication (agent reference, raw markdown)](https://docs.nyuchi.com/AUTH.md): The same WorkOS sign-in flow as a single fetchable file for agents building against api.nyuchi.com — the client_id/redirect_uris registration steps and the fail-closed callback default in particular.
 - [API keys](https://docs.nyuchi.com/api/api-keys): Console-managed client ID and secret pairings.
 - [Security](https://docs.nyuchi.com/api/security): Security and rate limits.
 - [Namespaces](https://docs.nyuchi.com/api/commerce): Commerce, Pay, Logistics, Lingo, News, Weather.

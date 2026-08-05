@@ -17,11 +17,17 @@ WorkOS AuthKit hosts the sign-in UI, handles passwordless email, social logins, 
 
 1. **Send the user to /v1/auth/workos/login**
 
-   Pass a `return_to` query parameter so the backend knows where to drop the user after sign-in. The endpoint responds with the hosted AuthKit URL.
+   Pass a `return_to` query parameter—an absolute URL—so the backend knows where to drop the user after sign-in. The endpoint responds with the hosted AuthKit URL.
 
    ```bash
-   GET /v1/auth/workos/login?return_to=/auth/workos/callback
+   GET /v1/auth/workos/login?return_to=https://your-app.example/auth/callback
    ```
+
+   `return_to` is validated against an allowlist—see
+   [Third-party apps: register your redirect origin](#third-party-apps-register-your-redirect-origin)
+   below. A relative path or an unregistered origin gets a `400`, not a
+   redirect—this is a public, multi-tenant endpoint, so it never redirects
+   a freshly minted token somewhere unverified.
 
 
 2. **WorkOS posts back to the backend**
@@ -37,11 +43,38 @@ WorkOS AuthKit hosts the sign-in UI, handles passwordless email, social logins, 
    302 /auth/workos/callback#access_token=…&person_id=…
    ```
 
+   If `return_to` was never supplied (or WorkOS didn't round-trip it), this
+   endpoint returns a `400` instead of the token—it does **not** fall back
+   to rendering the JWT in the response body unless the caller explicitly
+   opts in with `allow_direct_token_response=true`. Never do that from a
+   browser: a live access token would render in plain text on screen and
+   land in browser history. That opt-in exists only for scripted,
+   server-to-server code-exchange flows.
+
 
 4. **Your client consumes the fragment**
 
    Parse `window.location.hash`, store the token, and clean the fragment from the URL so a refresh does not re-process it. The console exposes this as `consumeWorkOSCallback()` on the auth context.
 
+
+### Third-party apps: register your redirect origin
+
+`/v1/auth/workos/login` is shared across every app built on the Nyuchi API—the gateway doesn't hardcode any single app's domain into its `return_to` allowlist. Instead, each app registers its own redirect origins on its [API key](/api/api-keys):
+
+```bash
+curl -X PATCH https://api.nyuchi.com/v1/api-keys/{key_id}/redirect-uris \
+  -H "Authorization: Bearer $PLATFORM_JWT" \
+  -H "Content-Type: application/json" \
+  -d '{"redirect_uris": ["https://your-app.example/auth/callback"]}'
+```
+
+Then pass that key's `client_id` alongside `return_to`:
+
+```bash
+GET /v1/auth/workos/login?return_to=https://your-app.example/auth/callback&client_id=nyk_...
+```
+
+The gateway checks `return_to`'s origin against *that key's* registered `redirect_uris`, not a global list—so onboarding a new app never requires a gateway config change. Omitting `client_id` only works for origins on the gateway's first-party allowlist (the Nyuchi console itself); every other app must pass it.
 
 ### Configure
 
@@ -59,7 +92,7 @@ Set four environment variables on the backend. Until all four are populated, `/v
 `POST /v1/auth/workos/logout` revokes the WorkOS session. Clear the local token afterwards so subsequent requests are unauthenticated.
 
 <Aside type="note">
-  A legacy email-OTP flow still exists under `/v1/auth/otp/*` for accounts created before the WorkOS cutover. It mints the same platform JWT and is being retired—do not build new integrations against it.
+  WorkOS AuthKit is the *only* sign-in path now—the legacy Stytch email/OTP flow (`/v1/auth/otp/*`, `/v1/auth/exchange`, `/v1/auth/refresh`) has been removed entirely. Accounts created before the migration keep a legacy `stytchUserId` on their person record, but it's read-only and never used to authenticate.
 </Aside>
 
 ## Using the platform JWT
@@ -71,10 +104,10 @@ curl https://api.nyuchi.com/v1/identity/me \
   -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
-Call `POST /v1/auth/refresh` before the token expires to obtain a new one without forcing the user back through AuthKit.
+There's no refresh endpoint—the token is valid for 30 days (1 year for native clients). When it expires, send the user through `/v1/auth/workos/login` again; AuthKit's own session usually makes that instant with no re-prompt.
 
 ## Next steps
 
 - Review the [API overview](/api/overview) for the full list of namespaces.
 - Create [API keys](/api/api-keys) in the console for programmatic access.
-- Read [security and rate limits](/api/security) before going live—`/v1/auth/exchange` and `/v1/auth/refresh` are rate limited per IP.
+- Read [security and rate limits](/api/security) before going live—`/v1/auth/workos/*` is rate limited per IP.

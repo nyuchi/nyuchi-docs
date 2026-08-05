@@ -40,6 +40,19 @@ Keys are scoped to the **public** product namespaces (news, weather, commerce, a
   A `403` on a namespace that works with a platform JWT usually means the namespace is internal-only. Check the [API overview](/api/overview) for the namespace list.
 </Aside>
 
+## Register redirect URIs for hosted sign-in
+
+If your app uses [WorkOS AuthKit sign-in](/api/authentication) (`/v1/auth/workos/login`), it needs its own `return_to` origin registered on its key—the gateway is a shared, multi-tenant endpoint and doesn't hardcode any single app's domain. Set `redirect_uris` when creating the key, or update them any time:
+
+```bash
+curl -X PATCH https://api.nyuchi.com/v1/api-keys/{key_id}/redirect-uris \
+  -H "Authorization: Bearer $PLATFORM_JWT" \
+  -H "Content-Type: application/json" \
+  -d '{"redirect_uris": ["https://your-app.example/auth/callback"]}'
+```
+
+Then pass your `client_id` alongside `return_to` at `/login`—see [Authentication](/api/authentication#third-party-apps-register-your-redirect-origin).
+
 ## Keys vs platform JWTs
 
 | Credential | Identifies | Use it for |
