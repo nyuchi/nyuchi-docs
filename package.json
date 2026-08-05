@@ -15,7 +15,7 @@
     "deploy:mcp": "pnpm --filter nyuchi-docs-mcp-worker deploy"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {
