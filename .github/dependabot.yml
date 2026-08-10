@@ -10,6 +10,26 @@ updates:
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 10
+    ignore:
+      # TypeScript 7 is the Corsa/native rewrite: its package entrypoint no
+      # longer re-exports the classic compiler API (`ts.sys` is undefined), so
+      # svelte2tsx — reached via @sveltejs/package — crashes emitting .d.ts for
+      # nyuchi-docs-search. The tree is held on the classic 6.x line by the
+      # `typescript: ^6.0.0` entry in the root `pnpm.overrides`.
+      #
+      # That override already makes a bot bump INERT, so this entry is about the
+      # bump never being proposed. The pin was made deliberately in 0e520fc, the
+      # majors group reverted it in #54, and it broke the build — a loop that
+      # only stayed invisible because the audit gate was failing ahead of the
+      # build step. With the override in place the next such PR would be worse
+      # than broken: it would look harmless and merge, leaving package.json
+      # declaring ^7 while overrides force ^6 — an inconsistency that invites
+      # someone to "tidy up" the override and break the build for real.
+      #
+      # Remove this when svelte2tsx supports the TS 7 API, together with the
+      # override. Not before, and not one without the other.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
     groups:
       minor-and-patch:
         update-types:
