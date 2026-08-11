@@ -67,7 +67,12 @@ jobs:
         with:
           node-version: '22'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile=false
+      # Frozen: CI installs exactly what pnpm-lock.yaml pins and FAILS if the
+      # lockfile disagrees with any package.json. With `=false` it silently
+      # re-resolved instead, so a dependency change committed without its
+      # lockfile update would install fine here and differ from every other
+      # machine — drift that only surfaces later, somewhere else.
+      - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high
 
   build:
@@ -81,7 +86,12 @@ jobs:
         with:
           node-version: '22'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile=false
+      # Frozen: CI installs exactly what pnpm-lock.yaml pins and FAILS if the
+      # lockfile disagrees with any package.json. With `=false` it silently
+      # re-resolved instead, so a dependency change committed without its
+      # lockfile update would install fine here and differ from every other
+      # machine — drift that only surfaces later, somewhere else.
+      - run: pnpm install --frozen-lockfile
       # `site` cannot build until nyuchi-docs-search is packaged, which its own
       # build:deps handles — hence the recursive build rather than a bare
       # `pnpm --filter site build`.
