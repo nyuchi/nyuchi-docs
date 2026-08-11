@@ -1,3 +1,25 @@
+# Three INDEPENDENT jobs, deliberately — not one job with three steps.
+#
+# These answer three unrelated questions: is the skills bundle well-formed, do
+# we ship a known advisory, and does the site build and pass its tests. Steps in
+# a single job are sequential, so the first failure cancels everything after it
+# and the run reports one red X that names only the earliest problem.
+#
+# That is not hypothetical here. `pnpm audit` sat ahead of `pnpm -r build`, and
+# when three high advisories went unpatched on 5 Aug the build step stopped
+# executing entirely. Five days later a Dependabot majors PR bumped typescript
+# 6 -> 7 — which breaks svelte2tsx and therefore the nyuchi-docs-search build —
+# and merged, because the only signal CI could give was already red for an
+# unrelated reason. Two independent problems, one indistinguishable X.
+#
+# Split, each failure is visible on its own and none can mask another. The cost
+# is one extra `pnpm install` (~20s, warm cache) on the audit job; a masked
+# regression costs days.
+#
+# Ordering WITHIN a job still matters and is still deliberate: install -> build
+# -> test, because a test run tells you nothing if the build did not produce
+# anything to test.
+
 name: build
 
 on:
@@ -7,6 +29,39 @@ on:
     branches: [main]
 
 jobs:
+  # Offline and zero-dependency (node: built-ins only), so it needs no pnpm, no
+  # install and no cache — it is the fastest signal in the run and should never
+  # queue behind a dependency install. Validates the published skills bundle and
+  # enforces the public/internal split (a skill lives in exactly one home).
+  skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - run: node scripts/validate-skills.mjs
+
+  # Fails on any critical/high advisory. Residual moderates are tracked, not
+  # blocking.
+  #
+  # This job must never gate the build job. An advisory and a broken build are
+  # different problems with different owners and different urgencies, and
+  # whichever one runs first should not decide whether the other gets reported.
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm audit --audit-level=high
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -19,15 +74,8 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile=false
-      # Offline, zero-dependency: validates the published skills bundle and
-      # enforces the public/internal split (a skill must live in exactly one
-      # home). Cheap, so it runs on every PR rather than only on publish.
-      - run: node scripts/validate-skills.mjs
-
-      # Fail the build on any critical/high advisory. Residual moderate
-      # (js-yaml >=4.2.0 drops its ESM default export, breaking the Astro
-      # build) and dev-only lows (wrangler's esbuild) are tracked, not
-      # blocking. Tighten to `moderate` once js-yaml ships an ESM-safe fix.
-      - run: pnpm audit --audit-level=high
+      # `site` cannot build until nyuchi-docs-search is packaged, which its own
+      # build:deps handles — hence the recursive build rather than a bare
+      # `pnpm --filter site build`.
       - run: pnpm -r build
       - run: pnpm -r --if-present run test
