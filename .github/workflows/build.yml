@@ -28,6 +28,14 @@ on:
   pull_request:
     branches: [main]
 
+# Least privilege for GITHUB_TOKEN, matching publish-mcp.yml and
+# publish-skills.yml — build.yml was the only workflow here without a block, so
+# it inherited the repository default, which can be read/write. Nothing in this
+# file touches the GitHub API: every job checks out, installs and runs local
+# commands. `contents: read` is what checkout needs and nothing here needs more.
+permissions:
+  contents: read
+
 jobs:
   # Offline and zero-dependency (node: built-ins only), so it needs no pnpm, no
   # install and no cache — it is the fastest signal in the run and should never
