@@ -1,6 +1,6 @@
 ---
 title: Identity overview
-description: How Nyuchi handles identity — WorkOS, identity.nyuchi.com, organisations, SSO, and the shape of Nyuchi-issued JWTs.
+description: How Nyuchi handles identity — WorkOS, accounts.mukoko.com, organisations, SSO, and the shape of Nyuchi-issued JWTs.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -10,9 +10,32 @@ import { Aside } from '@astrojs/starlight/components';
   list, not a reference.
 </Aside>
 
-The Nyuchi identity layer is built on **WorkOS**, fronted by
-`identity.nyuchi.com`. Every Nyuchi product, every Mzizi mini-app, and every
-mzizi-tools API call ultimately authenticates against the same JWT shape.
+The Nyuchi identity layer is built on **WorkOS**, fronted by the hosted
+AuthKit domain `accounts.mukoko.com`. Every Nyuchi product, every Mzizi
+mini-app, and every mzizi-tools API call ultimately authenticates against the
+same JWT shape.
+
+## The four hosts, and why they are not interchangeable
+
+Three `*.mukoko.com` subdomains plus one `nyuchi.com` do four different jobs.
+Mixing them up fails a long way from the cause, so check this table before
+setting any host in config:
+
+| Host | What it is |
+| --- | --- |
+| `accounts.mukoko.com` | The WorkOS **AuthKit issuer** — the OAuth 2.1 authorization server agents and browsers discover. Serves its own self-consistent `/.well-known/openid-configuration`, `/oauth2/authorize`, `/oauth2/token`, `/oauth2/jwks` and DCR. This is what a `WORKOS_ISSUER` / `WORKOS_AUTHKIT_DOMAIN` variable means. |
+| `auth.mukoko.com` | The WorkOS **auth API** — what an SDK calls and where an SDK's JWKS fetch goes. **Not** an issuer: it serves no authorization-server metadata. |
+| `api.nyuchi.com` | The **Nyuchi API gateway** (FastAPI on Fly). Nothing to do with WorkOS. |
+| `api.mukoko.com` | A **separate Mukoko gateway still being built** — serves nothing usable yet, and does not resolve today. Also not WorkOS. |
+
+<Aside type="danger">
+  **Point an issuer variable at the auth API and you get metadata that
+  validates but dead-ends** — a client following the pointer finds no
+  authorization-server document there and the flow dies at discovery, before
+  sign-in. The AuthKit domain moved to `accounts.mukoko.com` in the Aug 2026
+  migration; the previous host `identity.nyuchi.com` has had no DNS record
+  since, so anything still naming it is broken rather than merely stale.
+</Aside>
 
 ## Landed
 
@@ -24,8 +47,8 @@ mzizi-tools API call ultimately authenticates against the same JWT shape.
 ## What needs to land here
 
 - **WorkOS setup** — project layout, environments, the directory sync model.
-- **`identity.nyuchi.com`** — allowed redirect origins, branded login, and the
-  `/.well-known/` endpoints we expose.
+- **`accounts.mukoko.com`** — allowed redirect origins, branded login, and the
+  `/.well-known/` endpoints the AuthKit issuer exposes.
 - **Organisations** — the org model, org-scoped roles, how orgs map to billing
   and to Console plans.
 - **SSO** — connecting customer IdPs (SAML / OIDC), domain claiming, the
