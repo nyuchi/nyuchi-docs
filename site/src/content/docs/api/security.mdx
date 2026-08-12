@@ -13,12 +13,20 @@ The gateway only accepts traffic whose `Host` header matches an allowed entry. U
 
 | Allowed by default | Used for |
 |--------------------|----------|
-| `api.nyuchi.com` | Production traffic |
-| `api.mukoko.com` | Legacy production host |
+| `api.nyuchi.com` | Production traffic — the gateway serving requests today |
+| `api.mukoko.com` | Reserved for a separate Mukoko gateway still being built. Allow-listed ahead of that host existing — **not** a legacy or deprecated production host, and no DNS record today, so no request actually arrives carrying this `Host` header yet |
 | `*.fly.dev` | Fly.io preview deployments |
 | `localhost`, `testserver` | Local development and CI |
 
 Override the list with the `TRUSTED_HOSTS` environment variable (comma-separated) when you stand up a new edge or staging host.
+
+<Aside type="caution">
+  The `api.mukoko.com` entry is easy to misread as an old host kept alive for
+  back-compat. It is the reverse: the Mukoko gateway has not shipped, so nothing
+  has ever been served on that name. See [API overview](/api/overview/) for the
+  full four-host picture — the two gateways are also routinely confused with
+  WorkOS's `auth.mukoko.com` and `accounts.mukoko.com`.
+</Aside>
 
 ## Security headers
 

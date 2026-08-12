@@ -9,10 +9,21 @@ The Nyuchi API is a single versioned HTTP gateway. Every endpoint lives under a 
 
 ## Base URL
 
-| Environment | URL |
-|-------------|-----|
-| Production  | `https://api.nyuchi.com` |
-| Legacy host | `https://api.mukoko.com` |
+| Host | What it is |
+|------|------------|
+| `https://api.nyuchi.com` | **Production — the gateway serving traffic today** (FastAPI on Fly.io). Point every client here. |
+| `https://api.mukoko.com` | A **separate Mukoko gateway still being built.** It serves nothing usable yet and has no DNS record, so a request to it fails to connect. |
+
+<Aside type="caution">
+  **`api.mukoko.com` is not a legacy alias.** It has never served traffic and
+  does not redirect anywhere — it is a future gateway that has not shipped, not
+  a deprecated predecessor of `api.nyuchi.com`. Describing it as "legacy" tells
+  a reader the opposite of what is true (that it used to work, rather than that
+  it does not work yet), so please don't reword it back. The name is documented
+  here only because it appears in the gateway's trusted-host allowlist — see
+  [Security and rate limits](/api/security/) — and a reader who has heard it
+  needs somewhere to find out what it actually is.
+</Aside>
 
 <Aside type="note">
   The legacy `/api/*` prefix no longer resolves. If you are upgrading from an earlier client, repoint every request from `/api/...` to `/v1/...`.

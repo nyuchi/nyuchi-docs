@@ -122,9 +122,11 @@ be unnecessary.
 
 The OIDC identity is a **WorkOS Connect OAuth Application** (first-party,
 confidential — not Public, since agentgateway exchanges the code
-server-side), created in the "Nyuchi Identity" WorkOS project's Production
-environment — the same pattern `mzizi-mcp` and `bushtrade-mcp` use for
-gating internal services against the same identity pool.
+server-side), created in the **Production** environment of the WorkOS project
+**`Mukoko Account`** — the account's only project, whose other environment is
+the `Staging` sandbox. (There is no "Nyuchi Identity" project; that name never
+existed in this WorkOS account.) Same pattern `mzizi-mcp` and `bushtrade-mcp`
+use for gating internal services against the same identity pool.
 
 **Four secrets, set with `flyctl secrets set`, not written to `config.yaml`
 or committed to git:**
