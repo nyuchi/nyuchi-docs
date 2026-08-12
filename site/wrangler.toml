@@ -35,7 +35,16 @@ enabled = true
 # https://docs.nyuchi.com/oauth/callback is registered on that app.
 [vars]
 WORKOS_CLIENT_ID = "client_01KVTX0V2K1VM3PSC0DJ9VZWTV"
-WORKOS_ISSUER = "https://identity.nyuchi.com"
+# accounts.mukoko.com is the WorkOS **AuthKit issuer** — the OAuth 2.1
+# authorization server serving /.well-known/openid-configuration,
+# /oauth2/authorize, /oauth2/token and /oauth2/jwks (what gate.ts calls).
+# It is NOT auth.mukoko.com (the WorkOS *auth API* / JWKS-fetch host, which
+# serves no authorization-server metadata), and neither api.nyuchi.com (the
+# Nyuchi API gateway) nor api.mukoko.com (a separate gateway, still being
+# built) is WorkOS at all. The pre-Aug-2026 value identity.nyuchi.com has no
+# DNS record any more — do not restore it; a dead issuer makes every
+# `visibility: internal` page unsignable-into.
+WORKOS_ISSUER = "https://accounts.mukoko.com"
 
 # Secret (wrangler secret put INTERNAL_FETCH_KEY): shared with
 # nyuchi-docs-mcp-worker so it can read internal pages on behalf of a

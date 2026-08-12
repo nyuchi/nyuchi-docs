@@ -131,7 +131,7 @@ or committed to git:**
 
 | Var | Value |
 | --- | --- |
-| `WORKOS_ISSUER` | The Connect OAuth Application's issuer, e.g. `https://identity.nyuchi.com` |
+| `WORKOS_ISSUER` | The **AuthKit issuer** of the WorkOS environment the Connect app lives in — `https://accounts.mukoko.com` for Production. Not `auth.mukoko.com` (the WorkOS auth API serves no authorization-server metadata), and not `api.nyuchi.com`/`api.mukoko.com` (gateways, not WorkOS). Confirm against that environment's own `/.well-known/openid-configuration`. |
 | `WORKOS_CLIENT_ID` | Its Client ID |
 | `WORKOS_CLIENT_SECRET` | Its Client Secret |
 | `OIDC_COOKIE_SECRET` | 64 hex chars (`openssl rand -hex 32`) — a 32-byte AES-256-GCM key |
