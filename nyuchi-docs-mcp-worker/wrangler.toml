@@ -15,12 +15,16 @@ routes = [
 [vars]
 TOP_K = "5"
 ALLOWED_ORIGINS = "https://docs.nyuchi.com,https://docs.bundu.org"
-# The "Nyuchi Docs" WorkOS Connect OAuth Application's issuer — used only
-# to verify a caller's own bearer token (src/auth.ts), never to originate
-# a login flow itself. Not a secret: an OIDC issuer URL is public by
-# design (it's how discovery/JWKS work), but keep it in sync with the
-# same value the site worker uses.
-WORKOS_ISSUER = "https://identity.nyuchi.com"
+# The WorkOS **AuthKit issuer** — the OAuth 2.1 authorization server whose
+# /.well-known/openid-configuration + /oauth2/jwks verify a caller's own
+# bearer token (src/auth.ts); this worker never originates a login flow.
+# It is NOT auth.mukoko.com (the WorkOS *auth API* host, which serves no
+# authorization-server metadata), and neither api.nyuchi.com nor
+# api.mukoko.com is WorkOS at all. Not a secret — an OIDC issuer URL is
+# public by design — but keep it in sync with the same value the site
+# worker uses. The pre-Aug-2026 value identity.nyuchi.com has no DNS
+# record any more; do not restore it.
+WORKOS_ISSUER = "https://accounts.mukoko.com"
 
 # Same AI Search instance the Ask-AI tab uses — read tools ride the
 # existing nyuchi-docs corpus; this worker adds no ingestion of its own.

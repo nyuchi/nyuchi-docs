@@ -31,7 +31,8 @@ from npm and points at the `nyuchi-docs-mcp` worker.
 - **`mukoko-weather/`** — Mukoko Weather user guide and stations.
 - **`integrations/`** — connectors, webhooks, the docs MCP server, and
   the Mukoko Events MCP server.
-- **`identity/`** — WorkOS, `identity.nyuchi.com`, SSO, JWTs.
+- **`identity/`** — WorkOS, `accounts.mukoko.com` (the AuthKit issuer), SSO,
+  JWTs.
 - **`console/`** — the Nyuchi Console at `platform.nyuchi.com`.
 - **`tools/`** — the cross-repo tools directory: every skill, CLI, and MCP
   server across the Nyuchi and Bundu repos.
