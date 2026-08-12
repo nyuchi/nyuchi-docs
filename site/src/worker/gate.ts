@@ -19,6 +19,7 @@
 
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
 import { INTERNAL_PATHS } from './internal-paths.generated.js';
+import { securityTxtResponse } from './security-txt.js';
 
 export interface Env {
   ASSETS: Fetcher;
@@ -40,6 +41,7 @@ export interface Env {
 const SESSION_COOKIE = 'docs_session';
 const OAUTH_STATE_COOKIE = 'docs_oauth_state';
 const CALLBACK_PATH = '/oauth/callback';
+const SECURITY_TXT_PATH = '/.well-known/security.txt';
 
 function isInternalPath(pathname: string): boolean {
   const normalised = pathname.endsWith('/') ? pathname : `${pathname}/`;
@@ -172,6 +174,13 @@ async function handleCallback(env: Env, req: Request, url: URL): Promise<Respons
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
+
+    // Public and generated per request — see src/worker/security-txt.ts for
+    // why this isn't a file in ./public. Answered before anything else so it
+    // can never be gated or shadowed by an asset.
+    if (url.pathname === SECURITY_TXT_PATH) {
+      return securityTxtResponse();
+    }
 
     if (url.pathname === CALLBACK_PATH) {
       const res = await handleCallback(env, req, url);
