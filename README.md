@@ -88,6 +88,27 @@ no `CLOUDFLARE_API_TOKEN` repo secret.
   from `docs.nyuchi.com/mcp*`. Needs its own Workers Builds trigger (root
   directory `nyuchi-docs-mcp-worker/`).
 
+## Well-known and machine-readable endpoints
+
+`docs.nyuchi.com` serves these outside the docs tree. Most are static files in
+`site/public/`; `security.txt` is generated per request by the site worker.
+
+| Path                                | Served from                      | What it is                                                                 |
+| ----------------------------------- | -------------------------------- | -------------------------------------------------------------------------- |
+| `/robots.txt`                       | `site/public/robots.txt`         | Crawl policy + sitemap pointer. Everything here is meant to be indexed.    |
+| `/llms.txt`                         | `site/public/llms.txt`           | Machine-readable site index for LLMs.                                      |
+| `/AUTH.md`                          | `site/public/AUTH.md`            | Agent-facing WorkOS auth reference, synced from `nyuchi/api-gateway`.       |
+| `/.well-known/mcp/server-card.json` | `site/public/.well-known/mcp/`   | MCP server card for the `nyuchi-docs-mcp` worker at `/mcp`.                |
+| `/.well-known/security.txt`         | `site/src/worker/security-txt.ts` | RFC 9116 disclosure contact — **generated per request**, not a static file. |
+
+`security.txt` is dynamic because RFC 9116 makes `Expires` mandatory and caps
+it under one year, so a checked-in file silently becomes non-compliant as it
+ages. `site/wrangler.toml` sets `run_worker_first = true`, so every request
+already passes through `site/src/worker/gate.ts`; it answers this path before
+the gate check and before the asset router, deriving `Expires` from the
+request time (180 days out). Same approach as `nyuchi/nhimbe` and
+`nyuchi/kweli`.
+
 ## Why pnpm workspace
 
 The search package (`nyuchi-docs-search`) is consumed by **both**
