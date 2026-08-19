@@ -13,17 +13,17 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.41.6",
+    "@astrojs/starlight": "^0.41.7",
     "@astrojs/svelte": "^9.0.1",
     "@bundu/ui": "^0.1.1",
-    "astro": "^7.1.4",
-    "jose": "^6.2.7",
+    "astro": "^7.2.2",
+    "jose": "^6.2.9",
     "sharp": "^0.34.5",
-    "svelte": "^5.56.8",
+    "svelte": "^5.56.9",
     "@nyuchi/nyuchi-docs-search": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260801.1",
-    "wrangler": "^4.118.0"
+    "@cloudflare/workers-types": "^5.20260816.1",
+    "wrangler": "^4.123.0"
   }
 }
