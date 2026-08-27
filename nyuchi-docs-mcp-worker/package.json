@@ -10,7 +10,8 @@
     "deploy": "vp build && wrangler deploy -c dist/nyuchi_docs_mcp/wrangler.json",
     "test": "vp test",
     "lint": "vp lint",
-    "fmt": "vp fmt"
+    "fmt": "vp fmt",
+    "check": "vp check --no-fmt"
   },
   "dependencies": {
     "jose": "^6.2.10"
