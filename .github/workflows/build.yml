@@ -95,5 +95,9 @@ jobs:
       # `site` cannot build until nyuchi-docs-search is packaged, which its own
       # build:deps handles — hence the recursive build rather than a bare
       # `pnpm --filter site build`.
+      # `vp check` — oxlint + type checking in one pass across every package.
+      # It runs BEFORE the build so a type error fails in seconds rather than
+      # after Astro has rendered the whole site.
+      - run: pnpm check
       - run: pnpm -r build
       - run: pnpm -r --if-present run test
