@@ -5,16 +5,20 @@
   "type": "module",
   "description": "Cloudflare Worker that proxies the docs Ask-AI tab to Cloudflare AI Search instances (web-crawler corpora) and emits the SSE wire shape the nyuchi-docs-search client consumes.",
   "scripts": {
-    "build": "tsc --noEmit",
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "test": "vitest run"
+    "build": "tsc --noEmit && vp build",
+    "dev": "vp dev",
+    "deploy": "vp build && wrangler deploy -c dist/shamwari_docs_ai/wrangler.json",
+    "test": "vp test",
+    "lint": "vp lint",
+    "fmt": "vp fmt"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.54.0",
     "@cloudflare/workers-types": "^5.20260823.1",
     "typescript": "^7.0.2",
+    "vite": "^7.3.6",
+    "vite-plus": "^0.3.0",
     "vitest": "^4.1.11",
-    "wrangler": "^4.125.0"
+    "wrangler": "^4.126.0"
   }
 }
