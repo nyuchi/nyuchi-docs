@@ -1,7 +1,7 @@
 {
   "name": "@nyuchi/nyuchi-docs-mcp",
   "version": "0.1.0",
-  "description": "MCP server for the Nyuchi docs (docs.nyuchi.com) — search, read, ask, send feedback and raise issues. Stdio bridge to the hosted Streamable HTTP endpoint at docs.nyuchi.com/mcp.",
+  "description": "MCP server for the Nyuchi docs (docs.nyuchi.com) \u2014 search, read, ask, send feedback and raise issues. Stdio bridge to the hosted Streamable HTTP endpoint at docs.nyuchi.com/mcp.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -16,7 +16,10 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "vitest run"
+    "test": "vp test",
+    "check": "vp check --no-fmt",
+    "lint": "vp lint",
+    "fmt": "vp fmt"
   },
   "devDependencies": {
     "vitest": "^4.1.11"

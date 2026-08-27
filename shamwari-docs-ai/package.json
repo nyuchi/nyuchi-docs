@@ -10,7 +10,8 @@
     "deploy": "vp build && wrangler deploy -c dist/shamwari_docs_ai/wrangler.json",
     "test": "vp test",
     "lint": "vp lint",
-    "fmt": "vp fmt"
+    "fmt": "vp fmt",
+    "check": "vp check --no-fmt"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.54.0",

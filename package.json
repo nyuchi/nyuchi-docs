@@ -9,13 +9,16 @@
     "build:all": "pnpm -r build",
     "test": "pnpm -r test",
     "skills:validate": "node scripts/validate-skills.mjs",
-    "lint": "pnpm -r lint",
+    "lint": "pnpm -r --if-present run lint",
     "deploy:worker": "pnpm --filter shamwari-docs-ai deploy",
     "ingest": "pnpm --filter shamwari-docs-ai ingest",
-    "deploy:mcp": "pnpm --filter nyuchi-docs-mcp-worker deploy"
+    "deploy:mcp": "pnpm --filter nyuchi-docs-mcp-worker deploy",
+    "check": "pnpm -r --if-present run check",
+    "fmt": "pnpm -r --if-present run fmt"
   },
   "devDependencies": {
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.0",
+    "vite-plus": "^0.3.0"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {
