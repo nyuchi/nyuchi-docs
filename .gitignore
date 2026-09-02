@@ -28,8 +28,11 @@ pnpm-debug.log*
 #
 # Exception: the SessionStart hook and its settings are tracked, so
 # Claude Code on the web can install dependencies without a manual step.
+# .claude/* (not .claude/): a trailing-slash directory exclusion stops
+# git from ever descending into it, silently defeating the negations
+# below.
 CLAUDE.md
-.claude/
+.claude/*
 !.claude/settings.json
 !.claude/hooks/
 !.claude/hooks/*
