@@ -14,8 +14,20 @@
 import { defineConfig } from "vite-plus";
 import { cloudflare } from "@cloudflare/vite-plugin";
 
+// @ts-expect-error TS2321: comparing this config against vite-plus's UserConfig
+// exceeds TS's structural-comparison depth. Root cause: cloudflare() returns
+// Plugin[] typed against the raw `vite` package, while vite-plus vendors its
+// own independently-declared (structurally near-identical, nominally distinct)
+// Plugin type via @voidzero-dev/vite-plus-core — comparing two large, deeply
+// generic hook interfaces from different packages is exactly what exceeds
+// TS's depth limit. Confirmed harmless at runtime: vite-plus's plugin
+// pipeline accepts real vite.Plugin objects regardless of which package
+// declared the type. Revisit if vite-plus's vendored core types converge with
+// vite 8's Plugin shape.
 export default defineConfig({
-  plugins: [cloudflare()],
+  // Spread, not nest: cloudflare() already returns Plugin[]; nesting it as
+  // `[cloudflare()]` would produce Plugin[][] on top of the issue above.
+  plugins: [...cloudflare()],
   // Type checking is OPT-IN in Vite+. Without these two lines `vp check` runs
   // oxlint only and reports "pass" on `const x: number = "nope"` — verified
   // against tsc, which flags TS2322 on that exact line. Adopting the unified
