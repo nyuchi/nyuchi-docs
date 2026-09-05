@@ -17,7 +17,7 @@
     "@cloudflare/vite-plugin": "^1.54.2",
     "@cloudflare/workers-types": "^5.20260830.1",
     "typescript": "^7.0.2",
-    "vite": "^7.3.6",
+    "vite": "^8.2.2",
     "vite-plus": "^0.3.0",
     "vitest": "^4.1.11",
     "wrangler": "^4.127.1"
