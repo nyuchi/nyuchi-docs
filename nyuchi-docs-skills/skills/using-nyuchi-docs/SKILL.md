@@ -43,13 +43,13 @@ npx @nyuchi/nyuchi-docs-mcp
 
 ### The five tools
 
-| Tool | Use it for |
-| --- | --- |
-| `search_docs` | Keyword lookup. Start here when you know roughly what the page is called. |
-| `ask_docs` | A natural-language question answered over the corpus, with citations. Use when you don't know which page holds the answer. |
-| `read_page` | Pull one page in full, once search or ask has told you which one. |
-| `submit_feedback` | Report a page that is wrong, confusing, or incomplete. |
-| `raise_issue` | File a real issue when something is broken enough to need tracking. |
+| Tool              | Use it for                                                                                                                 |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `search_docs`     | Keyword lookup. Start here when you know roughly what the page is called.                                                  |
+| `ask_docs`        | A natural-language question answered over the corpus, with citations. Use when you don't know which page holds the answer. |
+| `read_page`       | Pull one page in full, once search or ask has told you which one.                                                          |
+| `submit_feedback` | Report a page that is wrong, confusing, or incomplete.                                                                     |
+| `raise_issue`     | File a real issue when something is broken enough to need tracking.                                                        |
 
 **The pattern that works:** `search_docs` or `ask_docs` to locate, then `read_page` to get the
 whole thing before you rely on it. Answering from a search snippet is how you end up quoting a

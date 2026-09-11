@@ -31,12 +31,12 @@ Some OSM records carry names that are not names — `"."`, `"8318"`, stray punct
 
 The taxonomy lives in `places.categories` and maps each `categorySlug` to one or more schema.org `@type` values via `schemaOrgType`. Examples:
 
-| `categorySlug` | schema.org `@type`(s) |
-|----------------|------------------------|
-| `restaurants` | `Restaurant`, `FoodEstablishment` |
-| `national-parks` | `Park`, `TouristAttraction` |
-| `tech-companies` | `Organization` |
-| `education` | `EducationalOrganization` |
-| `landmarks` | `LandmarksOrHistoricalBuildings` |
+| `categorySlug`   | schema.org `@type`(s)             |
+| ---------------- | --------------------------------- |
+| `restaurants`    | `Restaurant`, `FoodEstablishment` |
+| `national-parks` | `Park`, `TouristAttraction`       |
+| `tech-companies` | `Organization`                    |
+| `education`      | `EducationalOrganization`         |
+| `landmarks`      | `LandmarksOrHistoricalBuildings`  |
 
 Places reference the taxonomy via `primaryCategoryId` and `secondaryCategoryIds` — categories are never duplicated onto place documents.

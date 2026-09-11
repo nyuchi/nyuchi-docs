@@ -13,14 +13,14 @@ Use these endpoints when building learner-facing experiences or analytics tools 
 
 ## Endpoints
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|---------|
-| `GET` | `/v1/lingo/languages` | Optional | List supported languages. |
-| `GET` | `/v1/lingo/phrases` | Optional | List phrases. Supports `language`, `limit`, `offset`. |
-| `GET` | `/v1/lingo/phrases/{phrase_id}` | Optional | Fetch a phrase with its translations. |
-| `GET` | `/v1/lingo/me/progress` | Required | Return phrase progress for the caller. |
-| `GET` | `/v1/lingo/me/xp` | Required | Return XP and level for the caller. |
-| `POST` | `/v1/lingo/me/study-sessions` | Required | Log a study session for the caller. |
+| Method | Path                            | Auth     | Purpose                                               |
+| ------ | ------------------------------- | -------- | ----------------------------------------------------- |
+| `GET`  | `/v1/lingo/languages`           | Optional | List supported languages.                             |
+| `GET`  | `/v1/lingo/phrases`             | Optional | List phrases. Supports `language`, `limit`, `offset`. |
+| `GET`  | `/v1/lingo/phrases/{phrase_id}` | Optional | Fetch a phrase with its translations.                 |
+| `GET`  | `/v1/lingo/me/progress`         | Required | Return phrase progress for the caller.                |
+| `GET`  | `/v1/lingo/me/xp`               | Required | Return XP and level for the caller.                   |
+| `POST` | `/v1/lingo/me/study-sessions`   | Required | Log a study session for the caller.                   |
 
 ## Browse languages
 

@@ -10,8 +10,8 @@ npx skills add @nyuchi/nyuchi-docs-skills
 
 One skill, deliberately.
 
-| Skill | Covers |
-| --- | --- |
+| Skill               | Covers                                                                                                                                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `using-nyuchi-docs` | Searching, asking, and reading the docs; the MCP endpoint and its five tools; `llms.txt`; in-page `⌘K` search and Ask AI; how to tell an authoritative page from a stub; and how to report a bad page. |
 
 That is the whole public surface, and the split is intentional: **consuming** the docs is

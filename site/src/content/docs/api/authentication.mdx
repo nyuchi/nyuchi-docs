@@ -29,11 +29,9 @@ WorkOS AuthKit hosts the sign-in UI, handles passwordless email, social logins, 
    redirect—this is a public, multi-tenant endpoint, so it never redirects
    a freshly minted token somewhere unverified.
 
-
 2. **WorkOS posts back to the backend**
 
    AuthKit redirects to `WORKOS_REDIRECT_URI` with a short-lived `code`. The backend exchanges it for WorkOS user details, upserts the person record keyed on `workos_user_id` (falling back to email for pre-WorkOS accounts), and mints a platform JWT.
-
 
 3. **The backend redirects the browser with the token in the fragment**
 
@@ -51,11 +49,9 @@ WorkOS AuthKit hosts the sign-in UI, handles passwordless email, social logins, 
    land in browser history. That opt-in exists only for scripted,
    server-to-server code-exchange flows.
 
-
 4. **Your client consumes the fragment**
 
    Parse `window.location.hash`, store the token, and clean the fragment from the URL so a refresh does not re-process it. The console exposes this as `consumeWorkOSCallback()` on the auth context.
-
 
 ### Third-party apps: register your redirect origin
 
@@ -74,18 +70,18 @@ Then pass that key's `client_id` alongside `return_to`:
 GET /v1/auth/workos/login?return_to=https://your-app.example/auth/callback&client_id=nyk_...
 ```
 
-The gateway checks `return_to`'s origin against *that key's* registered `redirect_uris`, not a global list—so onboarding a new app never requires a gateway config change. Omitting `client_id` only works for origins on the gateway's first-party allowlist (the Nyuchi console itself); every other app must pass it.
+The gateway checks `return_to`'s origin against _that key's_ registered `redirect_uris`, not a global list—so onboarding a new app never requires a gateway config change. Omitting `client_id` only works for origins on the gateway's first-party allowlist (the Nyuchi console itself); every other app must pass it.
 
 ### Configure
 
 Set four environment variables on the backend. Until all four are populated, `/v1/auth/workos/*` returns `503 Service Unavailable`, so you can deploy the code path before turning the feature on.
 
-| Variable | Purpose |
-|----------|---------|
-| `WORKOS_API_KEY` | Server-side secret from the WorkOS dashboard. |
-| `WORKOS_CLIENT_ID` | Identifies the AuthKit application. |
-| `WORKOS_REDIRECT_URI` | Where AuthKit returns the user. Must point at `/v1/auth/workos/callback`. |
-| `WORKOS_COOKIE_PASSWORD` | 32+ character secret used to seal session cookies. |
+| Variable                 | Purpose                                                                   |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `WORKOS_API_KEY`         | Server-side secret from the WorkOS dashboard.                             |
+| `WORKOS_CLIENT_ID`       | Identifies the AuthKit application.                                       |
+| `WORKOS_REDIRECT_URI`    | Where AuthKit returns the user. Must point at `/v1/auth/workos/callback`. |
+| `WORKOS_COOKIE_PASSWORD` | 32+ character secret used to seal session cookies.                        |
 
 ### Sign out
 

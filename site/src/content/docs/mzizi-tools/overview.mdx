@@ -12,25 +12,25 @@ operated by Nyuchi as part of the open Mzizi project, and consumed by every
 Nyuchi codebase. It all lives in one monorepo,
 [`nyuchi/mzizi-tools`](https://github.com/nyuchi/mzizi-tools).
 
-This section documents *how Nyuchi uses them*. Upstream product reference lives
+This section documents _how Nyuchi uses them_. Upstream product reference lives
 in [bundu-docs](https://docs.bundu.org).
 
-| Also in this section | Covers |
-| --- | --- |
-| [The DNA double helix](/mzizi-tools/dna-helix/) | The architecture model Mzizi actually serves — nodes, strands, rungs |
-| [Registry health](/mzizi-tools/registry-health/) | Which of the 64 registry tools work, which serve retired data |
-| [A2A](/mzizi-tools/a2a/) | How long-running runs will be delegated to fundi. Design, not shipped |
+| Also in this section                             | Covers                                                                |
+| ------------------------------------------------ | --------------------------------------------------------------------- |
+| [The DNA double helix](/mzizi-tools/dna-helix/)  | The architecture model Mzizi actually serves — nodes, strands, rungs  |
+| [Registry health](/mzizi-tools/registry-health/) | Which of the 64 registry tools work, which serve retired data         |
+| [A2A](/mzizi-tools/a2a/)                         | How long-running runs will be delegated to fundi. Design, not shipped |
 
 ## The packages
 
-| Package | Version | Ships as |
-| --- | --- | --- |
-| [`@nyuchi/mzizi-mcp`](https://www.npmjs.com/package/@nyuchi/mzizi-mcp) | `0.5.0-beta.6` | Cloudflare Worker at `mcp.mzizi.dev` + an npm stdio bin |
-| [`@nyuchi/mzizi-cli`](https://www.npmjs.com/package/@nyuchi/mzizi-cli) | `0.4.0-beta.1` (last stable `0.3.0`) | npm — SDK + the `fundi` bin |
-| [`@nyuchi/mzizi-skills`](https://www.npmjs.com/package/@nyuchi/mzizi-skills) | `0.5.0` | npm — 9 skills, data only |
-| `@nyuchi/fundi-tester` | `0.2.0` | Cloudflare Worker only. `private: true` — **never published to npm** |
-| `@nyuchi/bushtrade-mcp` | `0.2.0` | Cloudflare Worker + stdio bin. Not on npm yet; ships manually |
-| `@nyuchi/mzizi-console-app` | `0.2.0-beta.1` | Svelte mini-app for the Console. Not on npm yet; ships manually |
+| Package                                                                      | Version                              | Ships as                                                             |
+| ---------------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------- |
+| [`@nyuchi/mzizi-mcp`](https://www.npmjs.com/package/@nyuchi/mzizi-mcp)       | `0.5.0-beta.6`                       | Cloudflare Worker at `mcp.mzizi.dev` + an npm stdio bin              |
+| [`@nyuchi/mzizi-cli`](https://www.npmjs.com/package/@nyuchi/mzizi-cli)       | `0.4.0-beta.1` (last stable `0.3.0`) | npm — SDK + the `fundi` bin                                          |
+| [`@nyuchi/mzizi-skills`](https://www.npmjs.com/package/@nyuchi/mzizi-skills) | `0.5.0`                              | npm — 9 skills, data only                                            |
+| `@nyuchi/fundi-tester`                                                       | `0.2.0`                              | Cloudflare Worker only. `private: true` — **never published to npm** |
+| `@nyuchi/bushtrade-mcp`                                                      | `0.2.0`                              | Cloudflare Worker + stdio bin. Not on npm yet; ships manually        |
+| `@nyuchi/mzizi-console-app`                                                  | `0.2.0-beta.1`                       | Svelte mini-app for the Console. Not on npm yet; ships manually      |
 
 Versions read from the npm registry and the monorepo on 2026-07-31. Per-package
 semver: every commit touching a tool is a patch, every merged PR lands a minor,
@@ -42,10 +42,10 @@ is why the two live tools currently report betas.
 Two live MCP surfaces read the same Mzizi document store, and the difference
 matters:
 
-| Endpoint | What it is | Auth |
-| --- | --- | --- |
+| Endpoint                    | What it is                                                                                                      | Auth                                    |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
 | `https://mcp.mzizi.dev/mcp` | The standalone `mzizi-mcp` Cloudflare Worker. **64 tools**, built at startup from the `mcp_tool_registry` table | WorkOS Connect OAuth PKCE — free signup |
-| `https://mzizi.dev/mcp` | The portal's canonical document-route MCP — components, collections, database status | none (anon read) |
+| `https://mzizi.dev/mcp`     | The portal's canonical document-route MCP — components, collections, database status                            | none (anon read)                        |
 
 The worker is **registry-driven**: it reads the tool catalogue from the database
 at startup and dispatches each tool by its `kind` — a SQL function, an edge
@@ -91,23 +91,23 @@ pnpm add -D @nyuchi/mzizi-cli
 
 Three verbs, plus session commands:
 
-| Command | Needs | Does |
-| --- | --- | --- |
-| `fundi explore` | nothing — offline | Reads a small set of disk markers (`package.json`, `tsconfig.json`, `app/globals.css`, `tailwind.config.*`, `components.json`) and prints a project snapshot. No model call. |
-| `fundi plan <goal...>` | `ANTHROPIC_API_KEY` + sign-in | Plans the minimal Mzizi-aligned edits. **Read-only** — prints the steps as a dry run and writes nothing. |
-| `fundi chat <message...>` | `ANTHROPIC_API_KEY` + sign-in | One-shot chat scoped to Mzizi doctrine. |
-| `fundi login [--token <jwt>]` | — | Saves a WorkOS access token for the gated `mzizi-mcp`. |
-| `fundi logout` / `fundi whoami` | — | Clears, or reports, the saved identity. |
+| Command                         | Needs                         | Does                                                                                                                                                                         |
+| ------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fundi explore`                 | nothing — offline             | Reads a small set of disk markers (`package.json`, `tsconfig.json`, `app/globals.css`, `tailwind.config.*`, `components.json`) and prints a project snapshot. No model call. |
+| `fundi plan <goal...>`          | `ANTHROPIC_API_KEY` + sign-in | Plans the minimal Mzizi-aligned edits. **Read-only** — prints the steps as a dry run and writes nothing.                                                                     |
+| `fundi chat <message...>`       | `ANTHROPIC_API_KEY` + sign-in | One-shot chat scoped to Mzizi doctrine.                                                                                                                                      |
+| `fundi login [--token <jwt>]`   | —                             | Saves a WorkOS access token for the gated `mzizi-mcp`.                                                                                                                       |
+| `fundi logout` / `fundi whoami` | —                             | Clears, or reports, the saved identity.                                                                                                                                      |
 
 Environment the CLI reads (the SDK itself is deliberately env-agnostic — wiring
 env into options is the caller's job):
 
-| Variable | Default |
-| --- | --- |
-| `ANTHROPIC_API_KEY` | required for `plan` and `chat` |
-| `MZIZI_MCP_URL` | `https://mcp.mzizi.dev/mcp` |
-| `MZIZI_MODEL` | `claude-sonnet-4-6` |
-| `WORKOS_ACCESS_TOKEN` | alternative to `fundi login` |
+| Variable              | Default                        |
+| --------------------- | ------------------------------ |
+| `ANTHROPIC_API_KEY`   | required for `plan` and `chat` |
+| `MZIZI_MCP_URL`       | `https://mcp.mzizi.dev/mcp`    |
+| `MZIZI_MODEL`         | `claude-sonnet-4-6`            |
+| `WORKOS_ACCESS_TOKEN` | alternative to `fundi login`   |
 
 As a library:
 
@@ -155,17 +155,17 @@ agent, the registry MCP, and the `/mzizi:*` commands in one step:
 
 **Nine skills** ship in `0.5.0`:
 
-| Skill | Reach for it when |
+| Skill                    | Reach for it when                                             |
 | ------------------------ | ------------------------------------------------------------- |
-| `nyuchi-design` | Generating any branded interface — minerals, radius, type |
-| `bundu-design` | Cross-brand materials and brand-voice decisions |
-| `mukoko-design` | Producing or exporting mukoko visual identity |
-| `simplify` | Before adding a component or style, and during any refactor |
-| `discoverability` | A shared link shows no preview, or you're adding a route/site |
-| `scaffold-component` | Authoring a new component into the Mzizi registry |
-| `ecosystem-app-setup` | Bootstrapping a new ecosystem app against the registry |
-| `cloudflare-worker-rust` | Building a Worker in Rust with `workers-rs` |
-| `mcp-server-cloudflare` | Adding or changing an MCP Worker |
+| `nyuchi-design`          | Generating any branded interface — minerals, radius, type     |
+| `bundu-design`           | Cross-brand materials and brand-voice decisions               |
+| `mukoko-design`          | Producing or exporting mukoko visual identity                 |
+| `simplify`               | Before adding a component or style, and during any refactor   |
+| `discoverability`        | A shared link shows no preview, or you're adding a route/site |
+| `scaffold-component`     | Authoring a new component into the Mzizi registry             |
+| `ecosystem-app-setup`    | Bootstrapping a new ecosystem app against the registry        |
+| `cloudflare-worker-rust` | Building a Worker in Rust with `workers-rs`                   |
+| `mcp-server-cloudflare`  | Adding or changing an MCP Worker                              |
 
 The last four were migrated out of the database and out of the `nyuchi/mzizi`
 repo during the `0.5.0` cycle, so git is now the single home for every Mzizi
@@ -210,10 +210,10 @@ outranks the policies.
 
 Two headers do two different jobs, and conflating them is the classic failure:
 
-| Header | Carries | Determines |
-| --- | --- | --- |
-| `apikey` | the publishable (anon) key | which **project** |
-| `Authorization` | `Bearer <M2M JWT>` | which **role** RLS evaluates |
+| Header          | Carries                    | Determines                   |
+| --------------- | -------------------------- | ---------------------------- |
+| `apikey`        | the publishable (anon) key | which **project**            |
+| `Authorization` | `Bearer <M2M JWT>`         | which **role** RLS evaluates |
 
 Sending the anon key as both can only ever be the anon role, which is read-only
 here. **A `401` or `403` on write is RLS declining — fix the policy, do not reach
@@ -256,10 +256,10 @@ between a design that scales and one that quietly leaks a secret into a CLI.
 
 **Authentication — how the caller proves identity:**
 
-| Surface kind | Mechanism | Examples |
-| --- | --- | --- |
-| Public / customer | **WorkOS Connect OAuth PKCE** — public client, no secret. Always a Worker; each public MCP has its own Connect app | `mzizi-mcp`, `bushtrade-mcp` |
-| Internal staff / machine | **WorkOS M2M** (client credentials). Only Workers hold the secret | fundi `/admin/*` |
+| Surface kind             | Mechanism                                                                                                          | Examples                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
+| Public / customer        | **WorkOS Connect OAuth PKCE** — public client, no secret. Always a Worker; each public MCP has its own Connect app | `mzizi-mcp`, `bushtrade-mcp` |
+| Internal staff / machine | **WorkOS M2M** (client credentials). Only Workers hold the secret                                                  | fundi `/admin/*`             |
 
 **Entitlement — what the caller may do:**
 
@@ -269,7 +269,7 @@ between a design that scales and one that quietly leaks a secret into a CLI.
   `fundi:security` / `fundi:chaos`). These are token scopes, not per-user tags.
 
 The fundi worker is a **resource server with no interactive login at all**. It
-validates two things on `/admin/*`: an inbound M2M token, *and* a forwarded
+validates two things on `/admin/*`: an inbound M2M token, _and_ a forwarded
 end-user token in `X-Fundi-User-Token` so it only ever acts for a real signed-in
 user. Cron, queue, webhook, and health routes bypass that gate because they are
 not user-triggered.
@@ -320,7 +320,7 @@ Honest gaps rather than a promise:
   validating component back-links, running the registry health check as part of
   a release.
 - How to exercise a skill locally before publishing, beyond `pnpm
-  skills:validate`'s structural checks.
+skills:validate`'s structural checks.
 - Whether Nyuchi-specific skills (ones no external consumer would want) belong in
   the shared bundle or in a per-repo `.claude/skills/`.
 - `@nyuchi/mzizi-console-app` integration from the Console side — it is still

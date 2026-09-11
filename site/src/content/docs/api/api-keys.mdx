@@ -5,7 +5,7 @@ description: Create client ID and secret pairings in the console and use them fo
 
 import { Aside } from '@astrojs/starlight/components';
 
-API access for scripts, services, and integrations is managed through **API keys**—client ID and secret pairings created in the console. A key authenticates your *application* rather than a person, so it works without a signed-in user and never expires with a session.
+API access for scripts, services, and integrations is managed through **API keys**—client ID and secret pairings created in the console. A key authenticates your _application_ rather than a person, so it works without a signed-in user and never expires with a session.
 
 ## Create a key
 
@@ -55,10 +55,10 @@ Then pass your `client_id` alongside `return_to` at `/login`—see [Authenticati
 
 ## Keys vs platform JWTs
 
-| Credential | Identifies | Use it for |
-|------------|-----------|------------|
-| Platform JWT (`Authorization: Bearer …`) | A signed-in person (via WorkOS AuthKit) | Acting on behalf of a user |
-| API key (`X-Client-Id`/`X-Client-Secret`) | Your application | Server-to-server calls, cron jobs, integrations |
+| Credential                                | Identifies                              | Use it for                                      |
+| ----------------------------------------- | --------------------------------------- | ----------------------------------------------- |
+| Platform JWT (`Authorization: Bearer …`)  | A signed-in person (via WorkOS AuthKit) | Acting on behalf of a user                      |
+| API key (`X-Client-Id`/`X-Client-Secret`) | Your application                        | Server-to-server calls, cron jobs, integrations |
 
 ## Next steps
 

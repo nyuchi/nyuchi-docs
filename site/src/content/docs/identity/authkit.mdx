@@ -37,13 +37,13 @@ One production WorkOS environment; each product is its **own AuthKit
 application** with its own client ID. Session continuity comes from the shared
 environment-level hosted session — **not** from sharing client IDs.
 
-| Application | Client | Primary surface |
-|---|---|---|
+| Application                  | Client               | Primary surface       |
+| ---------------------------- | -------------------- | --------------------- |
 | Nyuchi Console (default app) | `client_01KQBBSMQT…` | `platform.nyuchi.com` |
-| Mukoko News | `client_01KV2G41CH…` | `news.mukoko.com` |
-| Mukoko Weather | `client_01KWAQ1EAP…` | `weather.mukoko.com` |
-| Mukoko | `client_01KV2G518H…` | `www.mukoko.com` |
-| Mukoko Events | `client_01KV2G5FE7…` | Nhimbe events API |
+| Mukoko News                  | `client_01KV2G41CH…` | `news.mukoko.com`     |
+| Mukoko Weather               | `client_01KWAQ1EAP…` | `weather.mukoko.com`  |
+| Mukoko                       | `client_01KV2G518H…` | `www.mukoko.com`      |
+| Mukoko Events                | `client_01KV2G5FE7…` | Nhimbe events API     |
 
 <Aside type="danger">
   **Each app must use its own client ID.** Redirect URIs are registered

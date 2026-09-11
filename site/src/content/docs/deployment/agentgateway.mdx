@@ -23,11 +23,11 @@ Live at **`fundi.nyuchi.com`**.
 
 ## Repo layout
 
-| File | Does |
-| --- | --- |
+| File                | Does                                                                                                                                                                                                                                                            |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Dockerfile.vercel` | `FROM cr.agentgateway.dev/agentgateway:v1.4.1`, copies in `config.yaml` with `--chown=65532:65532` (see below), runs `agentgateway -f /config.yaml`. Named `.vercel` for historical reasons — `fly.toml`'s `[build]` block still points at this exact filename. |
-| `config.yaml` | `config.adminAddr: "off"`, the single gateway listener, one `routes` entry per namespaced MCP server, the `ui` OIDC policy |
-| `fly.toml` | One `[[services]]` block, one port (`3000` internal → `80`/`443` external) |
+| `config.yaml`       | `config.adminAddr: "off"`, the single gateway listener, one `routes` entry per namespaced MCP server, the `ui` OIDC policy                                                                                                                                      |
+| `fly.toml`          | One `[[services]]` block, one port (`3000` internal → `80`/`443` external)                                                                                                                                                                                      |
 
 ```docker filename="Dockerfile.vercel"
 FROM cr.agentgateway.dev/agentgateway:v1.4.1
@@ -70,7 +70,7 @@ forwarded externally on `80` (redirects to `443`) and `443`:
     handlers = ["tls", "http"]
 ```
 
-An earlier revision added a *second* `[[services]]` block exposing the
+An earlier revision added a _second_ `[[services]]` block exposing the
 admin UI on its own port, `15000`. It was reverted: verified working over
 Fly's internal WireGuard network, but the TLS handshake on `15000` reset
 from every public-internet path tested. **OIDC is what actually gates the
@@ -107,15 +107,15 @@ ui:
 ```
 
 `config.adminAddr` stays `"off"` — agentgateway's dedicated admin port has
-no built-in auth at all (`adminAddr` only controls *where* it binds, never
-*how* it authenticates).
+no built-in auth at all (`adminAddr` only controls _where_ it binds, never
+_how_ it authenticates).
 
 The `${WORKOS_*}` tokens are **not** placeholders we substitute — agentgateway
 resolves `$VAR`/`${VAR}` natively from its own process environment at
 startup, scanning the whole config file. That's confirmed the hard way: an
 earlier revision tried routing secrets through a hand-rolled `envsubst`
 entrypoint in a custom `debian:bookworm-slim` image, and a stray literal
-`${WORKOS_*}` left in a *comment* made agentgateway try to look up an env
+`${WORKOS_*}` left in a _comment_ made agentgateway try to look up an env
 var literally named `WORKOS_*` and refuse to boot. Once that surfaced
 agentgateway's native substitution, the custom-image detour turned out to
 be unnecessary.
@@ -131,12 +131,12 @@ use for gating internal services against the same identity pool.
 **Four secrets, set with `flyctl secrets set`, not written to `config.yaml`
 or committed to git:**
 
-| Var | Value |
-| --- | --- |
-| `WORKOS_ISSUER` | The **AuthKit issuer** of the WorkOS environment the Connect app lives in — `https://accounts.mukoko.com` for Production. Not `auth.mukoko.com` (the WorkOS auth API serves no authorization-server metadata), and not `api.nyuchi.com`/`api.mukoko.com` (gateways, not WorkOS). Confirm against that environment's own `/.well-known/openid-configuration`. |
-| `WORKOS_CLIENT_ID` | Its Client ID |
-| `WORKOS_CLIENT_SECRET` | Its Client Secret |
-| `OIDC_COOKIE_SECRET` | 64 hex chars (`openssl rand -hex 32`) — a 32-byte AES-256-GCM key |
+| Var                    | Value                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WORKOS_ISSUER`        | The **AuthKit issuer** of the WorkOS environment the Connect app lives in — `https://accounts.mukoko.com` for Production. Not `auth.mukoko.com` (the WorkOS auth API serves no authorization-server metadata), and not `api.nyuchi.com`/`api.mukoko.com` (gateways, not WorkOS). Confirm against that environment's own `/.well-known/openid-configuration`. |
+| `WORKOS_CLIENT_ID`     | Its Client ID                                                                                                                                                                                                                                                                                                                                                |
+| `WORKOS_CLIENT_SECRET` | Its Client Secret                                                                                                                                                                                                                                                                                                                                            |
+| `OIDC_COOKIE_SECRET`   | 64 hex chars (`openssl rand -hex 32`) — a 32-byte AES-256-GCM key                                                                                                                                                                                                                                                                                            |
 
 <Aside type="caution">
   `OIDC_COOKIE_SECRET` is **not** a `config.yaml` field at all — agentgateway
@@ -164,7 +164,7 @@ an explicit route matched first.
 ### Config durability
 
 Fly machines have an ephemeral root filesystem. The `--chown` fix above
-makes the admin UI's live saves to `/config.yaml` *succeed*, but nothing
+makes the admin UI's live saves to `/config.yaml` _succeed_, but nothing
 currently backs that file with a Fly Volume — any edit made through the UI
 is lost on the next `flyctl deploy` or machine restart, both of which
 revert to whatever's baked into the image. Durable UI-driven config editing

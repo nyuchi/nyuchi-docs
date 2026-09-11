@@ -20,16 +20,16 @@ import { Aside } from '@astrojs/starlight/components';
 They are not competing choices, and picking one is not the decision in front of
 you.
 
-| Protocol | Models | Shape |
-| --- | --- | --- |
-| **MCP** | agent → **tools** | synchronous request / response |
-| **A2A** | agent → **agent** | a **task** with a lifecycle |
+| Protocol | Models            | Shape                          |
+| -------- | ----------------- | ------------------------------ |
+| **MCP**  | agent → **tools** | synchronous request / response |
+| **A2A**  | agent → **agent** | a **task** with a lifecycle    |
 
 `mzizi-mcp` is an MCP server: a catalogue of read tools over the Mzizi registry,
 each answering in one round trip. That is exactly the right shape for
 `get_component` — you ask, you get the document, you are done.
 
-It is the wrong shape for *"run a security scan"* or *"inject chaos and report"*.
+It is the wrong shape for _"run a security scan"_ or _"inject chaos and report"_.
 Those are **long-running, stateful, and streaming**: minutes of work, progress
 through states, partial results, and a caller who may want to cancel.
 
@@ -98,13 +98,13 @@ this order: `message/send`, `tasks/get`, `tasks/cancel`, then `message/stream`
 (SSE), then push notifications over the existing queue. `tasks/cancel` is not
 optional — these runs are expensive.
 
-The bridge surfaces tasks as MCP tools, and the shape *is* the design:
+The bridge surfaces tasks as MCP tools, and the shape _is_ the design:
 
-| MCP tool (planned) | A2A call | Returns |
-| --- | --- | --- |
+| MCP tool (planned)  | A2A call       | Returns                           |
+| ------------------- | -------------- | --------------------------------- |
 | `fundi_submit_test` | `message/send` | `taskId` + state, **immediately** |
-| `fundi_task_status` | `tasks/get` | state + artifacts |
-| `fundi_cancel_task` | `tasks/cancel` | final state |
+| `fundi_task_status` | `tasks/get`    | state + artifacts                 |
+| `fundi_cancel_task` | `tasks/cancel` | final state                       |
 
 **`fundi_submit_test` never waits for the run to finish.** It returns a task id
 and the caller polls `fundi_task_status`, which is cheap, cancellable, and
@@ -179,13 +179,13 @@ health](/mzizi-tools/registry-health/).
 
 ## Staged build
 
-| Stage | Scope | Status |
-| --- | --- | --- |
-| 1 | fundi agent card + `POST /a2a` with `message/send` / `tasks/get` / `tasks/cancel` | in flight |
-| 2 | `mzizi-mcp` A2A client + the three bridge tools | not started |
-| 3 | `a11y-audit` wired end to end; retire the synchronous `run_accessibility_audit` | not started |
-| 4 | `security-scan` + `chaos-run`, scoped `fundi:security` / `fundi:chaos` | not started |
-| 5 | `message/stream` (SSE) + push notifications over the existing queue | not started |
+| Stage | Scope                                                                             | Status      |
+| ----- | --------------------------------------------------------------------------------- | ----------- |
+| 1     | fundi agent card + `POST /a2a` with `message/send` / `tasks/get` / `tasks/cancel` | in flight   |
+| 2     | `mzizi-mcp` A2A client + the three bridge tools                                   | not started |
+| 3     | `a11y-audit` wired end to end; retire the synchronous `run_accessibility_audit`   | not started |
+| 4     | `security-scan` + `chaos-run`, scoped `fundi:security` / `fundi:chaos`            | not started |
+| 5     | `message/stream` (SSE) + push notifications over the existing queue               | not started |
 
 Stages 1 and 2 are independently useful: once the card and `tasks/get` exist,
 `mzizi-mcp` can delegate before any new skill is implemented.

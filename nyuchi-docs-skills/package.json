@@ -9,7 +9,11 @@
     "./index.json": "./index.json",
     "./skills/*": "./skills/*"
   },
-  "files": ["index.json", "skills", "README.md"],
+  "files": [
+    "index.json",
+    "skills",
+    "README.md"
+  ],
   "engines": {
     "node": ">=18"
   },
@@ -19,7 +23,14 @@
     "directory": "nyuchi-docs-skills"
   },
   "homepage": "https://docs.nyuchi.com/tools/",
-  "keywords": ["skills", "agent", "claude", "mcp", "documentation", "nyuchi"],
+  "keywords": [
+    "skills",
+    "agent",
+    "claude",
+    "mcp",
+    "documentation",
+    "nyuchi"
+  ],
   "publishConfig": {
     "access": "public"
   }

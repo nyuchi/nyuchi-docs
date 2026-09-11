@@ -13,12 +13,12 @@ Verification is how a venue proves who it is. It covers **all entity types** —
 
 Each tier maps to a mineral color — this is the `nyuchi-verified-badge` contract, and every app in the ecosystem renders the badge the same way.
 
-| Tier | Name | Mineral | How it is earned |
-|------|------|---------|------------------|
-| 1 | Community | Terracotta | Community members vouch for the venue's operator |
-| 2 | Identity (OTP) | Cobalt | The operator verifies contact ownership via OTP |
-| 3 | Government | Gold | Checked against an official government registry |
-| 4 | Licensed | Tanzanite | Holds a licence from the relevant regulator — a **paid** legal review |
+| Tier | Name           | Mineral    | How it is earned                                                      |
+| ---- | -------------- | ---------- | --------------------------------------------------------------------- |
+| 1    | Community      | Terracotta | Community members vouch for the venue's operator                      |
+| 2    | Identity (OTP) | Cobalt     | The operator verifies contact ownership via OTP                       |
+| 3    | Government     | Gold       | Checked against an official government registry                       |
+| 4    | Licensed       | Tanzanite  | Holds a licence from the relevant regulator — a **paid** legal review |
 
 Tiers 1–3 are free. **Tier 4 (Licensed) is a paid service** — a legal
 check of the operator's licence with the relevant regulator, performed
@@ -47,12 +47,12 @@ Approved claims give the claimant a management role on the entity; verification 
 
 Kweli is a full KYC platform — individuals and organizations, not just venue claims. The admin console at `/dashboard/admin/claims` (admin role required) has four tabs:
 
-| Tab | What it shows |
-|-----|---------------|
-| **Queue** | Pending ownership claims — claimant, role, evidence link, review sheet with an optional decision note, approve/reject |
-| **People** | Individual KYC over `identity.persons` — auth-identity and email-verified signals, tier, search + tier filter |
-| **Entities** | Organization KYC over `entity.entities` — legal name, entity type, tier, Ubuntu trust score |
-| **Audit** | The platform-recorded tier transitions from `entity.verifications` |
+| Tab          | What it shows                                                                                                         |
+| ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| **Queue**    | Pending ownership claims — claimant, role, evidence link, review sheet with an optional decision note, approve/reject |
+| **People**   | Individual KYC over `identity.persons` — auth-identity and email-verified signals, tier, search + tier filter         |
+| **Entities** | Organization KYC over `entity.entities` — legal name, entity type, tier, Ubuntu trust score                           |
+| **Audit**    | The platform-recorded tier transitions from `entity.verifications`                                                    |
 
 Claim decisions flow through the platform API (`/v1/admin/claims/:id/decide`) — the console never writes tiers to the graph directly. People/Entities are read-only review surfaces until the platform exposes person- and entity-level decision endpoints.
 
@@ -63,13 +63,13 @@ Signed-in users can vouch for a venue's operator — this is the evidence base f
 - `POST /api/vouches` writes to `engagement.vouches`.
 - Each vouch declares a relationship via `vouchingType`:
 
-| `vouchingType` | Meaning |
-|----------------|---------|
-| `personal_knowledge` | I personally know the operator |
-| `long_term_customer` | I have been a customer over time |
-| `business_partner` | I do business with them |
-| `community_member` | We are part of the same community |
-| `neighbor` | I am located nearby |
+| `vouchingType`             | Meaning                                |
+| -------------------------- | -------------------------------------- |
+| `personal_knowledge`       | I personally know the operator         |
+| `long_term_customer`       | I have been a customer over time       |
+| `business_partner`         | I do business with them                |
+| `community_member`         | We are part of the same community      |
+| `neighbor`                 | I am located nearby                    |
 | `professional_endorsement` | Professional endorsement of their work |
 
 Enough **active** vouches satisfy the `community_attestation` verification method toward tier 1.

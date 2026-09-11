@@ -6,12 +6,12 @@ use the Mzizi tools from a Nyuchi project. Published at
 
 This repo is a **pnpm workspace** with these packages:
 
-| Package                | Path                  | What it does                                                                              |
-| ---------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
-| `site`                 | `site/`               | The Astro + [Starlight](https://starlight.astro.build) docs site itself. Ships as a Cloudflare Worker with Static Assets. |
-| `@nyuchi/nyuchi-docs-search`   | `nyuchi-docs-search/` | Publishable npm package: cmdk-style search modal + Ask-AI tab for Starlight sites.        |
-| `shamwari-docs-ai`     | `shamwari-docs-ai/`   | Cloudflare Worker — the Ask-AI chat proxy (SSE).                                          |
-| `nyuchi-docs-mcp-worker` | `nyuchi-docs-mcp-worker/` | Cloudflare Worker `nyuchi-docs-mcp` — the docs MCP server at docs.nyuchi.com/mcp.   |
+| Package                      | Path                      | What it does                                                                                                              |
+| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `site`                       | `site/`                   | The Astro + [Starlight](https://starlight.astro.build) docs site itself. Ships as a Cloudflare Worker with Static Assets. |
+| `@nyuchi/nyuchi-docs-search` | `nyuchi-docs-search/`     | Publishable npm package: cmdk-style search modal + Ask-AI tab for Starlight sites.                                        |
+| `shamwari-docs-ai`           | `shamwari-docs-ai/`       | Cloudflare Worker — the Ask-AI chat proxy (SSE).                                                                          |
+| `nyuchi-docs-mcp-worker`     | `nyuchi-docs-mcp-worker/` | Cloudflare Worker `nyuchi-docs-mcp` — the docs MCP server at docs.nyuchi.com/mcp.                                         |
 
 ## Companion site
 
@@ -94,12 +94,12 @@ no `CLOUDFLARE_API_TOKEN` repo secret.
 `docs.nyuchi.com` serves these outside the docs tree. Most are static files in
 `site/public/`; `security.txt` is generated per request by the site worker.
 
-| Path                                | Served from                      | What it is                                                                 |
-| ----------------------------------- | -------------------------------- | -------------------------------------------------------------------------- |
-| `/robots.txt`                       | `site/public/robots.txt`         | Crawl policy + sitemap pointer. Everything here is meant to be indexed.    |
-| `/llms.txt`                         | `site/public/llms.txt`           | Machine-readable site index for LLMs.                                      |
-| `/AUTH.md`                          | `site/public/AUTH.md`            | Agent-facing WorkOS auth reference, synced from `nyuchi/api-gateway`.       |
-| `/.well-known/mcp/server-card.json` | `site/public/.well-known/mcp/`   | MCP server card for the `nyuchi-docs-mcp` worker at `/mcp`.                |
+| Path                                | Served from                       | What it is                                                                  |
+| ----------------------------------- | --------------------------------- | --------------------------------------------------------------------------- |
+| `/robots.txt`                       | `site/public/robots.txt`          | Crawl policy + sitemap pointer. Everything here is meant to be indexed.     |
+| `/llms.txt`                         | `site/public/llms.txt`            | Machine-readable site index for LLMs.                                       |
+| `/AUTH.md`                          | `site/public/AUTH.md`             | Agent-facing WorkOS auth reference, synced from `nyuchi/api-gateway`.       |
+| `/.well-known/mcp/server-card.json` | `site/public/.well-known/mcp/`    | MCP server card for the `nyuchi-docs-mcp` worker at `/mcp`.                 |
 | `/.well-known/security.txt`         | `site/src/worker/security-txt.ts` | RFC 9116 disclosure contact — **generated per request**, not a static file. |
 
 `security.txt` is dynamic because RFC 9116 makes `Expires` mandatory and caps

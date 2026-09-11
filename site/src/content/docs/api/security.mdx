@@ -11,12 +11,12 @@ The `/v1` gateway ships with four protection layers that apply to every request,
 
 The gateway only accepts traffic whose `Host` header matches an allowed entry. Unknown hosts get a `400 Invalid host header` before any router runs.
 
-| Allowed by default | Used for |
-|--------------------|----------|
-| `api.nyuchi.com` | Production traffic — the gateway serving requests today |
-| `api.mukoko.com` | Reserved for a separate Mukoko gateway still being built. Allow-listed ahead of that host existing — **not** a legacy or deprecated production host, and no DNS record today, so no request actually arrives carrying this `Host` header yet |
-| `*.fly.dev` | Fly.io preview deployments |
-| `localhost`, `testserver` | Local development and CI |
+| Allowed by default        | Used for                                                                                                                                                                                                                                     |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api.nyuchi.com`          | Production traffic — the gateway serving requests today                                                                                                                                                                                      |
+| `api.mukoko.com`          | Reserved for a separate Mukoko gateway still being built. Allow-listed ahead of that host existing — **not** a legacy or deprecated production host, and no DNS record today, so no request actually arrives carrying this `Host` header yet |
+| `*.fly.dev`               | Fly.io preview deployments                                                                                                                                                                                                                   |
+| `localhost`, `testserver` | Local development and CI                                                                                                                                                                                                                     |
 
 Override the list with the `TRUSTED_HOSTS` environment variable (comma-separated) when you stand up a new edge or staging host.
 
@@ -46,9 +46,9 @@ You do not need to send any of these from your client. Browsers and crawlers wil
 
 Limits are enforced per client IP. When you exceed a limit you get `429 Too Many Requests` with a `Retry-After` header. Back off and retry; do not loop tightly.
 
-| Scope | Limit |
-|-------|-------|
-| Default for any endpoint | 60 requests / minute |
+| Scope                                         | Limit                |
+| --------------------------------------------- | -------------------- |
+| Default for any endpoint                      | 60 requests / minute |
 | `GET /v1/auth/workos/{login,callback,logout}` | 30 requests / minute |
 
 <Aside type="tip">

@@ -11,13 +11,13 @@ The platform guarantees at-least-once delivery for webhook events. If your endpo
 
 Failed deliveries are retried up to 5 times over approximately 24 hours:
 
-| Attempt | Delay after previous failure |
-|---------|------------------------------|
-| 1st retry | 5 minutes |
-| 2nd retry | 30 minutes |
-| 3rd retry | 2 hours |
-| 4th retry | 8 hours |
-| 5th retry | 24 hours |
+| Attempt   | Delay after previous failure |
+| --------- | ---------------------------- |
+| 1st retry | 5 minutes                    |
+| 2nd retry | 30 minutes                   |
+| 3rd retry | 2 hours                      |
+| 4th retry | 8 hours                      |
+| 5th retry | 24 hours                     |
 
 After the 5th retry, the delivery is marked as permanently failed. A `sync.failed` event is triggered if the endpoint has repeated failures across multiple events.
 

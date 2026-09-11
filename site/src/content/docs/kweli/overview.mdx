@@ -19,12 +19,12 @@ _Kweli_ means "truth" in Swahili. The trust score **is** the kweli — it travel
 
 The graph lives in MongoDB. Every collection `_id` is a **UUID string** (not an ObjectId); every document carries `_schemaVersion`, `createdAt`, and `updatedAt`. Field names are camelCase and geo data is GeoJSON (`geo: { type: 'Point', coordinates: [lng, lat] }`) with 2dsphere indexes.
 
-| Collection | Role |
-|------------|------|
-| `places.places` | The **place anchor** — 15k+ documents across 21 countries. Name, slug, `placeType` array, address, `geo`, `hierarchy` (country/province), `ownerEntityId`, translations, media. |
-| `places.placesGeo` | Administrative geography — continent, country, province, city, town, village documents with ISO codes and GeoJSON centroids/boundaries. |
-| `places.categories` | The category taxonomy — 21 categories mapping `categorySlug` → schema.org `@type`(s). |
-| `entity.entities` | The owning **organization** node — every place has an `ownerEntityId` pointing here. |
+| Collection          | Role                                                                                                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `places.places`     | The **place anchor** — 15k+ documents across 21 countries. Name, slug, `placeType` array, address, `geo`, `hierarchy` (country/province), `ownerEntityId`, translations, media. |
+| `places.placesGeo`  | Administrative geography — continent, country, province, city, town, village documents with ISO codes and GeoJSON centroids/boundaries.                                         |
+| `places.categories` | The category taxonomy — 21 categories mapping `categorySlug` → schema.org `@type`(s).                                                                                           |
+| `entity.entities`   | The owning **organization** node — every place has an `ownerEntityId` pointing here.                                                                                            |
 
 Edges are ID fields on documents, not join tables: place → geography via `hierarchy.countryId` / `hierarchy.provinceId`, place → owning org via `ownerEntityId`, place → category via `primaryCategoryId`.
 

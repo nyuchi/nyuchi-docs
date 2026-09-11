@@ -21,12 +21,12 @@ Three `*.mukoko.com` subdomains plus one `nyuchi.com` do four different jobs.
 Mixing them up fails a long way from the cause, so check this table before
 setting any host in config:
 
-| Host | What it is |
-| --- | --- |
+| Host                  | What it is                                                                                                                                                                                                                                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `accounts.mukoko.com` | The WorkOS **AuthKit issuer** — the OAuth 2.1 authorization server agents and browsers discover. Serves its own self-consistent `/.well-known/openid-configuration`, `/oauth2/authorize`, `/oauth2/token`, `/oauth2/jwks` and DCR. This is what a `WORKOS_ISSUER` / `WORKOS_AUTHKIT_DOMAIN` variable means. |
-| `auth.mukoko.com` | The WorkOS **auth API** — what an SDK calls and where an SDK's JWKS fetch goes. **Not** an issuer: it serves no authorization-server metadata. |
-| `api.nyuchi.com` | The **Nyuchi API gateway** (FastAPI on Fly). Nothing to do with WorkOS. |
-| `api.mukoko.com` | A **separate Mukoko gateway still being built** — serves nothing usable yet, and does not resolve today. Also not WorkOS. |
+| `auth.mukoko.com`     | The WorkOS **auth API** — what an SDK calls and where an SDK's JWKS fetch goes. **Not** an issuer: it serves no authorization-server metadata.                                                                                                                                                              |
+| `api.nyuchi.com`      | The **Nyuchi API gateway** (FastAPI on Fly). Nothing to do with WorkOS.                                                                                                                                                                                                                                     |
+| `api.mukoko.com`      | A **separate Mukoko gateway still being built** — serves nothing usable yet, and does not resolve today. Also not WorkOS.                                                                                                                                                                                   |
 
 <Aside type="danger">
   **Point an issuer variable at the auth API and you get metadata that

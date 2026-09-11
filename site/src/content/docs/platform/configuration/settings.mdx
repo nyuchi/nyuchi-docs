@@ -11,12 +11,12 @@ Navigate to **Settings → General** to access these options.
 
 ## General
 
-| Setting | Description |
-|---------|-------------|
-| **Workspace name** | The display name used in the UI, email notifications, and shared links. |
-| **Workspace slug** | The URL-safe identifier used in API calls. Changing this updates all URLs—notify your team before doing so. |
-| **Timezone** | The default timezone for date displays and scheduled jobs. Members can override this in their personal preferences. |
-| **Language** | The default display language for new members. |
+| Setting            | Description                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| **Workspace name** | The display name used in the UI, email notifications, and shared links.                                             |
+| **Workspace slug** | The URL-safe identifier used in API calls. Changing this updates all URLs—notify your team before doing so.         |
+| **Timezone**       | The default timezone for date displays and scheduled jobs. Members can override this in their personal preferences. |
+| **Language**       | The default display language for new members.                                                                       |
 
 ## Security
 
@@ -26,13 +26,14 @@ Navigate to **Settings → General** to access these options.
 
     - **Session timeout** — Idle sessions are signed out after this period. Default is 7 days.
     - **Force re-authentication** — Require password or SSO confirmation before accessing sensitive settings.
+
   </TabItem>
   <TabItem label="IP allowlist">
     Restrict access to specific IP ranges. When enabled, users outside the allowlist cannot authenticate, even with valid credentials.
 
     <Aside type="caution">
       Verify your own IP is included before enabling the allowlist—you can lock yourself out.
-    
+
 </Aside>
   </TabItem>
   <TabItem label="SSO">

@@ -17,13 +17,13 @@ corpus. A server card is published at
 
 ## Tools
 
-| Tool | Kind | What it does |
-| --- | --- | --- |
-| `search_docs` | read | Keyword/semantic search; returns titles, URLs and snippets |
-| `ask_docs` | read | Synthesized answer grounded in the docs, with citations |
-| `read_page` | read | Full readable text of any `docs.nyuchi.com` page |
-| `submit_feedback` | write | Correction / confusing / missing / praise — stored for the docs team |
-| `raise_issue` | write | Actionable problem; files a GitHub issue on `nyuchi/nyuchi-docs` when the `GITHUB_TOKEN` secret is configured, otherwise queued |
+| Tool              | Kind  | What it does                                                                                                                    |
+| ----------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `search_docs`     | read  | Keyword/semantic search; returns titles, URLs and snippets                                                                      |
+| `ask_docs`        | read  | Synthesized answer grounded in the docs, with citations                                                                         |
+| `read_page`       | read  | Full readable text of any `docs.nyuchi.com` page                                                                                |
+| `submit_feedback` | write | Correction / confusing / missing / praise — stored for the docs team                                                            |
+| `raise_issue`     | write | Actionable problem; files a GitHub issue on `nyuchi/nyuchi-docs` when the `GITHUB_TOKEN` secret is configured, otherwise queued |
 
 Write tools are unauthenticated by design (feedback friction kills
 feedback) but bounded: message sizes are capped, everything is tagged

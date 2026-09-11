@@ -13,17 +13,17 @@ Articles and metadata are scored and curated upstream. The router serves the cur
 
 ## Endpoints
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|---------|
-| `GET` | `/v1/news/articles` | Optional | List articles. Supports `organization_id`, `journalist_id`, `limit`, `offset`. |
-| `GET` | `/v1/news/articles/{article_id}` | Optional | Fetch a single article. |
-| `GET` | `/v1/news/organizations` | Optional | List media organisations. |
-| `GET` | `/v1/news/journalists` | Optional | List journalists. Supports `organization_id`. |
-| `POST` | `/v1/news/articles/{article_id}/like` | Required | Like an article (idempotent upsert). |
-| `POST` | `/v1/news/articles/{article_id}/bookmark` | Required | Bookmark an article (idempotent upsert). |
-| `POST` | `/v1/news/comments` | Required | Post a comment on an article. Supports threaded replies via `parent_id`. |
-| `POST` | `/v1/news/journalists/{journalist_id}/follow` | Required | Follow a journalist. |
-| `POST` | `/v1/news/organizations/{organization_id}/follow` | Required | Follow a media organisation. |
+| Method | Path                                              | Auth     | Purpose                                                                        |
+| ------ | ------------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| `GET`  | `/v1/news/articles`                               | Optional | List articles. Supports `organization_id`, `journalist_id`, `limit`, `offset`. |
+| `GET`  | `/v1/news/articles/{article_id}`                  | Optional | Fetch a single article.                                                        |
+| `GET`  | `/v1/news/organizations`                          | Optional | List media organisations.                                                      |
+| `GET`  | `/v1/news/journalists`                            | Optional | List journalists. Supports `organization_id`.                                  |
+| `POST` | `/v1/news/articles/{article_id}/like`             | Required | Like an article (idempotent upsert).                                           |
+| `POST` | `/v1/news/articles/{article_id}/bookmark`         | Required | Bookmark an article (idempotent upsert).                                       |
+| `POST` | `/v1/news/comments`                               | Required | Post a comment on an article. Supports threaded replies via `parent_id`.       |
+| `POST` | `/v1/news/journalists/{journalist_id}/follow`     | Required | Follow a journalist.                                                           |
+| `POST` | `/v1/news/organizations/{organization_id}/follow` | Required | Follow a media organisation.                                                   |
 
 ## List recent articles
 

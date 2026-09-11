@@ -13,16 +13,16 @@ Use these endpoints when building consumer or partner experiences that browse li
 
 ## Endpoints
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|---------|
-| `GET` | `/v1/commerce/products` | Optional | List products. Supports `business_id`, `limit`, `offset`. |
-| `GET` | `/v1/commerce/products/{product_id}` | Optional | Fetch a single product. |
-| `POST` | `/v1/commerce/products` | Required | Create a product owned by the caller. |
-| `GET` | `/v1/commerce/businesses` | Optional | List local businesses. |
-| `GET` | `/v1/commerce/businesses/{business_id}` | Optional | Fetch a single business. |
-| `GET` | `/v1/commerce/offers` | Optional | List offers. Supports `product_id`. |
-| `POST` | `/v1/commerce/inquiries` | Required | Send an inquiry against a product or business. |
-| `POST` | `/v1/commerce/scam-reports` | Required | Report a product, business, or offer for review. |
+| Method | Path                                    | Auth     | Purpose                                                   |
+| ------ | --------------------------------------- | -------- | --------------------------------------------------------- |
+| `GET`  | `/v1/commerce/products`                 | Optional | List products. Supports `business_id`, `limit`, `offset`. |
+| `GET`  | `/v1/commerce/products/{product_id}`    | Optional | Fetch a single product.                                   |
+| `POST` | `/v1/commerce/products`                 | Required | Create a product owned by the caller.                     |
+| `GET`  | `/v1/commerce/businesses`               | Optional | List local businesses.                                    |
+| `GET`  | `/v1/commerce/businesses/{business_id}` | Optional | Fetch a single business.                                  |
+| `GET`  | `/v1/commerce/offers`                   | Optional | List offers. Supports `product_id`.                       |
+| `POST` | `/v1/commerce/inquiries`                | Required | Send an inquiry against a product or business.            |
+| `POST` | `/v1/commerce/scam-reports`             | Required | Report a product, business, or offer for review.          |
 
 ## List products
 

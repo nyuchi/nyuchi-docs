@@ -22,20 +22,20 @@ holds no secrets and no database. It is declared on the MCP registry as
 
 ## Tools
 
-The tools are *tasks* a person (or their agent) actually wants done, not a thin
+The tools are _tasks_ a person (or their agent) actually wants done, not a thin
 CRUD mirror. Each result carries three layers: **inline HTML** (a carousel for
 several events, a card for one), a plain-text fallback, and machine-readable
 **`structuredContent`** — typed event fields (`id`, `name`, `url`, `startDate`,
 `category`, `city`, `isOnline`, …) so an agent consumes structured data instead
 of scraping the card.
 
-| Tool | Auth | What it does |
-| --- | --- | --- |
-| `events_near_me` | anonymous | Upcoming events near a city |
-| `events_matching_interests` | anonymous | Events matching one or more interests / categories, optionally scoped to a city |
-| `get_event` | anonymous | Look up a single event by id, slug, or short code |
-| `create_event` | WorkOS user | Create an event as the signed-in host |
-| `update_event` | WorkOS user | Edit or manage an event you host (e.g. cancel it) |
+| Tool                        | Auth        | What it does                                                                    |
+| --------------------------- | ----------- | ------------------------------------------------------------------------------- |
+| `events_near_me`            | anonymous   | Upcoming events near a city                                                     |
+| `events_matching_interests` | anonymous   | Events matching one or more interests / categories, optionally scoped to a city |
+| `get_event`                 | anonymous   | Look up a single event by id, slug, or short code                               |
+| `create_event`              | WorkOS user | Create an event as the signed-in host                                           |
+| `update_event`              | WorkOS user | Edit or manage an event you host (e.g. cancel it)                               |
 
 ### Read vs. write
 
@@ -69,7 +69,7 @@ marketplace:
 /reload-plugins
 ```
 
-Then just ask, e.g. *"what events are on in Harare this weekend?"* — the
+Then just ask, e.g. _"what events are on in Harare this weekend?"_ — the
 discovery skill triggers and calls the MCP.
 
 ### Claude (web & desktop)
