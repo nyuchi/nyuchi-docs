@@ -13,12 +13,12 @@
 
 ## Three credential types — don't conflate them
 
-| Credential | Identifies | Has a secret? | Use for |
-|---|---|---|---|
-| Platform JWT (`Authorization: Bearer …`) | A signed-in person | — | Acting on behalf of a user |
-| API key (`X-Client-Id`/`X-Client-Secret`, `nyk_...`/`nys_...`) | Your application | Yes | Server-to-server calls to product namespaces (news, weather, commerce, …) |
-| Machine token (`Authorization: Bearer …`, from `POST /v1/auth/token`) | Your application | Exchanged for one | The same as an API key, in standard OAuth `client_credentials` form — **preferred** |
-| Sign-in app (`client_id` only, `nya_...`) | Your application, for login purposes only | No | Telling `GET /v1/auth/workos/login` which `redirect_uris` to trust — nothing else |
+| Credential                                                            | Identifies                                | Has a secret?     | Use for                                                                             |
+| --------------------------------------------------------------------- | ----------------------------------------- | ----------------- | ----------------------------------------------------------------------------------- |
+| Platform JWT (`Authorization: Bearer …`)                              | A signed-in person                        | —                 | Acting on behalf of a user                                                          |
+| API key (`X-Client-Id`/`X-Client-Secret`, `nyk_...`/`nys_...`)        | Your application                          | Yes               | Server-to-server calls to product namespaces (news, weather, commerce, …)           |
+| Machine token (`Authorization: Bearer …`, from `POST /v1/auth/token`) | Your application                          | Exchanged for one | The same as an API key, in standard OAuth `client_credentials` form — **preferred** |
+| Sign-in app (`client_id` only, `nya_...`)                             | Your application, for login purposes only | No                | Telling `GET /v1/auth/workos/login` which `redirect_uris` to trust — nothing else   |
 
 An API key and a machine token are the **same credential**, not two — the
 token is what you get when you exchange the key pair at
@@ -132,7 +132,7 @@ response body privately. Fix `return_to` registration (step 1) instead.
 ## If you're building a script/service: API keys
 
 For server-to-server calls that aren't acting on behalf of a specific
-signed-in user, use an API key instead — a *different* registration from
+signed-in user, use an API key instead — a _different_ registration from
 a sign-in app, and this one does carry a secret:
 
 ```bash
@@ -218,13 +218,13 @@ GET /v1/auth/workos/login-link?return_to=https://your-app.example/linked
 Authorization: Bearer $PLATFORM_JWT
 ```
 
-This requires the caller's *own* platform JWT (they must already be
+This requires the caller's _own_ platform JWT (they must already be
 signed in) — completing hosted login with the new email is itself the
 proof they own it, so there's no separate verification step. After it
 succeeds, that email signs the same person in from then on; the response
 redirect carries `#linked=1&email=...`, not a new token (the caller's
 existing session doesn't change). If the email is already linked to a
-*different* person, this rejects with `409` — it never silently merges
+_different_ person, this rejects with `409` — it never silently merges
 two people. Untangling identities that already exist as separate people
 (e.g. before this endpoint existed) is a support action:
 `POST /v1/admin/persons/merge`.

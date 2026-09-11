@@ -15,16 +15,13 @@ WorkOS AuthKit is the recommended sign-in method. It supports single sign-on, mu
 
    Go to the console and select **Continue with WorkOS**. This is the primary button at the top of the sign-in form.
 
-
 2. **Authenticate with your identity provider**
 
    WorkOS redirects you to your organization's identity provider. Complete sign-in there (password, passkey, SSO, or MFA challenge—whatever your admin has configured).
 
-
 3. **Return to the console**
 
    After authentication, you land on `/auth/workos/callback`. The page hydrates your session and forwards you to your dashboard. The auth fragment is stripped from the URL so it doesn't appear in browser history.
-
 
 <Aside type="note">
   If your account previously signed in with an email code, WorkOS recognizes the email address and links the two records the first time you sign in. You don't need to reset anything.
@@ -38,16 +35,13 @@ Email codes are kept as a fallback for accounts that haven't migrated to WorkOS 
 
    On the sign-in page, select **or use email code** below the WorkOS button.
 
-
 2. **Request a code**
 
    Enter your email and select **Send code**. You'll receive a six-digit code that's valid for a short window.
 
-
 3. **Verify**
 
    Enter the code to complete sign-in. Codes can be requested up to 10 times per minute per email address.
-
 
 <Aside type="caution">
   Email codes will be retired once all accounts have migrated to WorkOS. Plan to move teammates over before that happens.
@@ -59,8 +53,8 @@ Select your avatar in the top-right and choose **Sign out**. The console clears 
 
 ## Troubleshooting
 
-| Symptom | Likely cause |
-|---------|--------------|
-| **Continue with WorkOS** button is disabled or missing | WorkOS isn't configured for this environment. Contact your admin to set the WorkOS credentials. |
-| Redirected back to sign-in immediately after WorkOS callback | The callback URL doesn't match what's registered in WorkOS. Verify the redirect URI in your WorkOS dashboard. |
-| Email code never arrives | Check spam, then verify the email is on a confirmed account. Rate limits apply—wait one minute between requests. |
+| Symptom                                                      | Likely cause                                                                                                     |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| **Continue with WorkOS** button is disabled or missing       | WorkOS isn't configured for this environment. Contact your admin to set the WorkOS credentials.                  |
+| Redirected back to sign-in immediately after WorkOS callback | The callback URL doesn't match what's registered in WorkOS. Verify the redirect URI in your WorkOS dashboard.    |
+| Email code never arrives                                     | Check spam, then verify the email is on a confirmed account. Rate limits apply—wait one minute between requests. |

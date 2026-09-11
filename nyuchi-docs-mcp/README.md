@@ -43,13 +43,13 @@ Direct HTTP (no package needed):
 
 ## Tools
 
-| Tool | Kind | What it does |
-| --- | --- | --- |
-| `search_docs` | read | Search the docs; titles, URLs, snippets |
-| `ask_docs` | read | Synthesized answer with citations |
-| `read_page` | read | Full readable text of a docs page |
+| Tool              | Kind  | What it does                                 |
+| ----------------- | ----- | -------------------------------------------- |
+| `search_docs`     | read  | Search the docs; titles, URLs, snippets      |
+| `ask_docs`        | read  | Synthesized answer with citations            |
+| `read_page`       | read  | Full readable text of a docs page            |
 | `submit_feedback` | write | Send a correction / comment to the docs team |
-| `raise_issue` | write | File an actionable docs issue |
+| `raise_issue`     | write | File an actionable docs issue                |
 
 The endpoint can be overridden with an argument
 (`nyuchi-docs-mcp <url>`) or `NYUCHI_DOCS_MCP_URL` — useful against a

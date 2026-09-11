@@ -15,7 +15,6 @@ Webhooks deliver HTTP POST requests to a URL you control whenever a selected eve
 
    Most webhook receiver frameworks (for example, ngrok for local testing, or cloud functions for production) provide HTTPS URLs automatically.
 
-
 2. **Register the endpoint**
 
    1. Go to **Integrations → Webhooks → Add endpoint**.
@@ -23,13 +22,11 @@ Webhooks deliver HTTP POST requests to a URL you control whenever a selected eve
    3. Add an optional description to remind yourself what this endpoint is for.
    4. Click **Create**.
 
-
 3. **Select events**
 
    After creating the endpoint, open it and click **Add events**. Choose the event types you want this endpoint to receive. You can subscribe to all events or select individual types.
 
    See [event types](/integrations/webhooks/event-types) for the full list and payload schemas.
-
 
 4. **Verify the signature header**
 
@@ -52,11 +49,9 @@ Webhooks deliver HTTP POST requests to a URL you control whenever a selected eve
 
    Your endpoint secret is shown once at creation time—save it securely.
 
-
 5. **Test with a sample payload**
 
    From the endpoint detail page, click **Send test event**. Select an event type and click **Send**. The platform delivers a sample payload to your endpoint and shows the response status and body in the test log.
-
 
 <Aside type="caution">
   Do not expose your endpoint secret in client-side code or public repositories. Rotate it immediately if it is compromised—go to **Integrations → Webhooks → [Endpoint] → Rotate secret**.

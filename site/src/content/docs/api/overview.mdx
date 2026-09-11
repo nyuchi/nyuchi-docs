@@ -9,9 +9,9 @@ The Nyuchi API is a single versioned HTTP gateway. Every endpoint lives under a 
 
 ## Base URL
 
-| Host | What it is |
-|------|------------|
-| `https://api.nyuchi.com` | **Production — the gateway serving traffic today** (FastAPI on Fly.io). Point every client here. |
+| Host                     | What it is                                                                                                                                |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `https://api.nyuchi.com` | **Production — the gateway serving traffic today** (FastAPI on Fly.io). Point every client here.                                          |
 | `https://api.mukoko.com` | A **separate Mukoko gateway still being built.** It serves nothing usable yet and has no DNS record, so a request to it fails to connect. |
 
 <Aside type="caution">
@@ -33,20 +33,20 @@ The Nyuchi API is a single versioned HTTP gateway. Every endpoint lives under a 
 
 Each namespace is backed by its own database. Endpoints in a namespace return `503 Service Unavailable` when the underlying database is not configured for the current deployment, so you can detect availability with a single health check.
 
-| Namespace | Purpose |
-|-----------|---------|
-| `/v1/auth`, `/v1/identity` | Sign-in, session, and person records |
-| `/v1/family`, `/v1/organization` | Household and org membership |
-| `/v1/places`, `/v1/events`, `/v1/directory` | Locations, calendar, and listings |
-| `/v1/content`, `/v1/media`, `/v1/search` | Articles, uploads, and search |
-| `/v1/travel`, `/v1/applications`, `/v1/ubuntu` | Travel bookings, applications, community |
-| `/v1/pipeline`, `/v1/dashboard`, `/v1/api-keys` | Internal tooling, dashboards, developer keys |
-| `/v1/commerce` | Products, offers, reviews, and inquiries |
-| `/v1/pay/wallet`, `/v1/pay/tokens`, `/v1/pay/gateway` | Wallets, tokens, and gateway transactions |
-| `/v1/logistics` | Booking drafts and shipments |
-| `/v1/lingo` | Translation and language tooling |
-| `/v1/news` | News articles and feeds |
-| `/v1/weather` | Weather forecasts (reserved) |
+| Namespace                                             | Purpose                                      |
+| ----------------------------------------------------- | -------------------------------------------- |
+| `/v1/auth`, `/v1/identity`                            | Sign-in, session, and person records         |
+| `/v1/family`, `/v1/organization`                      | Household and org membership                 |
+| `/v1/places`, `/v1/events`, `/v1/directory`           | Locations, calendar, and listings            |
+| `/v1/content`, `/v1/media`, `/v1/search`              | Articles, uploads, and search                |
+| `/v1/travel`, `/v1/applications`, `/v1/ubuntu`        | Travel bookings, applications, community     |
+| `/v1/pipeline`, `/v1/dashboard`, `/v1/api-keys`       | Internal tooling, dashboards, developer keys |
+| `/v1/commerce`                                        | Products, offers, reviews, and inquiries     |
+| `/v1/pay/wallet`, `/v1/pay/tokens`, `/v1/pay/gateway` | Wallets, tokens, and gateway transactions    |
+| `/v1/logistics`                                       | Booking drafts and shipments                 |
+| `/v1/lingo`                                           | Translation and language tooling             |
+| `/v1/news`                                            | News articles and feeds                      |
+| `/v1/weather`                                         | Weather forecasts (reserved)                 |
 
 ## Authentication
 
