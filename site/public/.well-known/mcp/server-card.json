@@ -8,7 +8,13 @@
     "url": "https://docs.nyuchi.com/mcp"
   },
   "capabilities": ["tools"],
-  "tools": ["search_docs", "ask_docs", "read_page", "submit_feedback", "raise_issue"],
+  "tools": [
+    "search_docs",
+    "ask_docs",
+    "read_page",
+    "submit_feedback",
+    "raise_issue"
+  ],
   "authentication": { "type": "none" },
   "documentation": "https://docs.nyuchi.com/integrations/docs-mcp/",
   "provider": {

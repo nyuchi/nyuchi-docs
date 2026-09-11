@@ -12,7 +12,7 @@ The **Mukoko Weather Stations console** at [weatherstations.nyuchi.com](https://
 ## Register a station
 
 1. Sign in at [weatherstations.nyuchi.com](https://weatherstations.nyuchi.com) — the same Nyuchi account used on weather.mukoko.com.
-2. Choose **Register a station**, give it a name (e.g. *Marondera High School*), and set its coordinates — the **Use GPS** button fills them in if you're standing at the station.
+2. Choose **Register a station**, give it a name (e.g. _Marondera High School_), and set its coordinates — the **Use GPS** button fills them in if you're standing at the station.
 3. Pick the station type: **Digital** (a console that uploads automatically) or **Analog** (manual readings).
 
 <Aside type="caution">
@@ -25,19 +25,19 @@ Most consumer stations (Ecowitt, Fine Offset, Ambient-style, and compatibles) su
 
 **Wunderground protocol**
 
-| Setting | Value |
-| ------- | ----- |
-| Server | `weather.mukoko.com` |
-| Path | `/api/py/stations/ingest` |
-| Station ID | your station ID |
-| Password / key | your ingest key |
+| Setting        | Value                     |
+| -------------- | ------------------------- |
+| Server         | `weather.mukoko.com`      |
+| Path           | `/api/py/stations/ingest` |
+| Station ID     | your station ID           |
+| Password / key | your ingest key           |
 
 **Ecowitt protocol**
 
-| Setting | Value |
-| ------- | ----- |
-| Server | `weather.mukoko.com` |
-| Path | `/api/py/stations/ingest` |
+| Setting | Value                     |
+| ------- | ------------------------- |
+| Server  | `weather.mukoko.com`      |
+| Path    | `/api/py/stations/ingest` |
 | PASSKEY | `<stationId>:<ingestKey>` |
 
 Imperial units are converted automatically, and every reading passes plausibility checks (quality control) before it becomes a validated observation.

@@ -20,11 +20,11 @@ https://kweli.mukoko.com/[locale]/verify?entity=<entityId>
 https://kweli.mukoko.com/[locale]/verify?place=<placeId>&source=<yourapp>
 ```
 
-| Query param | Required | Meaning |
-|-------------|----------|---------|
-| `entity` | no | The `entity.entities` UUID to verify |
-| `place` | no | The `places.places` UUID — the gateway resolves the place's entity via `ownerEntityId` |
-| `source` | no | Your app's identifier (e.g. `nhimbe`, `bushtrade`) for attribution |
+| Query param | Required | Meaning                                                                                |
+| ----------- | -------- | -------------------------------------------------------------------------------------- |
+| `entity`    | no       | The `entity.entities` UUID to verify                                                   |
+| `place`     | no       | The `places.places` UUID — the gateway resolves the place's entity via `ownerEntityId` |
+| `source`    | no       | Your app's identifier (e.g. `nhimbe`, `bushtrade`) for attribution                     |
 
 The gateway resolves the place, shows the current verification tier, the claim action for representatives, and the community vouch panel for everyone else.
 
