@@ -24,8 +24,9 @@ jobs:
       - name: Authenticate to MCP Registry (GitHub OIDC)
         run: ./mcp-publisher login github-oidc
 
+      # `status --all-versions` asks "Continue? [y/N]"; CI has no terminal.
       - name: Mark every version of io.github.nyuchi/mzizi-mcp deleted
         run: |
-          ./mcp-publisher status --status deleted --all-versions \
+          echo y | ./mcp-publisher status --status deleted --all-versions \
             --message "Moved to io.github.mzizi-dev/mzizi-mcp" \
             io.github.nyuchi/mzizi-mcp
