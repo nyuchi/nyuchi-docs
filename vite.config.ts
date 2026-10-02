@@ -22,8 +22,8 @@ export default defineConfig({
       },
     ],
   },
-  lint: {
-    // Without typeCheck, `vp check` is oxlint only and passes type errors.
-    options: { typeAware: true, typeCheck: true },
-  },
+  // No `lint` block here, deliberately. vite-plus 0.3 applies the workspace
+  // root's lint options to every package, which would switch typeCheck on in
+  // nyuchi-docs-search (a Svelte package that keeps it off; see its config).
+  // Type checking is on in each of the other packages' own vite.config.ts.
 });
