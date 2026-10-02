@@ -14,7 +14,8 @@
     "ingest": "pnpm --filter shamwari-docs-ai ingest",
     "deploy:mcp": "pnpm --filter nyuchi-docs-mcp-worker deploy",
     "check": "pnpm -r --if-present run check",
-    "fmt": "pnpm -r --if-present run fmt"
+    "fmt": "pnpm -r --if-present run fmt",
+    "ci:check": "pnpm -r --if-present run check"
   },
   "devDependencies": {
     "typescript": "^6.0.0",
