@@ -14,7 +14,9 @@
 import { defineConfig } from "vite-plus";
 import { cloudflare } from "@cloudflare/vite-plugin";
 
-// @ts-expect-error TS2321: comparing this config against vite-plus's UserConfig
+// No @ts-expect-error any more: tsgolint reports it unused (TS2578), so the
+// TS2321 below no longer reproduces. History: comparing this config against
+// vite-plus's UserConfig
 // exceeds TS's structural-comparison depth. Root cause: cloudflare() returns
 // Plugin[] typed against the raw `vite` package, while vite-plus vendors its
 // own independently-declared (structurally near-identical, nominally distinct)
