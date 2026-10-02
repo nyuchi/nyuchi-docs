@@ -48,6 +48,9 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
+          # No install here, so nothing to cache - and package.json names
+          # pnpm, which this job does not set up.
+          package-manager-cache: false
       - run: node scripts/validate-skills.mjs
 
   # Fails on any critical/high advisory. Residual moderates are tracked, not
