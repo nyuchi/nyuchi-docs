@@ -18,15 +18,26 @@ let jwks: ReturnType<typeof createRemoteJWKSet> | undefined;
 let jwksIssuer: string | undefined;
 
 /**
- * The AuthKit issuer origin, from configuration only (WORKOS_ISSUER) — no
- * compiled-in default. Accepts a bare host or an https origin; trims
- * whitespace and any trailing slash. Null when unset.
+ * Parse — never concatenate — the configured AuthKit issuer (WORKOS_ISSUER)
+ * into an https origin. No compiled-in default.
+ *
+ * Accepts a bare host or an https origin, in any case. Any path, query or
+ * fragment is dropped. A blank value is null (unset); `http:`, any other
+ * scheme, embedded credentials and anything `URL` cannot parse are also null —
+ * an unusable issuer fails closed exactly like a missing one. The result is
+ * `URL.origin`, which the `iss` claim must equal exactly.
  */
 export function normaliseIssuer(raw: string | undefined): string | null {
   const value = (raw ?? '').trim();
   if (!value) return null;
-  const origin = /^https?:\/\//.test(value) ? value : `https://${value}`;
-  return origin.replace(/\/+$/, '');
+  let url: URL;
+  try {
+    url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(value) ? value : `https://${value}`);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'https:' || url.username || url.password) return null;
+  return url.origin;
 }
 
 export async function verifyBearerAuth(
@@ -36,7 +47,7 @@ export async function verifyBearerAuth(
   const issuer = normaliseIssuer(configuredIssuer);
   if (!issuer) {
     // Fail closed: without a configured issuer no token can be verified.
-    if (req.headers.has('authorization')) console.error('[auth] WORKOS_ISSUER is not configured');
+    if (req.headers.has('authorization')) console.error('[auth] WORKOS_ISSUER is not configured (or is not an https origin)');
     return { authorized: false };
   }
   const header = req.headers.get('authorization') ?? '';
@@ -45,7 +56,7 @@ export async function verifyBearerAuth(
 
   try {
     if (!jwks || jwksIssuer !== issuer) {
-      jwks = createRemoteJWKSet(new URL(`${issuer}/oauth2/jwks`));
+      jwks = createRemoteJWKSet(new URL('/oauth2/jwks', issuer));
       jwksIssuer = issuer;
     }
     const { payload } = await jwtVerify(match[1], jwks, { issuer });

@@ -86,16 +86,33 @@ async function pkcePair(): Promise<{ verifier: string; challenge: string }> {
 
 const ISSUER_MISSING = 'WORKOS_ISSUER is not configured';
 
+// Kept identical to normaliseIssuer in nyuchi-docs-mcp-worker/src/auth.ts
+// (that package's tests exercise both copies).
 /**
- * The AuthKit issuer origin, from configuration only — no compiled-in default.
- * Accepts a bare host or an https origin; trims whitespace and any trailing
- * slash (the `iss` check is an exact string match). Null when unset.
+ * Parse — never concatenate — the configured AuthKit issuer (WORKOS_ISSUER)
+ * into an https origin. No compiled-in default.
+ *
+ * Accepts a bare host or an https origin, in any case. Any path, query or
+ * fragment is dropped. A blank value is null (unset); `http:`, any other
+ * scheme, embedded credentials and anything `URL` cannot parse are also null —
+ * an unusable issuer fails closed exactly like a missing one. The result is
+ * `URL.origin`, which the `iss` claim must equal exactly.
  */
+export function normaliseIssuer(raw: string | undefined): string | null {
+  const value = (raw ?? '').trim();
+  if (!value) return null;
+  let url: URL;
+  try {
+    url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(value) ? value : `https://${value}`);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'https:' || url.username || url.password) return null;
+  return url.origin;
+}
+
 function issuerOf(env: Env): string | null {
-  const raw = (env.WORKOS_ISSUER ?? '').trim();
-  if (!raw) return null;
-  const origin = /^https?:\/\//.test(raw) ? raw : `https://${raw}`;
-  return origin.replace(/\/+$/, '');
+  return normaliseIssuer(env.WORKOS_ISSUER);
 }
 
 // jose's remote JWKS caches keys internally; module-level so it survives
@@ -108,7 +125,7 @@ async function verifySession(env: Env, token: string): Promise<JWTPayload | null
   if (!issuer) return null;
   try {
     if (!jwks || jwksIssuer !== issuer) {
-      jwks = createRemoteJWKSet(new URL(`${issuer}/oauth2/jwks`));
+      jwks = createRemoteJWKSet(new URL('/oauth2/jwks', issuer));
       jwksIssuer = issuer;
     }
     const { payload } = await jwtVerify(token, jwks, {
@@ -122,7 +139,7 @@ async function verifySession(env: Env, token: string): Promise<JWTPayload | null
 }
 
 function redirectToLogin(issuer: string, env: Env, url: URL, verifier: string, challenge: string, state: string): Response {
-  const authorizeUrl = new URL(`${issuer}/oauth2/authorize`);
+  const authorizeUrl = new URL('/oauth2/authorize', issuer);
   authorizeUrl.searchParams.set('response_type', 'code');
   authorizeUrl.searchParams.set('client_id', env.WORKOS_CLIENT_ID);
   authorizeUrl.searchParams.set('redirect_uri', `${url.origin}${CALLBACK_PATH}`);
@@ -168,7 +185,7 @@ async function handleCallback(issuer: string, env: Env, req: Request, url: URL):
   };
   if (env.WORKOS_CLIENT_SECRET) tokenParams.client_secret = env.WORKOS_CLIENT_SECRET;
 
-  const tokenRes = await fetch(`${issuer}/oauth2/token`, {
+  const tokenRes = await fetch(new URL('/oauth2/token', issuer), {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams(tokenParams),
