@@ -24,7 +24,12 @@ import { securityTxtResponse } from './security-txt.js';
 export interface Env {
   ASSETS: Fetcher;
   WORKOS_CLIENT_ID: string;
-  WORKOS_ISSUER: string;
+  /**
+   * The WorkOS AuthKit issuer. REQUIRED, set per environment as a Worker
+   * secret — never committed, no default in code. Internal pages answer 503
+   * "WORKOS_ISSUER is not configured" until it is set.
+   */
+  WORKOS_ISSUER?: string;
   /**
    * Optional: only present for a confidential Connect app. The app this
    * gate actually uses — WorkOS's shared "Nyuchi Internal Tools" app,
@@ -79,19 +84,35 @@ async function pkcePair(): Promise<{ verifier: string; challenge: string }> {
   return { verifier, challenge };
 }
 
+const ISSUER_MISSING = 'WORKOS_ISSUER is not configured';
+
+/**
+ * The AuthKit issuer origin, from configuration only — no compiled-in default.
+ * Accepts a bare host or an https origin; trims whitespace and any trailing
+ * slash (the `iss` check is an exact string match). Null when unset.
+ */
+function issuerOf(env: Env): string | null {
+  const raw = (env.WORKOS_ISSUER ?? '').trim();
+  if (!raw) return null;
+  const origin = /^https?:\/\//.test(raw) ? raw : `https://${raw}`;
+  return origin.replace(/\/+$/, '');
+}
+
 // jose's remote JWKS caches keys internally; module-level so it survives
 // across requests to the same isolate instead of re-fetching every time.
 let jwks: ReturnType<typeof createRemoteJWKSet> | undefined;
 let jwksIssuer: string | undefined;
 
 async function verifySession(env: Env, token: string): Promise<JWTPayload | null> {
+  const issuer = issuerOf(env);
+  if (!issuer) return null;
   try {
-    if (!jwks || jwksIssuer !== env.WORKOS_ISSUER) {
-      jwks = createRemoteJWKSet(new URL(`${env.WORKOS_ISSUER}/oauth2/jwks`));
-      jwksIssuer = env.WORKOS_ISSUER;
+    if (!jwks || jwksIssuer !== issuer) {
+      jwks = createRemoteJWKSet(new URL(`${issuer}/oauth2/jwks`));
+      jwksIssuer = issuer;
     }
     const { payload } = await jwtVerify(token, jwks, {
-      issuer: env.WORKOS_ISSUER,
+      issuer,
       audience: env.WORKOS_CLIENT_ID,
     });
     return payload;
@@ -100,8 +121,8 @@ async function verifySession(env: Env, token: string): Promise<JWTPayload | null
   }
 }
 
-function redirectToLogin(env: Env, url: URL, verifier: string, challenge: string, state: string): Response {
-  const authorizeUrl = new URL(`${env.WORKOS_ISSUER}/oauth2/authorize`);
+function redirectToLogin(issuer: string, env: Env, url: URL, verifier: string, challenge: string, state: string): Response {
+  const authorizeUrl = new URL(`${issuer}/oauth2/authorize`);
   authorizeUrl.searchParams.set('response_type', 'code');
   authorizeUrl.searchParams.set('client_id', env.WORKOS_CLIENT_ID);
   authorizeUrl.searchParams.set('redirect_uri', `${url.origin}${CALLBACK_PATH}`);
@@ -120,7 +141,7 @@ function redirectToLogin(env: Env, url: URL, verifier: string, challenge: string
   });
 }
 
-async function handleCallback(env: Env, req: Request, url: URL): Promise<Response> {
+async function handleCallback(issuer: string, env: Env, req: Request, url: URL): Promise<Response> {
   const cookies = parseCookies(req);
   const raw = cookies[OAUTH_STATE_COOKIE];
   if (!raw) return new Response('Login expired — go back and try again.', { status: 400 });
@@ -147,7 +168,7 @@ async function handleCallback(env: Env, req: Request, url: URL): Promise<Respons
   };
   if (env.WORKOS_CLIENT_SECRET) tokenParams.client_secret = env.WORKOS_CLIENT_SECRET;
 
-  const tokenRes = await fetch(`${env.WORKOS_ISSUER}/oauth2/token`, {
+  const tokenRes = await fetch(`${issuer}/oauth2/token`, {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams(tokenParams),
@@ -183,7 +204,9 @@ export default {
     }
 
     if (url.pathname === CALLBACK_PATH) {
-      const res = await handleCallback(env, req, url);
+      const issuer = issuerOf(env);
+      if (!issuer) return new Response(`Service Unavailable: ${ISSUER_MISSING}`, { status: 503 });
+      const res = await handleCallback(issuer, env, req, url);
       // one-shot: the state cookie is spent whether the callback succeeded or not
       res.headers.append('set-cookie', clearCookie(OAUTH_STATE_COOKIE));
       return res;
@@ -205,8 +228,12 @@ export default {
       return env.ASSETS.fetch(req);
     }
 
+    // Fail closed: the authorization server comes only from configuration.
+    const issuer = issuerOf(env);
+    if (!issuer) return new Response(`Service Unavailable: ${ISSUER_MISSING}`, { status: 503 });
+
     const { verifier, challenge } = await pkcePair();
     const state = base64url(crypto.getRandomValues(new Uint8Array(16)));
-    return redirectToLogin(env, url, verifier, challenge, state);
+    return redirectToLogin(issuer, env, url, verifier, challenge, state);
   },
 } satisfies ExportedHandler<Env>;
