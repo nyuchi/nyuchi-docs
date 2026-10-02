@@ -98,12 +98,13 @@ For each AuthKit application (WorkOS dashboard) and its deployment:
 
 ## The backend variant (Console / API gateway)
 
-`nyuchi/mukoko-platform` consumes the same hosted page via its FastAPI
-backend: `GET /v1/auth/workos/login` builds the AuthKit authorization URL,
-the callback exchanges the code server-side, upserts `identity.person`, and
+`nyuchi/api-gateway` — the FastAPI gateway split out of
+`nyuchi/nyuchi-platform` — consumes the same hosted page:
+`GET /v1/auth/workos/login` builds the AuthKit authorization URL, the
+callback exchanges the code server-side, upserts `identity.person`, and
 mints the **platform JWT** (HS256, signed with the Supabase JWT secret) that
 the Console and RLS consume. Same hosted session, different token shape —
-see the platform repo's `CLAUDE.md`.
+see the gateway repo's `docs/AUTH.md`.
 
 ## Authorization is separate
 
