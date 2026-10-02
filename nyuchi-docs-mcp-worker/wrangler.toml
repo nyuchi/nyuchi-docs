@@ -15,16 +15,12 @@ routes = [
 [vars]
 TOP_K = "5"
 ALLOWED_ORIGINS = "https://docs.nyuchi.com,https://docs.bundu.org"
-# The WorkOS **AuthKit issuer** — the OAuth 2.1 authorization server whose
-# /.well-known/openid-configuration + /oauth2/jwks verify a caller's own
-# bearer token (src/auth.ts); this worker never originates a login flow.
-# It is NOT auth.mukoko.com (the WorkOS *auth API* host, which serves no
-# authorization-server metadata), and neither api.nyuchi.com nor
-# api.mukoko.com is WorkOS at all. Not a secret — an OIDC issuer URL is
-# public by design — but keep it in sync with the same value the site
-# worker uses. The pre-Aug-2026 value identity.nyuchi.com has no DNS
-# record any more; do not restore it.
-WORKOS_ISSUER = "https://accounts.mukoko.com"
+# WORKOS_ISSUER — the WorkOS **AuthKit issuer** whose /oauth2/jwks verifies a
+# caller's own bearer token (src/auth.ts) — is deliberately NOT a var here. It
+# is REQUIRED and set per environment as a secret (`wrangler secret put
+# WORKOS_ISSUER`; owner script, 1Password nyuchi/workos), never committed, no
+# default in code. Until it is set no bearer token verifies, so internal
+# content stays hidden (fail closed); public docs still answer.
 
 # Same AI Search instance the Ask-AI tab uses — read tools ride the
 # existing nyuchi-docs corpus; this worker adds no ingestion of its own.

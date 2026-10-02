@@ -17,11 +17,28 @@ import { createRemoteJWKSet, jwtVerify } from 'jose';
 let jwks: ReturnType<typeof createRemoteJWKSet> | undefined;
 let jwksIssuer: string | undefined;
 
+/**
+ * The AuthKit issuer origin, from configuration only (WORKOS_ISSUER) — no
+ * compiled-in default. Accepts a bare host or an https origin; trims
+ * whitespace and any trailing slash. Null when unset.
+ */
+export function normaliseIssuer(raw: string | undefined): string | null {
+  const value = (raw ?? '').trim();
+  if (!value) return null;
+  const origin = /^https?:\/\//.test(value) ? value : `https://${value}`;
+  return origin.replace(/\/+$/, '');
+}
+
 export async function verifyBearerAuth(
   req: Request,
-  issuer: string | undefined
+  configuredIssuer: string | undefined
 ): Promise<{ authorized: boolean; subject?: string }> {
-  if (!issuer) return { authorized: false };
+  const issuer = normaliseIssuer(configuredIssuer);
+  if (!issuer) {
+    // Fail closed: without a configured issuer no token can be verified.
+    if (req.headers.has('authorization')) console.error('[auth] WORKOS_ISSUER is not configured');
+    return { authorized: false };
+  }
   const header = req.headers.get('authorization') ?? '';
   const match = header.match(/^Bearer\s+(.+)$/i);
   if (!match) return { authorized: false };

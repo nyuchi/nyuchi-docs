@@ -69,7 +69,7 @@ export interface Env {
   FEEDBACK?: FeedbackStore;
   /** Optional secret — when set, raise_issue files real GitHub issues. */
   GITHUB_TOKEN?: string;
-  /** WorkOS issuer used to verify a caller's own bearer token (see src/auth.ts). Unset = every caller is treated as unauthenticated (public-only). */
+  /** WorkOS AuthKit issuer used to verify a caller's own bearer token (see src/auth.ts). REQUIRED, set per environment as a secret — never committed, no default. Unset = every caller is treated as unauthenticated (public-only; fails closed). */
   WORKOS_ISSUER?: string;
   /** Shared with nyuchi-docs's site worker — sent on internal-page fetches once a caller is verified, so the read skips the browser OIDC flow. */
   INTERNAL_FETCH_KEY?: string;
