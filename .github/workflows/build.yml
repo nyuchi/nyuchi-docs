@@ -76,6 +76,17 @@ jobs:
       # lockfile update would install fine here and differ from every other
       # machine — drift that only surfaces later, somewhere else.
       - run: pnpm install --frozen-lockfile
+      # pnpm-workspace.yaml's auditConfig.ignoreGhsas sets assessed advisories
+      # aside by ID, each with a recheck date. This step fails once the
+      # earliest date passes, so an exception cannot outlive its reasoning:
+      # remove the entry if a fix installs, or reassess and move the date.
+      - name: Advisories set aside are still within their recheck date
+        run: |
+          recheck=2026-11-03 # GHSA-ch52-4w7c-c8xp (http-cache-semantics)
+          if [[ "$(date -u +%F)" > "$recheck" ]]; then
+            echo "::error::GHSA-ch52-4w7c-c8xp was set aside until $recheck: recheck it (pnpm-workspace.yaml)"
+            exit 1
+          fi
       - run: pnpm audit --audit-level=high
 
   build:

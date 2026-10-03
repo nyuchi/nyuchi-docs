@@ -5,3 +5,16 @@ packages:
   - nyuchi-docs-mcp
   - nyuchi-docs-skills
   - nyuchi-docs-mcp-worker
+
+# Advisories set aside in `pnpm audit`, by ID only. Each has its reason, the
+# date it was added and a recheck date; .github/workflows/build.yml fails the
+# audit job once that date passes, so nothing stays here by default.
+auditConfig:
+  ignoreGhsas:
+    # GHSA-ch52-4w7c-c8xp — http-cache-semantics <=4.2.0, no patched release.
+    # Added 2026-10-03, recheck by 2026-11-03. astro (via starlight in site
+    # and nyuchi-docs-search) uses it only in assets/build/remote.js, to cache
+    # remote images during `astro build`. The site ships as static assets
+    # behind src/worker/gate.ts, which does not import astro, so the
+    # vulnerable max-stale path never runs for a visitor.
+    - GHSA-ch52-4w7c-c8xp
