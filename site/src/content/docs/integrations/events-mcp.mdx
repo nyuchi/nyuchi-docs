@@ -3,7 +3,8 @@ title: Mukoko Events MCP server
 description: Discover and manage community events across Africa from any MCP-capable agent via events.mukoko.com/mcp.
 ---
 
-**Mukoko Events** (the platform also branded **Nhimbe** — same thing) exposes
+**Mukoko Events** (formerly branded Nhimbe; the brand was retired on 4 October
+2026) exposes
 a task-based [Model Context Protocol](https://modelcontextprotocol.io) server so
 any MCP client — Claude, ChatGPT, IDE agents, custom tooling — can find events,
 look one up, and (signed in) create or manage its own.
@@ -12,13 +13,13 @@ The endpoint is **`https://events.mukoko.com/mcp`** (Streamable HTTP transport,
 JSON-RPC 2.0 over `POST`, stateless — no SSE stream and no session handshake).
 
 > **Single endpoint.** The MCP is served **only** at `events.mukoko.com/mcp`.
-> The app is dual-domain (`nhimbe.com` and `events.mukoko.com` both serve it),
-> but there is deliberately **no `nhimbe.com/mcp`** — use exactly the
-> `events.mukoko.com` URL.
+> The app lives at `events.mukoko.com`. The legacy `nhimbe.com` domain is being
+> redirected there, and there is deliberately **no `nhimbe.com/mcp`**, so use
+> exactly the `events.mukoko.com` URL.
 
-The server owns no data. Every tool calls the public Nhimbe app API; the server
-holds no secrets and no database. It is declared on the MCP registry as
-**`com.mukoko/nhimbe-events`**.
+The server owns no data. Every tool calls the public Mukoko Events app API; the
+server holds no secrets and no database. It is declared on the MCP registry as
+**`com.mukoko/events`**.
 
 ## Tools
 
@@ -48,7 +49,7 @@ of scraping the card.
   boundary. Without a token the write tools return a clear "sign in" error
   rather than failing silently.
 
-The OAuth metadata for the write path is advertised at the Nhimbe origin:
+The OAuth metadata for the write path is advertised at the Mukoko Events origin:
 `https://events.mukoko.com/.well-known/oauth-protected-resource` and
 `.../oauth-authorization-server` (WorkOS is the authorization server). The
 human-readable agent guide lives at
@@ -80,7 +81,7 @@ Add the server as a **custom connector** so the write tools (`create_event`,
 1. Open **Settings → Connectors → Add custom connector**.
 2. Enter the MCP server URL `https://events.mukoko.com/mcp` and click
    **Connect**.
-3. Claude runs OAuth discovery against the Nhimbe origin's `/.well-known/*`
+3. Claude runs OAuth discovery against the Mukoko Events origin's `/.well-known/*`
    metadata, self-registers, and opens the hosted **WorkOS AuthKit** sign-in.
    Complete sign-in (email code, password, passkey, MFA or social — whatever is
    configured on your account).
@@ -101,7 +102,7 @@ Developer mode first):
 - **Name**: `Mukoko Events`
 - **MCP server URL**: `https://events.mukoko.com/mcp`
 - **Authentication**: **No authentication** for the read tools; **OAuth** for
-  the write tools, pointing OAuth discovery at the Nhimbe origin's
+  the write tools, pointing OAuth discovery at the Mukoko Events origin's
   `/.well-known/*` metadata above.
 
 ### Raw MCP endpoint
@@ -136,6 +137,7 @@ curl -s https://events.mukoko.com/mcp \
   (`2025-06-18`, `2025-03-26`, `2024-11-05`, with the `initialize` handshake)
   plus beta support for the stateless `2026-07-28` revision (`server/discover`,
   per-request metadata).
-- **Own repository.** The server lives in **`nyuchi/mukoko-events-mcp`** (split
-  out of the Nhimbe app repo); the admin dashboard lives in
-  **`nyuchi/mukoko-events-admin`**. Neither is part of the app request path.
+- **Own repository.** The server lives in **`mukoko-dev/mukoko-events-mcp`**
+  (split out of the Mukoko Events app repo, `mukoko-dev/mukoko-events`, formerly
+  `nhimbe`); the admin dashboard lives in
+  **`mukoko-dev/mukoko-events-admin`**. Neither is part of the app request path.

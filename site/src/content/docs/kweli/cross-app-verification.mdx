@@ -1,6 +1,6 @@
 ---
 title: Cross-app verification
-description: How sibling Mukoko apps (Nhimbe, BushTrade, News, …) verify places and organizations by deep-linking to the Kweli gateway instead of building their own flow.
+description: How sibling Mukoko apps (Mukoko Events, BushTrade, News, …) verify places and organizations by deep-linking to the Kweli gateway instead of building their own flow.
 sidebar:
   label: Cross-app how-to
 ---
@@ -24,7 +24,7 @@ https://kweli.mukoko.com/[locale]/verify?place=<placeId>&source=<yourapp>
 | ----------- | -------- | -------------------------------------------------------------------------------------- |
 | `entity`    | no       | The `entity.entities` UUID to verify                                                   |
 | `place`     | no       | The `places.places` UUID — the gateway resolves the place's entity via `ownerEntityId` |
-| `source`    | no       | Your app's identifier (e.g. `nhimbe`, `bushtrade`) for attribution                     |
+| `source`    | no       | Your app's identifier (e.g. `events`, `bushtrade`) for attribution                       |
 
 The gateway resolves the place, shows the current verification tier, the claim action for representatives, and the community vouch panel for everyone else.
 
@@ -34,9 +34,9 @@ With **no query params**, `/verify` is a valid entry point rather than a 404: it
 
 Read `bundu.verificationTier` from the place's graph document and render the mineral-tiered badge (the `nyuchi-verified-badge` contract): 1 Community/Terracotta, 2 Identity/Cobalt, 3 Government/Gold, 4 Licensed/Tanzanite. The badge is **read-only** in your app — see the [tier ladder](/kweli/verification/#the-four-tier-ladder).
 
-## Example: integrating from Nhimbe
+## Example: integrating from Mukoko Events
 
-An event on Nhimbe is hosted at a place. Nhimbe shows the place's badge and offers a verify CTA when the place is unverified:
+An event on Mukoko Events is hosted at a place. Mukoko Events shows the place's badge and offers a verify CTA when the place is unverified:
 
 ```tsx
 // Badge: read-only, straight from the graph document
@@ -45,7 +45,7 @@ An event on Nhimbe is hosted at a place. Nhimbe shows the place's badge and offe
 // CTA: deep-link to the Kweli gateway — no local flow
 const verifyUrl =
   `https://kweli.mukoko.com/${locale}/verify` +
-  `?place=${venue.id}&source=nhimbe`;
+  `?place=${venue.id}&source=events`;
 ```
 
-That is the entire integration: one read (`bundu.verificationTier`) and one link. When the operator completes verification on Kweli, the tier updates in the graph and Nhimbe's badge reflects it on the next read.
+That is the entire integration: one read (`bundu.verificationTier`) and one link. When the operator completes verification on Kweli, the tier updates in the graph and Mukoko Events' badge reflects it on the next read.
