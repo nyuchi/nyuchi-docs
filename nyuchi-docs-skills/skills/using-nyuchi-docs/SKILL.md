@@ -111,4 +111,4 @@ script" is.
 
 ## Wordmarks
 
-Lowercase, always: `nyuchi`, `mzizi`, `mukoko`, `bundu`, `shamwari`, `nhimbe`, `kweli`.
+Lowercase, always: `nyuchi`, `mzizi`, `mukoko`, `bundu`, `shamwari`, `kweli`.

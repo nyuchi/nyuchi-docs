@@ -8,8 +8,8 @@
 // router — deriving `Expires` per request there means the file can never
 // expire, however long it is between deploys.
 //
-// Mirrors nyuchi/nhimbe and nyuchi/kweli, which serve the same file from a
-// dynamic route for the same reason.
+// Mirrors mukoko-dev/mukoko-events (formerly nhimbe) and mukoko-dev/kweli,
+// which serve the same file from a dynamic route for the same reason.
 
 /** Days ahead to set `Expires`. Well inside RFC 9116's one-year maximum. */
 const EXPIRY_DAYS = 180;

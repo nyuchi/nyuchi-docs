@@ -129,8 +129,8 @@ it under one year, so a checked-in file silently becomes non-compliant as it
 ages. `site/wrangler.toml` sets `run_worker_first = true`, so every request
 already passes through `site/src/worker/gate.ts`; it answers this path before
 the gate check and before the asset router, deriving `Expires` from the
-request time (180 days out). Same approach as `nyuchi/nhimbe` and
-`nyuchi/kweli`.
+request time (180 days out). Same approach as `mukoko-dev/mukoko-events` (formerly
+`nhimbe`) and `mukoko-dev/kweli`.
 
 ## Why pnpm workspace
 

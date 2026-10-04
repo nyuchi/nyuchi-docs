@@ -1,6 +1,6 @@
 {
   "name": "@nyuchi/nyuchi-docs-skills",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The public agent skill for docs.nyuchi.com — how a user or an agent searches, asks, reads, and reports problems with the Nyuchi documentation. One skill; the repo's authoring and maintenance skills are internal and deliberately not shipped here.",
   "license": "MIT",
   "type": "module",
