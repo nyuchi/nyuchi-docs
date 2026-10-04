@@ -8,7 +8,11 @@ name: Auto tag
 # does nothing. (GitHub starts no workflow from a tag or release made with
 # GITHUB_TOKEN; that is why the PAT is used.)
 #
-# The logic is nyuchi/.github's reusable-auto-tag.yml.
+# The logic is nyuchi/.github's reusable-auto-tag.yml. Versioning policy
+# (nyuchi/.github#80): a release to main is the next MINOR above the highest
+# tag, staging merges included (staging-version.yml tags those as patches), so
+# bump nyuchi-docs-mcp/package.json to that minor before releasing. A major is
+# only ever manual: run this workflow with bump: major.
 
 on:
   workflow_run:
@@ -16,6 +20,12 @@ on:
     types: [completed]
     branches: [main]
   workflow_dispatch:
+    inputs:
+      bump:
+        description: Override the bump (major is only ever manual).
+        type: choice
+        options: [minor, patch, major]
+        default: minor
 
 permissions:
   contents: read
@@ -26,9 +36,11 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push')
-    uses: nyuchi/.github/.github/workflows/reusable-auto-tag.yml@b0402fdd3b590fa6c6774ea81c4e8cc21a4cf6cb  # main 2026-10-04
+    uses: nyuchi/.github/.github/workflows/reusable-auto-tag.yml@924e5b4d0983d31379aedbec02b990793f29c792 # main, 2026-10-04
     with:
       version-command: "node -p \"require('./nyuchi-docs-mcp/package.json').version\""
+      channel: main
+      bump: ${{ inputs.bump || '' }}
       ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       create-release: true
     secrets:
