@@ -130,7 +130,8 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "$FIRST_PUBLISH_TOKEN" ]; then
-            echo "::warning::First publish of a never-published package, by NPM_TOKEN. Configure its trusted publisher on npmjs.com next, then delete the secret."
+            echo "::warning::First publish of a never-published package, by NPM_TOKEN." \
+              "Configure its trusted publisher on npmjs.com next, then delete the secret."
             npmrc="$RUNNER_TEMP/first-publish.npmrc"
             # The literal ${NODE_AUTH_TOKEN}: npm expands it, so the token is never written to disk.
             # shellcheck disable=SC2016
