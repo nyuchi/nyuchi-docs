@@ -1,12 +1,29 @@
-# Publishes the docs MCP server: nyuchi-docs-mcp to npm, then the
+# Publishes the docs MCP server: @nyuchi/nyuchi-docs-mcp to npm, then the
 # server record (server.json) to the official MCP registry
 # (registry.modelcontextprotocol.io) using GitHub OIDC — no registry
 # credentials needed for the io.github.nyuchi/* namespace.
 #
-# One-time setup: add the NPM_TOKEN repo secret (npm automation token
-# with publish rights on `nyuchi-docs-mcp`). Keep the versions in
-# nyuchi-docs-mcp/package.json and server.json in lockstep — this
-# workflow refuses to publish if they drift.
+# npm auth is TRUSTED PUBLISHING (OIDC, https://docs.npmjs.com/trusted-publishers),
+# not a token. `npm publish` swaps the job's GitHub OIDC ID token
+# (id-token: write) for a short-lived publish token for this one package. npm
+# accepts it only from the trusted publisher configured on npmjs.com for
+# @nyuchi/nyuchi-docs-mcp (GitHub Actions, org nyuchi, repo nyuchi-docs,
+# workflow publish-mcp.yml, `npm publish` allowed), on a GitHub-hosted runner,
+# from npm CLI 11.5.1+ on Node 22.14.0+. setup-node gets no registry-url, so no
+# .npmrc placeholder token can stand in for a failed exchange: a misconfigured
+# trusted publisher fails as ENEEDAUTH, not as a misleading 404. The repo is
+# public, so npm adds provenance by itself (--provenance says so explicitly).
+#
+# First publish only: the NPM_TOKEN fallback. npm attaches a trusted publisher
+# only to a package that already exists, so the very first version of a name
+# npm has never had cannot go by OIDC. When npm answers E404 for the package
+# name (and only then), the publish step gets the NPM_TOKEN secret and
+# publishes with it, with a warning; for an existing package the secret is
+# never passed to any step. After that first publish, configure the trusted
+# publisher on npmjs.com and delete the secret.
+#
+# Keep the versions in nyuchi-docs-mcp/package.json and server.json in
+# lockstep — this workflow refuses to publish if they drift.
 #
 # Trigger: publish a GitHub release (tag e.g. mcp-v0.1.0), or run
 # manually via workflow_dispatch.
@@ -19,22 +36,38 @@ on:
 
 permissions:
   contents: read
-  id-token: write # OIDC for mcp-publisher
+  id-token: write # npm trusted publishing (OIDC) + mcp-publisher github-oidc
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           version: 10.33.0
 
-      - uses: actions/setup-node@v7
+      # No registry-url: the OIDC token must be npm's only credential.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm CLI 11.5.1+ and Node 22.14.0+. Node 22's
+      # bundled npm is 10.x, which has no OIDC exchange. Pinned exactly.
+      - name: Install npm with trusted publishing support
+        run: |
+          set -euo pipefail
+          node -e '
+            const [maj, min] = process.versions.node.split(".").map(Number);
+            if (maj < 22 || (maj === 22 && min < 14)) {
+              console.log("::error::Node " + process.version + " is older than 22.14.0, which npm trusted publishing needs");
+              process.exit(1);
+            }'
+          npm install -g npm@11.21.0
+          echo "node $(node --version), npm $(npm --version)"
 
       - name: Check versions are in lockstep
         run: |
@@ -49,21 +82,69 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm --filter @nyuchi/nyuchi-docs-mcp test
 
-      - name: Publish to npm
+      # Skip when this version is already on the registry so a re-run (e.g.
+      # after a failed MCP-registry step) doesn't die on EPUBLISHCONFLICT
+      # before reaching the registry publish. never_published is true only
+      # when npm answers E404 for the package name itself.
+      - name: Check npm
+        id: npm_check
         working-directory: nyuchi-docs-mcp
-        # Skip when this version is already on the registry so a re-run
-        # (e.g. after a failed MCP-registry step) doesn't die on the
-        # npm EPUBLISHCONFLICT before reaching the registry publish.
         run: |
+          set -euo pipefail
           PKG=$(node -p "require('./package.json').name")
           VER=$(node -p "require('./package.json').version")
           if npm view "$PKG@$VER" version >/dev/null 2>&1; then
             echo "$PKG@$VER already published — skipping npm publish"
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
           else
-            npm publish --access public
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
           fi
+          if out=$(npm view "$PKG" name --json 2>&1); then
+            echo "never_published=false" >> "$GITHUB_OUTPUT"
+          elif grep -q E404 <<<"$out"; then
+            echo "$PKG has never been published"
+            echo "never_published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "$out"
+            echo "never_published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pack
+        id: pack
+        if: steps.npm_check.outputs.already_published != 'true'
+        working-directory: nyuchi-docs-mcp
+        run: |
+          set -euo pipefail
+          pack_dir="$RUNNER_TEMP/npm-pack"
+          rm -rf "$pack_dir" && mkdir -p "$pack_dir"
+          pnpm pack --pack-destination "$pack_dir"
+          echo "tarball=$(ls "$pack_dir"/*.tgz)" >> "$GITHUB_OUTPUT"
+
+      # OIDC (trusted publishing). FIRST_PUBLISH_TOKEN is the NPM_TOKEN secret
+      # only for a package npm has never had (see the header), else empty.
+      - name: Publish to npm
+        if: steps.npm_check.outputs.already_published != 'true'
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+          FIRST_PUBLISH_TOKEN: ${{ steps.npm_check.outputs.never_published == 'true' && secrets.NPM_TOKEN || '' }}
+        run: |
+          set -euo pipefail
+          if [ -n "$FIRST_PUBLISH_TOKEN" ]; then
+            echo "::warning::First publish of a never-published package, by NPM_TOKEN. Configure its trusted publisher on npmjs.com next, then delete the secret."
+            npmrc="$RUNNER_TEMP/first-publish.npmrc"
+            # The literal ${NODE_AUTH_TOKEN}: npm expands it, so the token is never written to disk.
+            # shellcheck disable=SC2016
+            printf '%s\n' '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' > "$npmrc"
+            NPM_CONFIG_USERCONFIG="$npmrc" NODE_AUTH_TOKEN="$FIRST_PUBLISH_TOKEN" \
+              npm publish "$TARBALL" --access public --provenance
+            rm -f "$npmrc"
+          elif ! npm publish "$TARBALL" --access public --provenance; then
+            echo "::error::npm publish failed. On ENEEDAUTH, 401 or 404, check the trusted publisher"
+            echo "for @nyuchi/nyuchi-docs-mcp on npmjs.com (Settings > Trusted publishing): GitHub Actions,"
+            echo "organization nyuchi, repository nyuchi-docs, workflow publish-mcp.yml, with npm publish"
+            echo "allowed. A package npm has never had needs the NPM_TOKEN secret for its first publish."
+            exit 1
+          fi
 
       - name: Install mcp-publisher
         # Resolve the release asset via the API instead of guessing the
