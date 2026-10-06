@@ -11,7 +11,17 @@
 # not change nyuchi-docs-skills/package.json#version is a no-op. Bump the
 # version or nothing ships.
 #
-# Needs the NPM_TOKEN repo secret (the same one publish-mcp.yml uses).
+# npm auth is TRUSTED PUBLISHING (OIDC, https://docs.npmjs.com/trusted-publishers),
+# not a token: `npm publish` swaps the job's GitHub OIDC ID token
+# (id-token: write) for a short-lived publish token for this one package. npm
+# accepts it only from the trusted publisher configured on npmjs.com for
+# @nyuchi/nyuchi-docs-skills (GitHub Actions, org nyuchi, repo nyuchi-docs,
+# workflow publish-skills.yml, `npm publish` allowed), from npm CLI 11.5.1+ on
+# Node 22.14.0+. pnpm packs, npm publishes the tarball (only the npm CLI does
+# the OIDC exchange). setup-node gets no registry-url, so a failed exchange
+# fails as ENEEDAUTH instead of falling back to a placeholder token. The
+# package is already on npm, so it needs no token-based first publish
+# (publish-mcp.yml has that fallback for a never-published package).
 name: Publish skills
 
 on:
@@ -29,24 +39,40 @@ concurrency:
 
 permissions:
   contents: read
-  id-token: write # npm provenance
+  id-token: write # npm trusted publishing (OIDC) + provenance
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           version: 10.33.0
 
-      - uses: actions/setup-node@v7
+      # No registry-url: the OIDC token must be npm's only credential.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
-          registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
+
+      # Trusted publishing needs npm CLI 11.5.1+ and Node 22.14.0+. Node 22's
+      # bundled npm is 10.x, which has no OIDC exchange. Pinned exactly.
+      - name: Install npm with trusted publishing support
+        run: |
+          set -euo pipefail
+          node -e '
+            const [maj, min] = process.versions.node.split(".").map(Number);
+            if (maj < 22 || (maj === 22 && min < 14)) {
+              console.log("::error::Node " + process.version + " is older than 22.14.0, which npm trusted publishing needs");
+              process.exit(1);
+            }'
+          npm install -g npm@11.21.0
+          echo "node $(node --version), npm $(npm --version)"
 
       # Zero-dependency, offline — runs before install so a broken bundle
       # fails fast rather than after resolving the whole workspace.
@@ -68,9 +94,28 @@ jobs:
             echo "already_published=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish to npm
+      - name: Pack with pnpm
+        id: pack
         if: steps.npm_check.outputs.already_published != 'true'
         working-directory: nyuchi-docs-skills
-        run: pnpm publish --access public --provenance --no-git-checks
+        run: |
+          set -euo pipefail
+          pack_dir="$RUNNER_TEMP/npm-pack"
+          rm -rf "$pack_dir" && mkdir -p "$pack_dir"
+          pnpm pack --pack-destination "$pack_dir"
+          echo "tarball=$(ls "$pack_dir"/*.tgz)" >> "$GITHUB_OUTPUT"
+
+      # OIDC (trusted publishing); there is no token.
+      - name: Publish to npm (trusted publishing)
+        if: steps.npm_check.outputs.already_published != 'true'
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+        run: |
+          set -euo pipefail
+          if ! npm publish "$TARBALL" --access public --provenance; then
+            echo "::error::npm publish failed. On ENEEDAUTH, 401 or 404, check the trusted publisher"
+            echo "for @nyuchi/nyuchi-docs-skills on npmjs.com (Settings > Trusted publishing): GitHub"
+            echo "Actions, organization nyuchi, repository nyuchi-docs, workflow publish-skills.yml,"
+            echo "with npm publish allowed."
+            exit 1
+          fi
