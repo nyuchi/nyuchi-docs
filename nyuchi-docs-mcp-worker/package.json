@@ -17,12 +17,12 @@
     "jose": "^6.2.12"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.56.0",
-    "@cloudflare/workers-types": "^5.20260920.1",
+    "@cloudflare/vite-plugin": "^1.62.5",
+    "@cloudflare/workers-types": "^5.20261004.1",
     "typescript": "^7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@^1.0.0",
     "vite-plus": "^1.0.0",
-    "vitest": "^5.0.2",
-    "wrangler": "^4.135.0"
+    "vitest": "^5.0.3",
+    "wrangler": "^4.147.0"
   }
 }
