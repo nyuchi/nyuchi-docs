@@ -6,6 +6,7 @@
 version: 2
 updates:
   - package-ecosystem: 'npm'
+    target-branch: "staging"
     directory: '/'
     schedule:
       interval: 'weekly'
@@ -39,6 +40,7 @@ updates:
         update-types:
           - 'major'
   - package-ecosystem: 'github-actions'
+    target-branch: "staging"
     directory: '/'
     schedule:
       interval: 'weekly'
