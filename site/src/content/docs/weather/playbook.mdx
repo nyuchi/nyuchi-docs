@@ -282,6 +282,18 @@ What the first look found:
 
 This feeds Objective 4 directly: it is the observation set the forecast verification join needs, and a model for registering stations on the Nyuchi API (a WIGOS id and a Places id on each station). Open decisions from the brief (D1 to D8): which `metrics` naming family the app reads, where the WIGOS id lives, station versus sea-level pressure, province assignment by polygon (provinces are centroids today), how official data ranks against community data in fusion, an MSD record in `entity.entities`, and rainfall trust. The reference code in the brief was run against the live API.
 
+### SAAOPA WX-CoPilot: a second live feed
+
+`wx.saaopa.org` is a community weather site ("WX-CoPilot", run under SAAOPA, saaopa.org). Its page is a script-driven app; the API it calls is `wx-api.saaopa.org`. Read on 2026-10-29 from the public routes only (`/stations`, `/stations/status`, `/stations/{code}`, `/metar/{code}`; the `admin` routes need a login and were not touched):
+
+- **84 stations:** 25 automatic weather stations (`aws`, all reporting, about 8 minutes old), 57 official aerodromes and 2 webcams. 34 are in Zimbabwe, then South Africa (16), Mozambique (12), Botswana (10), Namibia (7) and Zambia (5).
+- **Live fields:** temperature, dew point, wind direction, wind speed and gust (knots) and QNH, about every 10 minutes. No rainfall in the status route.
+- **No stated terms.** There is no OpenAPI document, no licence and no operator named on the page. Ask SAAOPA for permission and attribution wording before any scheduled call. The parsers exist; nothing calls the API.
+- **Do not duplicate:** the 57 official aerodromes republish METARs we can read from the Aviation Weather Center. Ingest the 25 `aws` stations only.
+- **QNH is not station pressure.** It is kept as its own value, never written to the station-pressure metric.
+
+The parsers for this feed and for the MSD WIS2 feed are `weather_core::external_feeds` (`mukoko-dev/mukoko-weather#362`); the plan, the gates and what is not built are in `mukoko-dev/mukoko-weather#361`. A WIS2 page boundary can cut a station-hour in two (seen live), so a writer must merge per metric, never replace.
+
 ## 6b. Tooling gaps found while building the agriculture database
 
 From the same session (brief of 2026-10-29; items marked tested were run, the rest come from the tools' own descriptions):
