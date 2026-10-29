@@ -168,7 +168,7 @@ export default defineConfig({
           label: 'Playbooks',
           collapsed: true,
           items: [
-            'playbooks/index',
+            'playbooks',
             'playbooks/data',
             'playbooks/platform',
             'playbooks/api',
