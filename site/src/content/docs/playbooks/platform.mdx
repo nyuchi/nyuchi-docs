@@ -1,0 +1,36 @@
+---
+title: Platform playbook
+description: "How Nyuchi builds, ships and runs services: where code runs, how it is released, what must never break, and how secrets are handled."
+sidebar:
+  label: Platform
+---
+
+This playbook decides how we build and run services. Sources: the mission and engineering bar in the `AGENTS.md` of `nyuchi/nyuchi-servers-api` and `nyuchi/data-infra` (owner, 2026-10-23), and the `data-infra` README. "Decided, not built" is said wherever that is the case.
+
+## The decisions
+
+1. **Built from Africa, for the world.** The platform competes with the top five in the world and is not a product only for Africa. Judge each change against the whole platform, not one repository.
+2. **Open standards, open data by default.** No proprietary data structures, so any system can connect to our data, transformations and services. See the [Data playbook](/playbooks/data/) and the [API playbook](/playbooks/api/).
+3. **Rust, in three layers.** Each service has a pure `core` (decisions, no I/O, builds natively and for `wasm32`), an `origin` (a container) and an `edge` (a Cloudflare Worker, workers-rs). Decisions live in `core`; the others are adapters. The four gateways (Mzizi API public, Nyuchi API B2B at `api.nyuchi.com`, Mukoko API consumer, Nyuchi Servers API internal with no public IP) are all rebuilt this way (`nyuchi-api#355`, `#353`).
+4. **Backends run on wasmtime** (owner, 2026-10-29). `weather-core` already compiles for `wasm32-wasip1`. Cloudflare Workers run V8, so wasmtime fits the Fly origins. Which services move is a design step before any restructuring; see the [Data playbook](/playbooks/data/#backends-under-wasmtime).
+5. **Where things run.** Stateless services are decided to go multi-region: Fly `jnb`, `cdg` (`mad` second choice) and `sin`. Stateful stores (Cassandra, the Postgres ledger, Redpanda, CouchDB, Doris) stay primary in `jnb` until a replication design exists. Nothing in `data-infra` has a public address; it is reached over 6PN.
+6. **Reach backends from either side.** A backend behind a trait with an adapter per side can be reached from Cloudflare or from Fly. The internal Servers API sits behind a private Cloudflare Tunnel; decided, not built.
+7. **Nothing crashes.** A handler panic becomes a 500 and the process keeps serving. Requests have timeouts and size limits, shutdown is graceful, `/health` is liveness, `/ready` checks each dependency, and the version reported is the real release. No `unwrap()` or `expect()` outside tests; configuration errors stop the process at startup, never on a request.
+8. **Everything ships to production.** Releases go `staging` to `main` through the merge queue; a merge to `staging` is a patch, a release to `main` is a minor, a major is only made by hand. Deploys run on every push to `main`. No deploy waits on a repository variable, and a missing secret fails the deploy loudly instead of skipping it.
+9. **Never push to `main`; never close a conflicting PR.** Resolve the conflict and keep every feature. Keep history linear; do not merge a base branch into a feature branch.
+10. **Secrets live in a secret store.** None in a repository, example or doc. Deployments hold SHA-256 digests of internal keys. Never write credential status into a committed file, and never log a key, token, body or connection string.
+11. **Honesty.** Report what was measured, label design as design, and never claim parity, speed or latency that nothing has measured.
+12. **Big work gets an issue** in the repository that owns it, with the goal, the owner's decisions verbatim, the plan, acceptance criteria and the owner-only steps. Every PR references it.
+
+## How to build a service
+
+1. Put the decision in `core` and test it natively; check it builds for `wasm32`.
+2. Add routes to the one route table, the router and the OpenAPI document together (a test fails otherwise).
+3. Every error is an RFC 9457 problem, rendered in one place.
+4. Add a changelog entry that keeps "decided" and "built" apart.
+5. Open a draft PR to `staging` (or `main` where no `staging` exists yet, and say so), with the checks the repository's CI runs.
+
+## Open for the owner
+
+- Which Workers move to wasmtime origins, and what that does to the Cloudflare bindings they use.
+- The replication design for stateful stores outside `jnb`.
