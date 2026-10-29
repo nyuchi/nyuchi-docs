@@ -1,0 +1,26 @@
+---
+title: Playbooks
+description: "How Nyuchi builds. Decisions are made here once, so they are not asked again."
+---
+
+A playbook holds the decisions for one subject. When a question comes up, the answer is in the playbook or the playbook has a gap. A gap is filled by deciding it once with the owner and writing it down. Then everyone builds the same way.
+
+| Playbook                           | Decides                                                                          |
+| ---------------------------------- | -------------------------------------------------------------------------------- |
+| [Data](/playbooks/data/)           | Domains, standards, the canonical model, events as the record, what is not Mongo |
+| [Platform](/playbooks/platform/)   | Where code runs, Rust and wasmtime, releases, secrets, what must never break     |
+| [API](/playbooks/api/)             | The four gateways, contracts, errors, auth, limits, conventions                  |
+| [Open data](/playbooks/open-data/) | What we publish, in what form, with what privacy guarantee                       |
+| [Analytics](/playbooks/analytics/) | How we measure without surveilling                                               |
+| [Weather](/playbooks/weather/)     | The weather goal and its objectives. It follows the other playbooks              |
+
+## Where the structure lives
+
+The playbooks say how we decide. The structure of the data and the standards we adopt and publish live in [`bundu-labs/bundu-standards`](https://github.com/bundu-labs/bundu-standards): `register/` for standards we adopt, `standards/` for the ones we publish. The canonical model moves there too. A playbook links to a standard by its register id and never restates it.
+
+## Rules for the playbooks themselves
+
+1. A decision names its source (an owner message with its date, a repository file, an issue).
+2. "Decided, not built" is said wherever that is the case.
+3. No counts of live things in prose; they go stale. Say how to measure them.
+4. A playbook for a product (weather) follows these and does not restate them.

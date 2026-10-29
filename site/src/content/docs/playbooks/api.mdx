@@ -1,0 +1,33 @@
+---
+title: API playbook
+description: "How Nyuchi designs, secures and versions its APIs, and which API owns what."
+sidebar:
+  label: API
+---
+
+This playbook decides how we build APIs. Sources: the `AGENTS.md` files of `nyuchi/nyuchi-servers-api` and `nyuchi/data-infra`, `docs/event-platform.md`, `docs/ledger-key-contract.md` and the weather repository's `CLAUDE.md`.
+
+## The decisions
+
+1. **Four gateways, four jobs.** Mzizi API (public), Nyuchi API (B2B, `api.nyuchi.com`), Mukoko API (consumer), Nyuchi Servers API (internal, no public IP). The Nyuchi API is the only public endpoint for writes: it validates an action and appends one event to the log.
+2. **Callers integrate through the contract.** `GET /openapi.json` (OpenAPI 3.1) is the contract. Callers never import our code. A route is added to the route table, the router and the OpenAPI document together.
+3. **Every error is RFC 9457 Problem Details**, with `instance` and `traceId`, rendered in one place. Never write an error body by hand.
+4. **Standard auth and discovery.** OAuth 2.1 and OIDC, with RFC 9728 protected-resource metadata. Internal `nyk_` keys are a second factor, not an identity. Keys are stored as digests in the ledger, never in Mongo.
+5. **Standard observability and limits.** W3C Trace Context and OpenTelemetry; IETF RateLimit headers; per-key limits and usage metered in the ledger.
+6. **JSON conventions.** Field names are camelCase, timestamps are RFC 3339 UTC, countries are ISO 3166, currencies ISO 4217, languages BCP 47. Events are CloudEvents.
+7. **Read your write.** An action returns the new state itself, not from a view that may not have caught up.
+8. **Public data endpoints say how fresh they are.** An answer that comes from a cache or a fallback says so (`X-Cache`, `X-Weather-Provider` are the pattern in weather), and a degraded answer is not cached as if it were whole.
+9. **Be a good neighbour to providers.** Budget calls to free upstreams, cache, and fail to a clearly labelled fallback. Never hammer a community source: ask permission and for attribution wording first (the SAAOPA rule in the weather playbook).
+10. **Weather API.** `/v1/weather` is a Nyuchi API router (`nyuchi-api#397`). Stations are registered on the Nyuchi API with a WIGOS id and a Places id. Decided; the routes are not built.
+
+## How to add an endpoint
+
+1. Name the domain that owns the data ([Data playbook](/playbooks/data/)) and the standard each field follows.
+2. Define the request and response types first; they generate the OpenAPI document.
+3. Return problems for every non-2xx.
+4. Test the contract: the route table, the router and the OpenAPI document agree.
+5. State rate limits and what the endpoint costs per call.
+
+## Open for the owner
+
+- Station registration routes on the Nyuchi API: shape and scopes.

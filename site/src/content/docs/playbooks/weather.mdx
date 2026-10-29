@@ -1,9 +1,11 @@
 ---
 title: Weather playbook
-description: The goal, rules and recurring objectives for Nyuchi weather infrastructure, with the state of each repo and what needs an owner decision.
+description: "The goal, rules and recurring objectives for Nyuchi weather infrastructure, with the state of each repo and what needs an owner decision."
 sidebar:
-  label: Playbook
+  label: Weather
 ---
+
+This playbook is about weather only. How we build anything (data, platform, open data, analytics, APIs) is decided in the other [playbooks](/playbooks/), and this one follows them.
 
 **Weather is infrastructure, so it belongs to Nyuchi** (owner direction, 2026-10-29). Nyuchi Web Services builds and runs it; Mukoko Weather is the consumer product on top of it, alongside the other apps and partners that read it. Where this page says "the weather repo" it means `mukoko-dev/mukoko-weather`, which still sits under the Mukoko organisation. Whether it moves is an open decision (section 7).
 
@@ -89,81 +91,9 @@ Order is priority. Objectives 1 to 3 are the foundation and unblock the rest. Do
 - **What `data-infra` already says (#90, read 2026-10-29; comments dated 2026-10-28; the owner's mandatory-and-urgent note is tracked in `data-infra#122`):** weather has no module in the platform model (`schemas/model/`), so nothing checks it. Findings: ObjectId `_id` instead of UUID strings; free-text country and province on stations; two metric names per quantity (`temperatureCelsius` and `airTemperatureCelsius`, and three more pairs); daily values keyed by an instant instead of an ISO date plus IANA zone; `regions` boxes not in GeoJSON `bbox` order. Planned sequence: a `weather.yaml` model PR (no data touched), then a station-to-place match report, then a backfill that needs your yes. Unmatched stations are listed, not guessed. The sibling issues are `nyuchi-api#397` (the `/v1/weather` router, which filters stations by free-text country and province) and an unfiled audit of the mobile app. The agriculture domain was added in `data-infra#117` (merged 2026-10-28) with no data model yet; `nyuchi/agriconnect` is an empty repo (a heading in its README).
 - **Loop order for this objective:** (1) review the `weather.yaml` model PR when it lands, (2) make new code in this repo write the model's names only, behind adapters, (3) wait for the match report before any backfill.
 
-### 3a. The agriculture database
+### 3b. Where weather's data belongs
 
-The `agriculture` database exists in the Nyuchi Platform cluster (`nyuchi-platform-doc-db`, MongoDB 8.0, AWS af-south-1) but has not been set up as a platform domain. The cluster held 34 databases on 2026-10-29: 31 platform and working databases plus `admin`, `config` and `local`. Older docs say 27; the number keeps growing, so re-read the cluster before quoting it. Read on 2026-10-29, read-only:
-
-| Collection        | Documents | Notes                                                                                                                                                                           |
-| ----------------- | --------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adminAreas`      |       101 | Administrative areas                                                                                                                                                            |
-| `stations`        |        19 | Weather stations with a `wigosId`, a GeoJSON `location`, `wmoRegion`, `publisher`, `dataPolicy`, `sourceUrl` and `consumers` (national and WMO sources, not community stations) |
-| `datasets`        |        13 | Dataset records                                                                                                                                                                 |
-| `observations`    |        12 | Observations                                                                                                                                                                    |
-| `rainfallDekadal` |        10 | Ten-day rainfall                                                                                                                                                                |
-| `sourceFacts`     |         6 | Source facts                                                                                                                                                                    |
-
-What is missing, measured:
-
-- **Ids are ObjectIds** in the collections I sampled. The platform rule (`data-infra#90`) is UUIDv7 strings.
-- **Only the `_id` index exists** on `stations` and `observations`. There is no 2dsphere index on `stations.location`, so a nearest-station query cannot run.
-- **No model.** `data-infra` registered `agriculture` as a domain in PR #117 (merged 2026-10-28) with an empty migrations directory and no `agriculture.yaml` model, so nothing generates or checks its validators. I did not read the live validators; confirm them before relying on them.
-- **Invisible to the Nyuchi Data tool.** That read-only tool lists 26 domains. Of the 31 non-system databases, it cannot see `agriculture`, `logistics`, `pulse`, `transport`, `mzizi_samples` and `weather_backup_20261028`. Its checks do not cover them, and the registry needs updating (`data-infra` `schemas/domains.yaml` is the source of truth).
-- **A reader exists, on a different store.** `nyuchi/agriconnect` PR #1 (draft, open since 2026-10-28) scaffolds an open-data-only service that reads Doris, not MongoDB. How the Mongo data reaches Doris is not defined (the news bridge in `data-infra#124` is the pattern).
-- **Staging copies that belong elsewhere.** The loader of this database (a Bundu Foundation knowledge session, brief of 2026-10-29, 161 documents) says `agriculture.stations` belongs in `weather.stations` and `agriculture.adminAreas` belongs in `places.placesGeo` as an OCHA P-code cross-reference (`externalIds.ochaPcode`). Both are retired after they are merged. That follows the rule that weather holds no geography of its own. The ten Zimbabwe province P-codes (ZW10 to ZW19) map one-to-one to ISO 3166-2 and to `placesGeo` ids; that table is in the brief.
-- **A stray backup.** `weather_backup_20261028` (stations and regions, 147 KB) sits beside the live `weather` database. Drop it only after you confirm the live data is right.
-
-Setup, in order (each step is its own reviewed change):
-
-1. Write `agriculture.yaml` in `data-infra` (models for station, observation, dataset, rainfall) with UUIDv7 ids, ISO 8601 times with an IANA zone, ISO 3166 codes, CF names and a WIGOS id; generate the validators.
-2. Apply validators and indexes (2dsphere on station locations; unique keys on natural identifiers such as WIGOS id and dataset id), plus the domain's role and credentials per `docs/domain-isolation.md`.
-3. Re-key the existing 160 documents (plan and match report first; the backfill needs the owner's yes).
-4. Add the domain to the Nyuchi Data tool, then wire AgriConnect to it.
-
-The agriculture links to `knowledge.topics` are blocked: two inserts failed validation and nothing exposes the validator. That is the first gap in the "Tooling gaps" section below. Weather adds no agriculture data store of its own. The `/api/py/agriculture` endpoint and the crop calendars move here when AgriConnect serves them.
-
-**Correction (owner, 2026-10-29): one domain, one kind of data.** The first agriculture model in `data-infra#138` wrongly carried weather and geography records (a WIS2 dataset entry, an OCHA boundary entry, a `registry-loaded` status). Those are removed from the agriculture model: agriculture holds crop, yield, production, food-security and rainfall-for-farming data only. Stations go to `weather`, administrative areas go to `places`, and a catalogue of external sources belongs with `integrations`.
-
-### 3b. Audit: what in the weather database is not weather
-
-Read-only, 2026-10-29. The `weather` database holds 35 collections. No data has been moved. Counts are from the Nyuchi Data tool and the Atlas tool; the five collections marked "not re-read" were counted earlier in this session.
-
-| Collection                                                                                                                                           |                   Docs | Belongs in                                          | Why                                                                                                                                    |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------: | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `stations`, `observations`, `stationObservations`, `alerts`                                                                                          |             1, 1, 1, 0 | stays in `weather`                                  | Core weather. Needs a `weather.yaml` model (`data-infra#90`): UUID ids, CF names, ISO country codes, a Places id instead of free text. |
-| `weather_history`, `climate_normals`, `forecastVerification`, `modelBlendConfig`                                                                     |     3053, 206, 4403, 0 | stays in `weather`                                  | Weather facts and forecast engineering. `weather_history` days are keyed by an instant, not a local date.                              |
-| `weather_reports` and `communityReports`                                                                                                             |                  12, 0 | one collection in `weather`                         | The same thing twice. Pick one name, migrate the 12, drop the other.                                                                   |
-| `suitability_rules`                                                                                                                                  |                     10 | stays in `weather`                                  | Weather logic. It points at activities by id.                                                                                          |
-| `activities`, `activity_categories`                                                                                                                  |                  55, 6 | owner decision                                      | A catalogue of what people do, not weather. Candidates: `knowledge` (as a defined-term set) or `engagement`. Not decided here.         |
-| `tags`                                                                                                                                               |                      8 | `engagement`                                        | `engagement.tags` already holds 288 tags as defined terms.                                                                             |
-| `regions`                                                                                                                                            |                     10 | `places`                                            | Bounding boxes. Geography.                                                                                                             |
-| `airports`                                                                                                                                           |                    308 | `places`                                            | Aerodromes are places. The ICAO code is an identifier on the place, not the `_id`.                                                     |
-| `seasons`                                                                                                                                            |                    234 | `places.placeKnowledge` (`data-infra#107`)          | Country seasons are place knowledge. Crop calendars and crop windows go to `agriculture`.                                              |
-| `ai_prompts`, `ai_suggested_rules`, `ai_summaries`, `history_analysis`                                                                               | 12, 21, 0, not re-read | `shamwari`                                          | Prompts and AI output belong to the AI domain. The Worker already owns the model.                                                      |
-| `agriculture_cache`, `agriculture_ai`                                                                                                                |                   0, 0 | `agriculture`, or no store                          | Agriculture caches. Retire with the Python route.                                                                                      |
-| `api_keys`                                                                                                                                           |                      1 | the secret store, not Mongo                         | Holds third-party provider keys (I did not read the value). Secrets belong in the Cloudflare Secrets Store the Workers already use.    |
-| `rate_limits`, `providerBudget`                                                                                                                      |                   3, 9 | the ledger (`platform` usage counters) or Worker D1 | Metering and quota. The Workers already use D1 `rate_events`. The ledger is not deployed, so these stay until it is.                   |
-| `creation_locks`                                                                                                                                     |            not re-read | retire with the Python route                        | A transient lock.                                                                                                                      |
-| `weather_cache`, `enrichmentCache`, `air_quality_cache`, `air_quality_grid_cache`, `haze_cache`, `metar_cache`, `model_grid_cache`, `map_tile_cache` |     0 now, not re-read | KV or the Cache API in the Workers                  | Caches are not domain data. Mongo TTL collections were the Python design.                                                              |
-| `agriculture.stations` (19), `agriculture.adminAreas` (101)                                                                                          |                19, 101 | `weather.stations`, `places.placesGeo`              | Staging copies. Merge, then retire (already recorded in the `data-infra` drift baseline).                                              |
-| `weather_backup_20261028`                                                                                                                            |                        | drop                                                | A stray backup. Drop only after the owner confirms the live data.                                                                      |
-
-Order of work, none of it started: (1) the `weather.yaml` model, with the station-to-place match report, (2) re-scope `agriculture` to agriculture only, (3) move reference data (`regions`, `airports`, `seasons`, `tags`) to their domains behind adapters, (4) move prompts to `shamwari`, (5) drop caches and locks as the Python routes go. Every step that touches data on the shared cluster needs the owner's yes.
-
-### 3c. External sources: convert at the edge, store our schema
-
-The rule: **we never adopt an external API's schema.** Every feed (WIS2 from the Zimbabwe Meteorological Services Department, SAAOPA WX-CoPilot, Open-Meteo, Tomorrow.io, AWC) goes through a transformation layer that outputs our standard model, and only that is stored or served.
-
-- Names are CF standard names (`air_temperature`, `relative_humidity`, `surface_air_pressure`, `air_pressure_at_mean_sea_level`, `wind_speed`, `wind_speed_of_gust`, `wind_from_direction`, `dew_point_temperature`, `precipitation_amount`). One name per quantity.
-- Units are declared once, in SI and UCUM (`Cel`, `%`, `hPa`, `m/s`, `deg`, `mm`). Knots and km/h are display formatting, never storage.
-- Identifiers are WIGOS ids for stations, ISO 3166 for countries, ISO 8601 / RFC 3339 for times with an IANA zone. Provenance and licence travel with each value.
-- The standards register has WMO station ids, WMO 4677 and CF. It does not yet list UCUM, the WIS2 / OGC API Features profile, or OCHA P-codes. Proposing them is a small change to `standards/register.yaml` in `data-infra`.
-- Why: it is what lets us publish and contribute to global models. If our storage mirrors one provider, we are locked to that provider.
-
-The first parsers (`mukoko-dev/mukoko-weather#362`) emit the app's older metric names, in km/h. That is being reworked to this rule before anything calls a feed.
-
-### 3d. Backends under wasmtime
-
-Direction from the owner: the Rust backends run on wasmtime. What was checked on 2026-10-29: `weather-core` (the pure logic crate) compiles for `wasm32-wasip1`, so its logic already runs on a WASI runtime. I could not run it under wasmtime in this session, because installing the binary was refused by the sandbox. Open questions for the owner: Cloudflare Workers run V8, not wasmtime, so wasmtime fits the origin hosts (Fly) in the `nyuchi-servers-api` origin/edge layout rather than the Workers. Which of the weather Workers move to origin hosts, and what that does to the Cloudflare bindings (KV, D1, service bindings) they rely on today, is a design decision before any restructuring.
+The audit of the `weather` database (which collections are not weather and where each goes), the rule for converting external feeds at the edge, and the wasmtime direction are decisions about data, so they live in the [Data playbook](/playbooks/data/), not here. Weather's part of the work: the `weather.yaml` model (`data-infra#90`), stations registered on the Nyuchi API, and feed parsers that output standard names and units.
 
 ### Objective 4: Forecasts people can trust in Africa
 
@@ -291,7 +221,7 @@ Marketing here is service and community storytelling. Each objective has a story
 Run one objective per loop. Paste the block, filling the objective number. A loop reads this file first, does the smallest safe step, writes its result as an issue comment on the referenced issue (hand-off: done, left, branch), and ends with a single "Needs you:" line.
 
 ```text
-/loop 1h Weather playbook, Objective <N> (docs.nyuchi.com/weather/playbook).
+/loop 1h Weather playbook, Objective <N> (docs.nyuchi.com/playbooks/weather).
 Read the objective and rules in section 2. Do the next smallest safe step
 listed under "Loop does". Run the repo's checks for what you changed.
 Never merge, deploy, publish or message users. Comment progress and the
@@ -337,18 +267,6 @@ This feeds Objective 4 directly: it is the observation set the forecast verifica
 - **QNH is not station pressure.** It is kept as its own value, never written to the station-pressure metric.
 
 The parsers for this feed and for the MSD WIS2 feed are `weather_core::external_feeds` (`mukoko-dev/mukoko-weather#362`); the plan, the gates and what is not built are in `mukoko-dev/mukoko-weather#361`. A WIS2 page boundary can cut a station-hour in two (seen live), so a writer must merge per metric, never replace.
-
-## 6b. Tooling gaps found while building the agriculture database
-
-From the same session (brief of 2026-10-29; items marked tested were run, the rest come from the tools' own descriptions):
-
-1. **No validator or schema contract in the Nyuchi Data tool.** It shows that a collection exists, its counts and indexes, but not its required fields, enums or `validationAction`. The `knowledge.topics` inserts failed twice with only "Document failed validation". Request: a read-only collection-info tool that returns validators, collection options and the declared schema from `data-infra`.
-2. **The Atlas tool is write-capable and has no scoping.** It accepted writes across the cluster (stopped only by a validator), takes optional filters on update and delete, and bundles cluster and database-user administration with data tools. Use a dedicated least-privilege database user per task.
-3. **Index reporting has two defects:** `_id_` shows as not unique, and compound index key order is lost. Unique, TTL and partial indexes cannot be created through the Atlas tool at all.
-4. **No read-only aggregation**, so verifying a load needs the write-capable tool.
-5. **Operational honesty:** 24 of 63 Nyuchi Data tools front stores that are undeployed, unconfigured or empty (Postgres undeployed, Redpanda and Cassandra unconfigured, Doris empty).
-
-Practical rules until fixed: load only small curated data through a tool, verify with an aggregate checksum, give every document a `loadId` so a rollback is one filtered delete, and use a script with a scoped connection string for anything larger. These sit with the `data-infra` team.
 
 ## 7a. Repo and PR sweep (2026-10-29)
 
