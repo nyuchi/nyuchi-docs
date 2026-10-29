@@ -91,7 +91,7 @@ Order is priority. Objectives 1 to 3 are the foundation and unblock the rest. Do
 
 ### 3a. The agriculture database
 
-The `agriculture` database exists in the Nyuchi Platform cluster (`nyuchi-platform-doc-db`, MongoDB 8.0, AWS af-south-1) but has not been set up as a platform domain. Read on 2026-10-29, read-only:
+The `agriculture` database exists in the Nyuchi Platform cluster (`nyuchi-platform-doc-db`, MongoDB 8.0, AWS af-south-1) but has not been set up as a platform domain. The cluster held 34 databases on 2026-10-29: 31 platform and working databases plus `admin`, `config` and `local`. Older docs say 27; the number keeps growing, so re-read the cluster before quoting it. Read on 2026-10-29, read-only:
 
 | Collection        | Documents | Notes                                                                                                                                                                           |
 | ----------------- | --------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -107,8 +107,9 @@ What is missing, measured:
 - **Ids are ObjectIds** in the collections I sampled. The platform rule (`data-infra#90`) is UUIDv7 strings.
 - **Only the `_id` index exists** on `stations` and `observations`. There is no 2dsphere index on `stations.location`, so a nearest-station query cannot run.
 - **No model.** `data-infra` registered `agriculture` as a domain in PR #117 (merged 2026-10-28) with an empty migrations directory and no `agriculture.yaml` model, so nothing generates or checks its validators. I did not read the live validators; confirm them before relying on them.
-- **Invisible to the Nyuchi Data tool.** That read-only tool lists 26 domains and `agriculture` is not one of them, so its checks do not see this database.
+- **Invisible to the Nyuchi Data tool.** That read-only tool lists 26 domains. Of the 31 non-system databases, it cannot see `agriculture`, `logistics`, `pulse`, `transport`, `mzizi_samples` and `weather_backup_20261028`. Its checks do not cover them, and the registry needs updating (`data-infra` `schemas/domains.yaml` is the source of truth).
 - **A reader exists, on a different store.** `nyuchi/agriconnect` PR #1 (draft, open since 2026-10-28) scaffolds an open-data-only service that reads Doris, not MongoDB. How the Mongo data reaches Doris is not defined (the news bridge in `data-infra#124` is the pattern).
+- **Staging copies that belong elsewhere.** The loader of this database (a Bundu Foundation knowledge session, brief of 2026-10-29, 161 documents) says `agriculture.stations` belongs in `weather.stations` and `agriculture.adminAreas` belongs in `places.placesGeo` as an OCHA P-code cross-reference (`externalIds.ochaPcode`). Both are retired after they are merged. That follows the rule that weather holds no geography of its own. The ten Zimbabwe province P-codes (ZW10 to ZW19) map one-to-one to ISO 3166-2 and to `placesGeo` ids; that table is in the brief.
 - **A stray backup.** `weather_backup_20261028` (stations and regions, 147 KB) sits beside the live `weather` database. Drop it only after you confirm the live data is right.
 
 Setup, in order (each step is its own reviewed change):
@@ -118,7 +119,7 @@ Setup, in order (each step is its own reviewed change):
 3. Re-key the existing 160 documents (plan and match report first; the backfill needs the owner's yes).
 4. Add the domain to the Nyuchi Data tool, then wire AgriConnect to it.
 
-Weather adds no agriculture data store of its own. The `/api/py/agriculture` endpoint and the crop calendars move here when AgriConnect serves them.
+The agriculture links to `knowledge.topics` are blocked: two inserts failed validation and nothing exposes the validator. That is the first gap in the "Tooling gaps" section below. Weather adds no agriculture data store of its own. The `/api/py/agriculture` endpoint and the crop calendars move here when AgriConnect serves them.
 
 ### Objective 4: Forecasts people can trust in Africa
 
@@ -267,6 +268,31 @@ Each of these blocks a named objective. A loop surfaces them; only the owner dec
 5. Whether the Astro port (#293) stays on the roadmap, given Rust-only is the stated priority. Recommendation: defer it until Objective 2 is done, since it replaces the front end the other objectives are still changing.
 6. Mobile store submission and an iOS account (Objective 5).
 7. Approving the `data-infra` weather model (`#90`) and, later, the station-to-place backfill (Objective 3). The model PR has not landed yet.
+
+## 6a. A new source of ground truth: Zimbabwe's WIS2 feed
+
+The Meteorological Services Department (MSD) publishes hourly surface observations from its automatic stations through an open, keyless OGC API under WMO's core data policy (free and unrestricted exchange). Read from the live node on 2026-10-29 (brief of the same date). This is the strongest ground truth available for Zimbabwe, and it plugs into what exists: `weather.stations` (registry), `weather.stationObservations` (raw hourly), then the existing fusion into `weather.observations`. It needs no new collection.
+
+What the first look found:
+
+- **19 stations are registered; four reported in the last 15 days** (Bulawayo Goetz, Victoria Falls, Buffalo Range, Mount Darwin). Registered does not mean publishing. Buffalo Range had been silent about 20 hours.
+- **Rainfall was exactly 0.0 in all 833 reported hours at every reporting station.** That may be a dry fortnight, but zero everywhere for 16 days is unusual enough to verify. Hold this feed's rainfall out of farm advice until MSD or a cross-check (CHIRPS) confirms the gauges.
+- **Quirks that break a naive import:** one row per parameter per station per hour, so group by `reportId` (precipitation carries an interval, the rest an instant); wind speed is m/s, so km/h is x 3.6; pressure is station-level, not sea-level; and some stations have doubtful coordinates or elevations (Beitbridge's published point is near Harare, Nyanga's elevation and barometer height differ by about 360 m, and Kutsaga is registered twice).
+- **Import rules:** idempotent upserts keyed `wis2:<reportId>`; attribution "Meteorological Services Department of Zimbabwe, via WMO WIS2" on every record; flag questionable values, do not fix them; never invent a station that is not in the registry; keep `lastObservedAt` honest so the app can show a station as stale.
+
+This feeds Objective 4 directly: it is the observation set the forecast verification join needs, and a model for registering stations on the Nyuchi API (a WIGOS id and a Places id on each station). Open decisions from the brief (D1 to D8): which `metrics` naming family the app reads, where the WIGOS id lives, station versus sea-level pressure, province assignment by polygon (provinces are centroids today), how official data ranks against community data in fusion, an MSD record in `entity.entities`, and rainfall trust. The reference code in the brief was run against the live API.
+
+## 6b. Tooling gaps found while building the agriculture database
+
+From the same session (brief of 2026-10-29; items marked tested were run, the rest come from the tools' own descriptions):
+
+1. **No validator or schema contract in the Nyuchi Data tool.** It shows that a collection exists, its counts and indexes, but not its required fields, enums or `validationAction`. The `knowledge.topics` inserts failed twice with only "Document failed validation". Request: a read-only collection-info tool that returns validators, collection options and the declared schema from `data-infra`.
+2. **The Atlas tool is write-capable and has no scoping.** It accepted writes across the cluster (stopped only by a validator), takes optional filters on update and delete, and bundles cluster and database-user administration with data tools. Use a dedicated least-privilege database user per task.
+3. **Index reporting has two defects:** `_id_` shows as not unique, and compound index key order is lost. Unique, TTL and partial indexes cannot be created through the Atlas tool at all.
+4. **No read-only aggregation**, so verifying a load needs the write-capable tool.
+5. **Operational honesty:** 24 of 63 Nyuchi Data tools front stores that are undeployed, unconfigured or empty (Postgres undeployed, Redpanda and Cassandra unconfigured, Doris empty).
+
+Practical rules until fixed: load only small curated data through a tool, verify with an aggregate checksum, give every document a `loadId` so a rollback is one filtered delete, and use a script with a scoped connection string for anything larger. These sit with the `data-infra` team.
 
 ## 7a. Repo and PR sweep (2026-10-29)
 
