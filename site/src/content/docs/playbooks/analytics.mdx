@@ -10,7 +10,7 @@ This playbook decides how we measure. Sources: `docs/event-platform.md` and the 
 ## The decisions
 
 1. **No surveillance business model.** Dignity is the default. Measure whether people were helped, not how long they were held. Every metric names the person it is about and what that person got.
-2. **One pipeline.** Every action is an event in the log (Redpanda). Doris receives the analytics and search feeds by Routine Load, with `search` and `analytics` workload groups, a database per domain, and a nightly backup to R2. Flink does stream processing. Nothing writes an analytics table by hand.
+2. **Each store has one job.** Doris is for search and analytics: a database per domain, `search` and `analytics` workload groups, loaded by Routine Load, with a nightly backup to R2. Redpanda carries the events, and with Flink supports open data and PII stripping, so what reaches Doris or the commons has already been made anonymous. Nothing writes an analytics table by hand.
 3. **Events follow the model.** CloudEvents envelopes with Avro payloads from the canonical model. A new event type is a model change, not an ad hoc payload.
 4. **Anonymous before analysed.** Product analytics carry no personal fields. Locations are coarsened before they leave the browser: spot slugs become a 4-character geohash, URLs drop every query parameter except campaign attribution, coordinates are rounded to about 110 m in logs and analytics. The page URL itself, which people share, is untouched.
 5. **Two layers.** Web and app analytics (GA4 and Vercel Web Analytics today, with `trackEvent` as the one call) answer product questions. Platform analytics (Doris) answer service questions. They are not joined on a person.

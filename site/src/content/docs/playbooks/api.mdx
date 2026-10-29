@@ -9,7 +9,7 @@ This playbook decides how we build APIs. Sources: the `AGENTS.md` files of `nyuc
 
 ## The decisions
 
-1. **Four gateways, four jobs.** Mzizi API (public), Nyuchi API (B2B, `api.nyuchi.com`), Mukoko API (consumer), Nyuchi Servers API (internal, no public IP). The Nyuchi API is the only public endpoint for writes: it validates an action and appends one event to the log.
+1. **Four gateways, four jobs.** Mzizi API (public), Nyuchi API (B2B, `api.nyuchi.com`), Mukoko API (consumer), Nyuchi Servers API (internal, no public IP). The Nyuchi API validates actions and is where places and stations are created. Where a write lands follows the [Data playbook](/playbooks/data/): documents in MongoDB, relational and money in the ledger.
 2. **Callers integrate through the contract.** `GET /openapi.json` (OpenAPI 3.1) is the contract. Callers never import our code. A route is added to the route table, the router and the OpenAPI document together.
 3. **Every error is RFC 9457 Problem Details**, with `instance` and `traceId`, rendered in one place. Never write an error body by hand.
 4. **Standard auth and discovery.** OAuth 2.1 and OIDC, with RFC 9728 protected-resource metadata. Internal `nyk_` keys are a second factor, not an identity. Keys are stored as digests in the ledger, never in Mongo.
