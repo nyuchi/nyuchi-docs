@@ -165,6 +165,11 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Weather',
+          collapsed: true,
+          items: ['weather/playbook'],
+        },
+        {
           label: 'Mukoko Weather',
           collapsed: true,
           items: [
