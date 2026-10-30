@@ -1,0 +1,23 @@
+---
+title: Analytics playbook
+description: "How Nyuchi measures products and the platform without surveilling people: stores, events, privacy rules and what to track."
+sidebar:
+  label: Analytics
+---
+
+This playbook decides how we measure. Sources: `docs/event-platform.md` and the Doris README in `nyuchi/data-infra`, and the weather repository's `CLAUDE.md` (analytics and location privacy).
+
+## The decisions
+
+1. **No surveillance business model.** Dignity is the default. Measure whether people were helped, not how long they were held. Every metric names the person it is about and what that person got.
+2. **Each store has one job.** Doris is for search and analytics: a database per domain, `search` and `analytics` workload groups, loaded by Routine Load, with a nightly backup to R2. Redpanda carries the events, and with Flink supports open data and PII stripping, so what reaches Doris or the commons has already been made anonymous. Nothing writes an analytics table by hand.
+3. **Events follow the model.** CloudEvents envelopes with Avro payloads from the canonical model. A new event type is a model change, not an ad hoc payload.
+4. **Anonymous before analysed.** Product analytics carry no personal fields. Locations are coarsened before they leave the browser: spot slugs become a 4-character geohash, URLs drop every query parameter except campaign attribution, coordinates are rounded to about 110 m in logs and analytics. The page URL itself, which people share, is untouched.
+5. **Two layers.** Web and app analytics (GA4 and Vercel Web Analytics today, with `trackEvent` as the one call) answer product questions. Platform analytics (Doris) answer service questions. They are not joined on a person.
+6. **Track the metric the work moves.** Each product or feature names its growth metric (users, retention, community activity) before it ships; the entity scorecards are in the playbook for that product.
+7. **Open data is separate.** Anything published to the commons follows the [Open data playbook](/playbooks/open-data/).
+8. **Tracking is planned.** Use the tracking-plan process: model the product, audit current tracking, design the plan, then implement. Do not add events without a plan entry.
+
+## Open for the owner
+
+- Whether GA4 stays, given decision 1. The location-privacy rules reduce the exposure but do not remove the third party.

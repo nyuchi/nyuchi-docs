@@ -1,0 +1,26 @@
+---
+title: Open data playbook
+description: "How Nyuchi publishes data to the commons: what may be published, in what form, under which licence, and with what privacy guarantee."
+sidebar:
+  label: Open data
+---
+
+This playbook decides what we publish and how. Sources: the canonical open-data model (`schemas/model/opendata.yaml`), the standards register, the Bundu vocabulary, and the owner's directions of 2026-10-04 and 2026-10-23.
+
+## The decisions
+
+1. **Open by default, on published standards.** Datasets are described with DCAT v3 and licensed CC BY 4.0 unless a source's own licence is stricter. Each dataset keeps its own licence and attribution; we never relabel a source.
+2. **Nothing personal.** Open datasets contain no person id and no slot marked personal. Identifiers are random with no stored mapping; age is a band, location a continent, time a week or a month; usage is counts. This is what lets the data go to the cold tier and Doris at all (the model check refuses a personal slot there).
+3. **Anonymous by construction, then checked.** k-anonymity with k >= 10 and a re-identification risk check before a release. The Bundu vocabulary has `kAnonymity` and `maxReidentificationRisk` for datasets that carry them. Redpanda and Flink do the PII stripping before data reaches the open-data tables.
+4. **Release, not rows.** Contributions are never published row by row; only releases are.
+5. **Giving back.** When a person deletes their account and does not opt out, anonymous counts of how they used the platforms go to the commons (owner, 2026-10-04).
+6. **Contribute to the global models.** Convert external data to standard names and units at the edge ([Data playbook](/playbooks/data/)), so what we hold can be published and contributed in standard form rather than in a provider's shape.
+7. **Attribute every source.** Provenance and licence travel with each value. Weather data credits ECMWF, NOAA, DWD, ECCC and Météo-France via Open-Meteo (CC BY 4.0), the Meteorological Services Department of Zimbabwe via WMO WIS2, and so on.
+8. **A source with no stated terms is not ingested on a schedule.** Ask first (SAAOPA is the live case).
+9. **Agriculture is its own domain.** `agriculture` holds crop, yield, production, food-security and farming-rainfall data. Station data goes to `weather`, administrative areas to `places`.
+10. **Reading open data.** AgriConnect is an open-data-only service. It reads Doris, not MongoDB. How MongoDB data reaches Doris follows the news bridge pattern (`data-infra#124`).
+
+## Open for the owner
+
+- Whether `opendata` becomes its own domain or its tables move under `platform` (`data-infra` domains list, question on the Doris `open_data` database).
+- A licence statement per source dataset in the agriculture catalogue; some entries still hold free text.
