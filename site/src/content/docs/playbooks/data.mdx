@@ -70,18 +70,18 @@ Order of work, none of it started: (1) the `weather.yaml` model, with the statio
 
 ### Where our own models break the rule
 
-Found on 2026-10-29, in work this session produced or reviewed. Each is a defect to fix, with the standard it should use. The standards marked proposed are in the register awaiting adoption.
+Found on 2026-10-29, in work this session produced or reviewed. Each is a defect to fix, with the standard it should use. The eight weather standards that were proposed (UCUM, SOSA/SSN, SensorThings, WMDR, WIS2, OGC API - Features, SDMX, OCHA COD) were adopted on 2026-10-30.
 
 | Where                                  | Defect                                                                                                               | Should be                                                                                                                                                     |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `agriculture` model (`data-infra#138`) | Slots named after a provider: `zimdataUpdated`, `zimdataTopicLabel`, `zimdataFullRowsRequireLogin`.                  | DCAT v3 terms for a dataset record (title, publisher, licence, modified, landing page, distribution). Provider detail goes in provenance, not in field names. |
-| `agriculture` model                    | Series use FAOSTAT's table layout (`item`, `itemCode`, `element`, `elementCode`, `unit`).                            | SDMX dimensions, attributes and codelists (proposed), with UCUM units (proposed).                                                                             |
-| `weather.stations` and `observations`  | Two names per quantity and units in names (`airTemperatureCelsius`, `windSpeedKph`). Free-text country and province. | CF standard names, UCUM units, ISO 3166 codes, WIGOS ids; WMDR for station metadata, SOSA/SSN for the observation shape (proposed).                           |
+| `agriculture` model                    | Series use FAOSTAT's table layout (`item`, `itemCode`, `element`, `elementCode`, `unit`).                            | SDMX dimensions, attributes and codelists, with UCUM units.                                                                             |
+| `weather.stations` and `observations`  | Two names per quantity and units in names (`airTemperatureCelsius`, `windSpeedKph`). Free-text country and province. | CF standard names, UCUM units, ISO 3166 codes, WIGOS ids; WMDR for station metadata, SOSA/SSN for the observation shape.                           |
 | `weather_core::external_feeds`         | Names and units are now standard. The record is still a bespoke struct, and `legacy_metrics()` writes the old names. | Map to SOSA observations. Remove `legacy_metrics()` with the weather model (`data-infra#90`).                                                                 |
 | `/api/py/weather` payload              | The forecast answer has Open-Meteo's field names (`temperature_2m`, `weather_code`).                                 | A CF-named, UCUM-united answer; Open-Meteo becomes one converted source.                                                                                      |
 | The standards register                 | Lists "Open-Meteo API (/v1 API shapes)" as an adopted standard. That is a provider's API, not a standard.            | Move it to the integrations list as a source. Adopted by the owner on 2026-10-02, so reclassifying is the owner's call.                                       |
 
-Order: adopt the proposed standards, then write `weather.yaml` and fix `agriculture` against them, then convert. Nothing here moves data without the owner's yes.
+Order: the standards are adopted; now write `weather.yaml` and fix `agriculture` against them, then convert. Nothing here moves data without the owner's yes.
 
 ### Converting an external feed
 
