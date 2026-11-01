@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Dedicated Cloudflare Worker for the docs MCP server (docs.nyuchi.com/mcp) \u2014 read tools over the nyuchi-docs AI Search corpus, feedback/issue write tools into KV. The npm stdio bridge lives in ../nyuchi-docs-mcp.",
+  "description": "Dedicated Cloudflare Worker for the docs MCP server (docs.nyuchi.com/mcp) — read tools over the nyuchi-docs AI Search corpus, feedback/issue write tools into KV. The npm stdio bridge lives in ../nyuchi-docs-mcp.",
   "scripts": {
     "build": "tsc --noEmit && vp build",
     "dev": "vp dev",
@@ -14,15 +14,17 @@
     "check": "vp check --no-fmt"
   },
   "dependencies": {
-    "jose": "^6.2.12"
+    "@modelcontextprotocol/server": "^2.4.0",
+    "jose": "^6.2.12",
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.56.0",
     "@cloudflare/workers-types": "^5.20260920.1",
     "typescript": "^7.0.2",
-    "vite": "npm:@voidzero-dev/vite-plus-core@^1.0.0",
-    "vite-plus": "^1.0.0",
-    "vitest": "^5.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@^1.4.0",
+    "vite-plus": "^1.4.0",
+    "vitest": "^5.0.5",
     "wrangler": "^4.135.0"
   }
 }
