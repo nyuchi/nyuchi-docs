@@ -21,6 +21,7 @@ This playbook decides how we build and run services. Sources: the mission and en
 10. **Secrets live in a secret store.** None in a repository, example or doc. Deployments hold SHA-256 digests of internal keys. Never write credential status into a committed file, and never log a key, token, body or connection string.
 11. **Honesty.** Report what was measured, label design as design, and never claim parity, speed or latency that nothing has measured.
 12. **Big work gets an issue** in the repository that owns it, with the goal, the owner's decisions verbatim, the plan, acceptance criteria and the owner-only steps. Every PR references it.
+13. **Naming** (owner, 2026-11-01: "Our classes come from African species our server names from Lord of the Rings"). Classes (the fauna classes of the Mzizi apps, for example `.kudu` and `.impala`) are named after African species. Servers are named after places, peoples and creatures of _The Lord of the Rings_. A server name is chosen once, is unique across the ecosystem, and is internal: it is never a customer-facing brand or domain. **Gwaihir**, the Windlord, is the weather backend (decided, not built). Deployments that exist today keep their descriptive names; renaming them is not part of this decision.
 
 ## How to build a service
 
