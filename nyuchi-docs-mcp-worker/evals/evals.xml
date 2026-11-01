@@ -1,0 +1,60 @@
+<!--
+  Read-only evaluation set for the Nyuchi Docs MCP server (docs.nyuchi.com/mcp),
+  in the mcp-builder evaluation format. Every answer was checked against
+  production on 2026-11-01 with nyuchi_docs_search / nyuchi_docs_read_page (the
+  page each one comes from is in the comment). Only the read tools are needed;
+  none of these questions should lead an agent to submit feedback or raise an issue.
+  If a docs page changes, re-verify the pair that cites it.
+-->
+<evaluation>
+  <!-- /api/overview/ : "https://api.nyuchi.com … Production" -->
+  <qa_pair>
+    <question>According to the Nyuchi docs, what is the base URL of the production Nyuchi API gateway?</question>
+    <answer>https://api.nyuchi.com</answer>
+  </qa_pair>
+  <!-- /api/overview/ : "Every endpoint lives under a /v1/<product>/* namespace" -->
+  <qa_pair>
+    <question>The Nyuchi API docs say the legacy path prefix no longer resolves. What prefix should every request use instead?</question>
+    <answer>/v1/</answer>
+  </qa_pair>
+  <!-- /api/overview/ : namespaces "return 503 Service Unavailable when the underlying database is not configured" -->
+  <qa_pair>
+    <question>Per the Nyuchi API overview, what HTTP status does a namespace's endpoint return when its database is not configured for the deployment? Give the number.</question>
+    <answer>503</answer>
+  </qa_pair>
+  <!-- /api/commerce/ : "backed by the mukoko_bushtrade_db Supabase project" -->
+  <qa_pair>
+    <question>Which Supabase project backs the Nyuchi API's commerce namespace?</question>
+    <answer>mukoko_bushtrade_db</answer>
+  </qa_pair>
+  <!-- /api/commerce/ : "Base path: /v1/commerce" ; "POST /v1/commerce/scam-reports" -->
+  <qa_pair>
+    <question>In the Nyuchi commerce API, what path do you POST to in order to report a product, business or offer for review?</question>
+    <answer>/v1/commerce/scam-reports</answer>
+  </qa_pair>
+  <!-- /kweli/open-data/ : "GET https://kweli.mukoko.com/api/open/stats" -->
+  <qa_pair>
+    <question>The Kweli open-data docs describe an anonymous JSON API for the knowledge-graph snapshot. What is its full URL?</question>
+    <answer>https://kweli.mukoko.com/api/open/stats</answer>
+  </qa_pair>
+  <!-- /kweli/open-data/ : "get_open_stats tool on https://kweli.mukoko.com/mcp" -->
+  <qa_pair>
+    <question>Which MCP tool on the Kweli MCP server returns the open-data snapshot, according to the Nyuchi docs?</question>
+    <answer>get_open_stats</answer>
+  </qa_pair>
+  <!-- /kweli/open-data/ : "recomputed roughly every five minutes" -->
+  <qa_pair>
+    <question>How often, roughly, is the Kweli open-data snapshot recomputed? Answer in minutes as a number.</question>
+    <answer>5</answer>
+  </qa_pair>
+  <!-- /integrations/events-mcp/ : "The endpoint is https://events.mukoko.com/mcp" -->
+  <qa_pair>
+    <question>What is the MCP endpoint URL for Mukoko Events, according to the Nyuchi docs?</question>
+    <answer>https://events.mukoko.com/mcp</answer>
+  </qa_pair>
+  <!-- /integrations/events-mcp/ : "formerly branded Nhimbe" -->
+  <qa_pair>
+    <question>Mukoko Events was formerly branded under another name, retired in October 2026. What was that name?</question>
+    <answer>Nhimbe</answer>
+  </qa_pair>
+</evaluation>
