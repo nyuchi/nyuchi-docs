@@ -26,7 +26,7 @@ on:
   push:
     branches: ['**']
   pull_request:
-    branches: [main]
+    branches: [main, staging]
 
 # Least privilege for GITHUB_TOKEN, matching publish-mcp.yml and
 # publish-skills.yml — build.yml was the only workflow here without a block, so
