@@ -6,9 +6,14 @@
 version: 2
 updates:
   - package-ecosystem: 'npm'
+    target-branch: "staging"
     directory: '/'
     schedule:
       interval: 'weekly'
+    # Wait a week before proposing a newly published version: new releases can
+    # be malicious or unstable. Security updates are not delayed by this.
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     ignore:
       # TypeScript 7 is the Corsa/native rewrite: its package entrypoint no
@@ -39,6 +44,9 @@ updates:
         update-types:
           - 'major'
   - package-ecosystem: 'github-actions'
+    target-branch: "staging"
     directory: '/'
     schedule:
       interval: 'weekly'
+    cooldown:
+      default-days: 7

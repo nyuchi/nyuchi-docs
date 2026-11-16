@@ -6,7 +6,7 @@
     "url": "https://github.com/nyuchi/nyuchi-docs",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.2.0",
   "websiteUrl": "https://docs.nyuchi.com/integrations/docs-mcp/",
   "remotes": [
     {
@@ -19,7 +19,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@nyuchi/nyuchi-docs-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"

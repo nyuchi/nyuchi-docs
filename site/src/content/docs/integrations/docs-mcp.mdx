@@ -9,21 +9,27 @@ Protocol client (Claude, IDE agents, custom tooling) can connect to
 2.0 over `POST`) to read these docs and — crucially — write back:
 feedback, corrections, and issues flow straight to the docs team.
 
-The endpoint is served by the `shamwari-docs-ai` Cloudflare Worker (a
-path route on the docs domain) and rides the same Cloudflare AI Search
+The endpoint is served by the `nyuchi-docs-mcp` Cloudflare Worker (a
+path route on the docs domain), built on the official MCP TypeScript SDK
+v2. It speaks both protocol eras: 2026-07-28 (`server/discover`, per-request
+version) and the 2025 `initialize` handshake. It rides the same Cloudflare AI Search
 index that powers the Ask-AI tab, so agents and humans read from one
 corpus. A server card is published at
 `/.well-known/mcp/server-card.json` for discovery.
 
 ## Tools
 
-| Tool              | Kind  | What it does                                                                                                                    |
-| ----------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `search_docs`     | read  | Keyword/semantic search; returns titles, URLs and snippets                                                                      |
-| `ask_docs`        | read  | Synthesized answer grounded in the docs, with citations                                                                         |
-| `read_page`       | read  | Full readable text of any `docs.nyuchi.com` page                                                                                |
-| `submit_feedback` | write | Correction / confusing / missing / praise — stored for the docs team                                                            |
-| `raise_issue`     | write | Actionable problem; files a GitHub issue on `nyuchi/nyuchi-docs` when the `GITHUB_TOKEN` secret is configured, otherwise queued |
+| Tool                          | Kind  | What it does                                                                                                                    |
+| ----------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `nyuchi_docs_search`          | read  | Keyword/semantic search; returns titles, URLs and snippets                                                                      |
+| `nyuchi_docs_ask`             | read  | Synthesized answer grounded in the docs, with citations                                                                         |
+| `nyuchi_docs_read_page`       | read  | Full readable text of any `docs.nyuchi.com` page                                                                                |
+| `nyuchi_docs_submit_feedback` | write | Correction / confusing / missing / praise — stored for the docs team                                                            |
+| `nyuchi_docs_raise_issue`     | write | Actionable problem; files a GitHub issue on `nyuchi/nyuchi-docs` when the `GITHUB_TOKEN` secret is configured, otherwise queued |
+
+The original names (`search_docs`, `ask_docs`, `read_page`,
+`submit_feedback`, `raise_issue`) still work as deprecated aliases. Every
+tool carries a title and annotations (the read tools are `readOnlyHint`).
 
 Write tools are unauthenticated by design (feedback friction kills
 feedback) but bounded: message sizes are capped, everything is tagged
