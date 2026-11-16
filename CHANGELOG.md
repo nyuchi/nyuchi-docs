@@ -11,6 +11,7 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ### Security
 
+- **`http-cache-semantics` moves to 4.3.0 and the set-aside advisory is gone** (GHSA-ch52-4w7c-c8xp). The advisory was set aside until 2026-11-03 because no patched release existed; 4.3.0 shipped on 2026-10-04. A `pnpm.overrides` entry (`http-cache-semantics@<4.3.0` to `>=4.3.0`) puts both `astro` snapshots on it, the `auditConfig.ignoreGhsas` block and its recheck step in `build.yml` are removed, and the `audit` job passes again.
 - **`pnpm audit --audit-level=high` is clean.** Most of these advisories were already on `staging`; only the `zod` floor relates to the SDK change.
   - `zod` gets an override `>=4.6.6` and the worker's spec is now `^4.6.6` (GHSA-mrhx-c7xc-m3w5). It resolves to 4.6.7.
   - `sharp` `^0.35.5` (GHSA-wq5f-xc86-pv6w), resolving 0.35.5.
