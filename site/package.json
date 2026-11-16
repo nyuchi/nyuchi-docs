@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.2",
-    "@astrojs/svelte": "^9.0.1",
+    "@astrojs/svelte": "^9.1.2",
     "@bundu/ui": "^0.1.1",
     "astro": "^7.3.3",
     "jose": "^6.2.12",
