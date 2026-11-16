@@ -165,6 +165,19 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Playbooks',
+          collapsed: true,
+          items: [
+            'playbooks',
+            'playbooks/data',
+            'playbooks/platform',
+            'playbooks/api',
+            'playbooks/open-data',
+            'playbooks/analytics',
+            'playbooks/weather',
+          ],
+        },
+        {
           label: 'Mukoko Weather',
           collapsed: true,
           items: [
