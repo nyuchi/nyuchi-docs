@@ -17,12 +17,13 @@
 
 ## Packages
 
-A **pnpm workspace** of six packages.
+A **pnpm workspace** of seven packages.
 
 | Package                      | Path                      | What it does                                                                                                              |
 | ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `site`                       | `site/`                   | The Astro + [Starlight](https://starlight.astro.build) docs site itself. Ships as a Cloudflare Worker with Static Assets. |
 | `@nyuchi/nyuchi-docs-search` | `nyuchi-docs-search/`     | cmdk-style search modal + Ask-AI tab for Starlight sites. **Not yet published to npm.**                                   |
+| `@nyuchi/nyuchi-docs-shell`  | `nyuchi-docs-shell/`      | The standard Mzizi shell (header, sidebar, footer) for Starlight sites. Private, workspace-only.                          |
 | `shamwari-docs-ai`           | `shamwari-docs-ai/`       | Cloudflare Worker — the Ask-AI chat proxy (SSE).                                                                          |
 | `nyuchi-docs-mcp-worker`     | `nyuchi-docs-mcp-worker/` | Cloudflare Worker `nyuchi-docs-mcp` — the docs MCP server at docs.nyuchi.com/mcp.                                         |
 | `@nyuchi/nyuchi-docs-mcp`    | `nyuchi-docs-mcp/`        | The stdio bridge to that hosted endpoint, for clients that cannot speak Streamable HTTP.                                  |

@@ -1,0 +1,65 @@
+{
+  "name": "@nyuchi/nyuchi-docs-shell",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The standard Mzizi shell (header, sidebar, footer) for Starlight docs sites (nyuchi-docs, bundu-docs). Astro and CSS only, no UI framework.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nyuchi/nyuchi-docs.git",
+    "directory": "nyuchi-docs-shell"
+  },
+  "keywords": [
+    "starlight",
+    "astro",
+    "mzizi",
+    "docs",
+    "header",
+    "sidebar",
+    "footer"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js"
+    },
+    "./options": {
+      "types": "./dist/options.d.ts",
+      "import": "./dist/options.js"
+    },
+    "./Header.astro": "./dist/Header.astro",
+    "./Sidebar.astro": "./dist/Sidebar.astro",
+    "./Footer.astro": "./dist/Footer.astro",
+    "./PageFrame.astro": "./dist/PageFrame.astro",
+    "./MobileMenuToggle.astro": "./dist/MobileMenuToggle.astro",
+    "./shell.css": "./dist/shell.css"
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && cp src/Header.astro src/Sidebar.astro src/Footer.astro src/PageFrame.astro src/MobileMenuToggle.astro src/shell.css dist/",
+    "test": "vp test",
+    "test:watch": "vp test --watch",
+    "check": "vp check --no-fmt",
+    "lint": "vp lint",
+    "fmt": "vp fmt"
+  },
+  "peerDependencies": {
+    "@astrojs/starlight": "^0.42.0"
+  },
+  "devDependencies": {
+    "@astrojs/starlight": "^0.42.2",
+    "jsdom": "^30.1.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.5"
+  }
+}
