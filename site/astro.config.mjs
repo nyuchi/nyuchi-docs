@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { starlightDocsSearch } from '@nyuchi/nyuchi-docs-search/plugin';
+import { starlightMziziShell } from '@nyuchi/nyuchi-docs-shell/plugin';
 
 // https://astro.build/config
 export default defineConfig({
@@ -33,12 +34,69 @@ export default defineConfig({
           aiUrl: import.meta.env.PUBLIC_SHAMWARI_AI_URL,
           source: 'nyuchi',
         }),
+        // The standard Mzizi shell: header, sidebar, footer. The header links
+        // are the sidebar's top-level sections (a subset: the header is one
+        // row); the footer columns are the sections plus the ecosystem links
+        // the old footer carried.
+        starlightMziziShell({
+          navLinks: [
+            { label: 'Platform', href: '/platform/' },
+            { label: 'API Docs', href: '/api/' },
+            { label: 'Integrations', href: '/integrations/' },
+            { label: 'Playbooks', href: '/playbooks/' },
+            { label: 'Identity', href: '/identity/' },
+          ],
+          footerColumns: [
+            {
+              title: 'Docs',
+              links: [
+                { label: 'Platform', href: '/platform/' },
+                { label: 'API Docs', href: '/api/' },
+                { label: 'Analytics', href: '/analytics/' },
+                { label: 'Integrations', href: '/integrations/' },
+                { label: 'Playbooks', href: '/playbooks/' },
+              ],
+            },
+            {
+              title: 'Products',
+              links: [
+                { label: 'Mukoko Weather', href: '/mukoko-weather/' },
+                { label: 'Mukoko Kweli', href: '/kweli/' },
+                { label: 'Identity', href: '/identity/' },
+                { label: 'Console', href: '/console/overview/' },
+              ],
+            },
+            {
+              title: 'Ecosystem',
+              links: [
+                { label: 'Website', href: 'https://nyuchi.com', external: true },
+                {
+                  label: 'Platform app',
+                  href: 'https://platform.nyuchi.com',
+                  external: true,
+                },
+                {
+                  label: 'Bundu docs',
+                  href: 'https://docs.bundu.org',
+                  external: true,
+                },
+                {
+                  label: 'GitHub',
+                  href: 'https://github.com/nyuchi',
+                  external: true,
+                },
+              ],
+            },
+          ],
+          tagline: 'I am because we are.',
+          legal: '© 2026 Nyuchi Africa (Pvt) Ltd · Part of the Bundu Foundation',
+          // Nyuchi's brand accent is the site's existing Starlight accent (gold).
+          accent: 'var(--sl-color-accent)',
+        }),
       ],
       customCss: ['./src/styles/theme.css'],
       components: {
         PageFrame: './src/components/PageFrame.astro',
-        Header: './src/components/Header.astro',
-        Footer: './src/components/Footer.astro',
       },
       logo: {
         light: './src/assets/icon-light.png',
