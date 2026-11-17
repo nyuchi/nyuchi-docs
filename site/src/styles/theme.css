@@ -45,7 +45,8 @@
   --sl-color-white: #fafaf7;
   --sl-color-gray-1: #ededea;
   --sl-color-gray-2: #c4c4c1;
-  --sl-color-gray-3: #8c8c89;
+  /* gray-3 carries secondary text (card descriptions): 7.26:1 on the page */
+  --sl-color-gray-3: #a6a6a3;
   --sl-color-gray-4: #585855;
   --sl-color-gray-5: #383835;
   --sl-color-gray-6: #27272a;
@@ -64,13 +65,13 @@
 :root[data-theme='light'] {
   /* Only the mid link colour needs a per-theme override — accent-low/high
      follow the gold container tokens automatically. Deep honey-gold reads
-     AA-legible on the warm cream N1 paper (5.9:1). */
-  --sl-color-accent: #7a5c00;
+     7:1+ on the warm cream N1 paper and header (7.30:1 on the header). */
+  --sl-color-accent: #634a00;
 
   --sl-color-white: #18181b;
   --sl-color-gray-1: #27272a;
   --sl-color-gray-2: #383835;
-  --sl-color-gray-3: #585855;
+  --sl-color-gray-3: #4f4f4c;
   --sl-color-gray-4: #8c8c89;
   --sl-color-gray-5: #c4c4c1;
   --sl-color-gray-6: #ededea;
