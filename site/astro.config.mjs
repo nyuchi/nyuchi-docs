@@ -8,7 +8,7 @@ export default defineConfig({
   site: 'https://docs.nyuchi.com',
   // API documentation consolidated into the top-level API Docs section.
   redirects: {
-    // Single-page sections have no landing of their own.
+    // Single-page sections are direct sidebar links; the bare root redirects.
     '/console': '/console/overview',
     '/conventions': '/conventions/overview',
     '/platform/api/overview': '/api/overview',
@@ -210,10 +210,7 @@ export default defineConfig({
           collapsed: true,
           items: ['identity', 'identity/overview', 'identity/authkit'],
         },
-        {
-          label: 'Console',
-          items: ['console/overview'],
-        },
+        { label: 'Console', slug: 'console/overview' },
         {
           label: 'Tools',
           items: ['tools'],
@@ -231,10 +228,7 @@ export default defineConfig({
           label: 'Deployment',
           items: ['deployment/overview', 'deployment/agentgateway'],
         },
-        {
-          label: 'Conventions',
-          items: ['conventions/overview'],
-        },
+        { label: 'Conventions', slug: 'conventions/overview' },
       ],
     }),
   ],
