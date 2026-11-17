@@ -14,12 +14,10 @@
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.2",
-    "@astrojs/svelte": "^9.0.1",
     "@bundu/ui": "^0.1.1",
     "astro": "^7.3.3",
     "jose": "^6.2.12",
     "sharp": "^0.35.4",
-    "svelte": "^5.57.1",
     "@nyuchi/nyuchi-docs-search": "workspace:*"
   },
   "devDependencies": {
