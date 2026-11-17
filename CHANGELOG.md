@@ -24,4 +24,5 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ### Added
 
+- **The standard Mzizi shell on docs.nyuchi.com** (steps 2 and 3 of #133, `nyuchi-docs` only). New private workspace package `@nyuchi/nyuchi-docs-shell`: a Starlight plugin, `starlightMziziShell`, that replaces Starlight's Header and Sidebar with the Mzizi N7 anatomy (56px sticky header with section links, the brand-accent pill action group on small screens, a blurred and bordered scrolled state; a sidebar with the seven-mineral strip and 48px items with a tinted accent active state) and mounts a full-width footer (3px mineral strip, brand column with "I am because we are.", link columns with 48px targets, legal line). Astro and CSS only, tokens only, no UI framework. The site's custom Header and Footer overrides are removed. Refs #133.
 - `nyuchi-docs-mcp-worker/evals/evals.xml`: ten read-only evaluation questions, verified against production.

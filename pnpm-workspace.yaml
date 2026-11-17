@@ -1,6 +1,7 @@
 packages:
   - site
   - nyuchi-docs-search
+  - nyuchi-docs-shell
   - shamwari-docs-ai
   - nyuchi-docs-mcp
   - nyuchi-docs-skills

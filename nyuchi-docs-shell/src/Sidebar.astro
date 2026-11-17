@@ -1,0 +1,31 @@
+---
+/**
+ * Mzizi shell sidebar (anatomy of the registry's `mzizi-sidebar`): the
+ * seven-mineral strip across the top, a header with the logo (in the mobile
+ * menu; on desktop the header already carries it), a separator, then the
+ * labelled groups and items.
+ *
+ * The group tree itself is Starlight's own SidebarSublist inside its
+ * SidebarPersister, so collapsible groups, remembered open state, scroll
+ * restoration, badges and `aria-current="page"` are unchanged. The Mzizi look
+ * (48px items, tinted accent active state, focus ring) is shell.css, scoped to
+ * `.mzizi-sidebar`. The `<nav>` landmark and the mobile popover come from
+ * Starlight's PageFrame.
+ */
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+import SiteTitle from 'virtual:starlight/components/SiteTitle';
+
+const { sidebar } = Astro.locals.starlightRoute;
+---
+
+<div class="mzizi-sidebar" data-slot="mzizi-sidebar">
+  <div class="mzizi-strip" aria-hidden="true" data-slot="mineral-strip"></div>
+  <div class="mzizi-sidebar__brand md:sl-hidden">
+    <SiteTitle />
+  </div>
+  <hr class="mzizi-sidebar__separator" />
+  <SidebarPersister>
+    <SidebarSublist sublist={sidebar} />
+  </SidebarPersister>
+</div>
