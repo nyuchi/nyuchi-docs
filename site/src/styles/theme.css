@@ -102,3 +102,65 @@
   font-variant-caps: normal;
   text-transform: lowercase;
 }
+
+/* ── Home hero (index.mdx) ───────────────────────────────────────────────
+   Bundu floor: 7px gaps, 14px insets, 1.5 body leading, 44px touch targets,
+   pill shape as in the header icon group. Tokens only. */
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.875rem; /* 14px */
+  margin-block-end: 1.5rem;
+}
+.home-tagline {
+  margin: 0;
+  max-inline-size: 36rem;
+  font-size: var(--sl-text-lg);
+  line-height: 1.5;
+  color: var(--sl-color-gray-1);
+}
+.home-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem; /* 7px */
+  inline-size: 100%;
+  max-inline-size: 28rem;
+  min-block-size: 2.75rem; /* 44px */
+  padding-inline: 0.875rem;
+  border: 1px solid var(--sl-color-gray-4);
+  border-radius: 9999px;
+  background: var(--sl-color-black);
+  color: var(--sl-color-gray-2);
+  font: inherit;
+  cursor: pointer;
+}
+.home-search:hover {
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-white);
+}
+.home-search-label {
+  flex: 1;
+  text-align: start;
+}
+.home-search kbd {
+  font-size: var(--sl-text-xs);
+  padding: 0.125rem 0.4375rem;
+  border-radius: 9999px;
+  border: 1px solid var(--sl-color-gray-5);
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-gray-2);
+}
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4375rem; /* 7px */
+}
+.home-actions .sl-link-button {
+  min-block-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+.sl-markdown-content .home-hero > * {
+  margin: 0;
+}
