@@ -5,23 +5,30 @@ sidebar:
   label: Platform
 ---
 
-This playbook decides how we build and run services. Sources: the mission and engineering bar in the `AGENTS.md` of `nyuchi/nyuchi-servers-api` and `nyuchi/data-infra` (owner, 2026-10-23), and the `data-infra` README. "Decided, not built" is said wherever that is the case.
+This playbook decides how we build and run services. Sources: the mission and engineering bar in the `AGENTS.md` of `nyuchi/nyuchi-servers-api` and `nyuchi/data-infra` (owner, 2026-10-23), the `data-infra` README and ADRs, and the live Fly and Cloudflare inventory read through the Nyuchi Data tool. Reviewed 2026-11-17 (first written 2026-10-29). "Decided, not built" is said wherever that is the case.
+
+Related playbooks: [Releases](/playbooks/releases/), [Web](/playbooks/web/), [Identity](/playbooks/identity/), [Agents](/playbooks/agents/) and [Notifications](/playbooks/notifications/).
 
 ## The decisions
 
 1. **Built from Africa, for the world.** The platform competes with the top five in the world and is not a product only for Africa. Judge each change against the whole platform, not one repository.
 2. **Open standards, open data by default.** No proprietary data structures, so any system can connect to our data, transformations and services. See the [Data playbook](/playbooks/data/) and the [API playbook](/playbooks/api/).
-3. **Rust, in three layers.** Each service has a pure `core` (decisions, no I/O, builds natively and for `wasm32`), an `origin` (a container) and an `edge` (a Cloudflare Worker, workers-rs). Decisions live in `core`; the others are adapters. The four gateways (Mzizi API public, Nyuchi API B2B at `api.nyuchi.com`, Mukoko API consumer, Nyuchi Servers API internal with no public IP) are all rebuilt this way (`nyuchi-api#355`, `#353`).
+3. **Rust, in three layers.** Each service has a pure `core` (decisions, no I/O, builds natively and for `wasm32`), an `origin` (a container) and an `edge` (a Cloudflare Worker, workers-rs). Decisions live in `core`; the others are adapters. The four gateways (Mzizi API public, Nyuchi API B2B at `api.nyuchi.com`, Mukoko API consumer, Nyuchi Servers API internal with no public IP) are the target for this layout (`nyuchi-api#353`). **Where each stands (2026-11-17):** the Nyuchi API's Rust workspace is scaffolded (`nyuchi-api#526`, which replaced the closed `#355`), with a route table and an edge router that serves nothing yet, so its FastAPI app on Fly still answers every route; the Nyuchi Servers API is Rust and deployed to Fly `jnb`; the Mukoko API is a Cloudflare Worker, not Rust; the Mzizi API is a Worker. The repository `nyuchi/nyuchi-api` was formerly `nyuchi/api-gateway`, and `nyuchi/nyuchi-servers-api` was `nyuchi/data-gateway` (owner, 2026-10-20). How a route moves is the rulebook in the [API playbook](/playbooks/api/#moving-a-route-to-rust).
 4. **Backends run on wasmtime** (owner, 2026-10-29). `weather-core` already compiles for `wasm32-wasip1`. Cloudflare Workers run V8, so wasmtime fits the Fly origins. Which services move is a design step before any restructuring; see the [Data playbook](/playbooks/data/#backends-under-wasmtime).
-5. **Where things run.** Stateless services are decided to go multi-region: Fly `jnb`, `cdg` (`mad` second choice) and `sin`. Stateful stores (Cassandra, the Postgres ledger, Redpanda, CouchDB, Doris) stay primary in `jnb` until a replication design exists. Nothing in `data-infra` has a public address; it is reached over 6PN.
-6. **Reach backends from either side.** A backend behind a trait with an adapter per side can be reached from Cloudflare or from Fly. The internal Servers API sits behind a private Cloudflare Tunnel; decided, not built.
+5. **Where things run.** Stateless services are decided to go multi-region: Fly `jnb`, `cdg` (`mad` second choice) and `sin`. Stateful stores stay primary in `jnb` until a replication design exists (decided 2026-10-20; the design is not built). Nothing in `data-infra` has a public address; it is reached over 6PN. **Changed since 2026-10-29:**
+   - Cassandra and JanusGraph are gone: the owner said "Destroy the Cassandra volumes, shut the machine and stop the app" (2026-11-02, `data-infra#164`), and no backup existed. Cassandra is "for later" (owner, quoted in `data-infra#124`), not live.
+   - CouchDB is not retiring. It serves every user's own database, which the local database pulls through (owner, 2026-11-01, ADR-0002).
+   - The Postgres ledger is decided and not deployed. The owner wants it on one machine at the absolute minimum, with several databases on one Fly app if that works (2026-11-05, `data-infra#171`); ADR-0001's second amendment withdrew the two-instance plan.
+   - Redpanda, Doris and CouchDB are deployed. A running store is not a loaded one: the Doris news tables were empty on 2026-11-17 because nothing writes them yet (the bridge is an unmerged draft, `data-infra#124`).
+   - **Measure, do not quote.** The state of every store and app is read live with the Nyuchi Data tool (`data_health`, `fly_apps_list`, `fly_app_status`) and the Cloudflare account lists, never from prose.
+6. **Reach backends from either side.** A backend behind a trait with an adapter per side can be reached from Cloudflare or from Fly. The internal Servers API sits behind a private Cloudflare Tunnel; decided, not built (the tunnel was inactive with no ingress on 2026-11-15, `nyuchi-servers-api#51`). What is built is a Fly-private internal listener with no key, serving two Shamwari reads only; the origin has no public IP.
 7. **Nothing crashes.** A handler panic becomes a 500 and the process keeps serving. Requests have timeouts and size limits, shutdown is graceful, `/health` is liveness, `/ready` checks each dependency, and the version reported is the real release. No `unwrap()` or `expect()` outside tests; configuration errors stop the process at startup, never on a request.
-8. **Everything ships to production.** Releases go `staging` to `main` through the merge queue; a merge to `staging` is a patch, a release to `main` is a minor, a major is only made by hand. Deploys run on every push to `main`. No deploy waits on a repository variable, and a missing secret fails the deploy loudly instead of skipping it.
+8. **Everything ships to production.** Releases go `staging` to `main` through the merge queue; a merge to `staging` is a patch, a release to `main` is a minor, a major is only made by hand. Deploys run on every push to `main`. No deploy waits on a repository variable, and a missing secret fails the deploy loudly instead of skipping it. The full rules, including what the release app does and which of them still conflict, are in the [Releases playbook](/playbooks/releases/).
 9. **Never push to `main`; never close a conflicting PR.** Resolve the conflict and keep every feature. Keep history linear; do not merge a base branch into a feature branch.
 10. **Secrets live in a secret store.** None in a repository, example or doc. Deployments hold SHA-256 digests of internal keys. Never write credential status into a committed file, and never log a key, token, body or connection string.
 11. **Honesty.** Report what was measured, label design as design, and never claim parity, speed or latency that nothing has measured.
 12. **Big work gets an issue** in the repository that owns it, with the goal, the owner's decisions verbatim, the plan, acceptance criteria and the owner-only steps. Every PR references it.
-13. **Naming** (owner, 2026-11-01: "Our classes come from African species our server names from Lord of the Rings"). Classes (the fauna classes of the Mzizi apps, for example `.kudu` and `.impala`) are named after African species. Servers are named after places, peoples and creatures of _The Lord of the Rings_. A server name is chosen once, is unique across the ecosystem, and is internal: it is never a customer-facing brand or domain. **Gwaihir**, the Windlord, is the weather backend (decided, not built). Deployments that exist today keep their descriptive names; renaming them is not part of this decision.
+13. **Naming** (owner, 2026-11-01: "Our classes come from African species our server names from Lord of the Rings"). Classes (the fauna classes of the Mzizi apps, for example `.kudu` and `.impala`) are named after African species. Servers are named after places, peoples and creatures of _The Lord of the Rings_. A server name is chosen once, is unique across the ecosystem, and is internal: it is never a customer-facing brand or domain. **Gwaihir**, the Windlord, is the weather backend. It is decided; a `/v1/weather` namespace exists in the Servers API origin (built 2026-11-01 to 2026-11-02, with an in-memory store and MongoDB read methods), and an ADR makes Gwaihir its own Fly app, but no separately deployed Gwaihir app was found on 2026-11-17 and the weather Workers still serve the product (see the [Weather playbook](/playbooks/weather/)). Deployments that exist today keep their descriptive names; renaming them is not part of this decision.
 
 ## How to build a service
 
@@ -31,7 +38,28 @@ This playbook decides how we build and run services. Sources: the mission and en
 4. Add a changelog entry that keeps "decided" and "built" apart.
 5. Open a draft PR to `staging` (or `main` where no `staging` exists yet, and say so), with the checks the repository's CI runs.
 
+## Edge and secrets
+
+Decided, and built where the repositories show it (the org `AGENTS.md` proposed in `nyuchi-docs#118`, `super-app-web`, `shamwari-ai/github-app`, `mukoko-weather` `workers/README.md`):
+
+1. **A secret lives in the Cloudflare Secrets Store** and is bound in the Worker's config with the `workers` scope. A Worker that binds a secret which does not exist **fails to deploy** (Cloudflare error 10182). That is the intent: a missing secret is loud, never skipped. The token that deploys needs "Account Secrets Store Edit".
+2. **Non-secret settings live in the Worker's config file, never only in the dashboard.** `wrangler deploy` replaces `[vars]`, so a setting made only in the dashboard disappears on the next deploy (a dashboard edit is how a wrong hostname once shipped).
+3. **Every Worker has `/health` and `/ready`,** and a deploy step that checks the secrets it needs are set, naming the one that is not, then fails.
+4. **Deploy order follows dependencies.** The weather Workers deploy foundations first (forecast, aviation, mongo bridge, stations, tiles), then places, then the ones that depend on them, and the public API last, so a Worker with a missing secret does not hold back unrelated ones.
+5. **A Worker with no business being public has no route and no `workers.dev` address.** It is reached by a service binding and, where it sends or writes, a shared key checked before the body is read.
+6. **Only the Nyuchi API connects to a database for the apps** (org rule, `#118`); services and apps go through the Servers API or the Nyuchi API (the owner's direction of 2026-11-13, recorded in the Servers API README).
+7. **Never write credential status into a committed file or a public issue.** Say "an owner step", not which secrets exist.
+
+## What it costs
+
+The cost record is `docs/phase-1/cost.md` in `nyuchi/data-infra`. It is a plan, priced from Fly's list prices on 2026-10-05, and **is not billing**: the Atlas line is approximate and "the invoice is the real number". It keeps MongoDB Atlas in every row, by the owner's decision (2026-10-29, confirmed 2026-11-11). The owner's direction on spend is to run the minimum: one machine for the ledger, not two (2026-11-05). Reserved compute (a year paid ahead, about 40% off) is recorded as an option, not a decision.
+
+Not recorded anywhere this review could read, so each is a gap to close with the owner: the Atlas invoice, Cloudflare plan and quota, Vercel, Railway, the weather data providers (Open-Meteo's free API is non-commercial; Tomorrow.io), and the organisation's monthly AI-model spend limit. A cost table that is not kept goes stale in a week, so the rule is: a plan states its prices with the date they were read, and the invoice is the check.
+
 ## Open for the owner
 
 - Which Workers move to wasmtime origins, and what that does to the Cloudflare bindings they use.
 - The replication design for stateful stores outside `jnb`.
+- Where the cost of Vercel, Railway, Cloudflare and the weather providers is recorded, and by whom it is reviewed.
+- Two secret patterns are in use: the Secrets Store, and `wrangler secret put` from a password manager. One is needed.
+- When the ledger is deployed, and on what machine.

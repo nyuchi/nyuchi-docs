@@ -5,7 +5,7 @@ sidebar:
   label: API
 ---
 
-This playbook decides how we build APIs. Sources: the `AGENTS.md` files of `nyuchi/nyuchi-servers-api` and `nyuchi/data-infra`, `docs/event-platform.md`, `docs/ledger-key-contract.md` and the weather repository's `CLAUDE.md`.
+This playbook decides how we build APIs. Sources: the `AGENTS.md` files of `nyuchi/nyuchi-servers-api` and `nyuchi/data-infra`, `docs/event-platform.md`, `docs/ledger-key-contract.md` and the weather repository's `CLAUDE.md`; since the review of 2026-11-17, `docs/architecture/rust-routing.md` and `data-access.md` in `nyuchi/nyuchi-api` (formerly `nyuchi/api-gateway`) and the owner's messages on `nyuchi-api#547`.
 
 ## The decisions
 
@@ -18,7 +18,23 @@ This playbook decides how we build APIs. Sources: the `AGENTS.md` files of `nyuc
 7. **Read your write.** An action returns the new state itself, not from a view that may not have caught up.
 8. **Public data endpoints say how fresh they are.** An answer that comes from a cache or a fallback says so (`X-Cache`, `X-Weather-Provider` are the pattern in weather), and a degraded answer is not cached as if it were whole.
 9. **Be a good neighbour to providers.** Budget calls to free upstreams, cache, and fail to a clearly labelled fallback. Never hammer a community source: ask permission and for attribution wording first (the SAAOPA rule in the weather playbook).
-10. **Weather API.** `/v1/weather` is a Nyuchi API router (`nyuchi-api#397`). Stations are registered on the Nyuchi API with a WIGOS id and a Places id. Decided; the routes are not built.
+10. **Weather API.** `/v1/weather` is a Nyuchi API router (`nyuchi-api#397`, an issue, still open). Stations are registered on the Nyuchi API (owner, 2026-10-29), and the owner confirmed on 2026-11-13 that the Nyuchi API builds the station routes and that anonymous registration ends (`mukoko-weather#293`). **Built since 2026-10-29:** the station domain logic, `/v1/stations` (register, list, status, readings, rotate key, claim), the `/v1/stations/service/*` routes for the ingest Worker and an import path, merged to `staging` on 2026-11-13 (`nyuchi-api#540` to `#544`). Not verified: that they are in a tagged release. Per the stationkit console's README, they answer `503 stations_unavailable` until the owner applies the indexes. `api.mukoko.com/v1/weather` is a Worker with Nyuchi API keys and per-key limits (`mukoko-api#19`); the full client cutover is open (`mukoko-api#9`).
+11. **The gateway is the only read path for apps** (owner direction, 2026-10-02, `docs/architecture/data-access.md`, status "Proposed"). Apps are thin clients with no database client. Doris answers search and aggregation; MongoDB answers single records, cached; the relational database owns people, entities, memberships and keys; money goes to the ledger. Caching has three layers (the framework cache, an in-process gateway cache with single-flight, and the edge with `Cache-Control: public, s-maxage`); a failure is never cached and a credentialed response is private. When the gateway cannot answer it returns a non-2xx, never an empty 200. Limits are keyed by credential. `mukoko-news` is the first app moving (see the [News playbook](/playbooks/news/)); weather's step is unchecked.
+12. **Every backend service reaches data only through the Servers API** (owner direction, 2026-11-13, recorded in the Servers API README). `api.mukoko.com` is the consumer API and is not for internal apps.
+
+## Moving a route to Rust
+
+The Nyuchi API is being ported route by route, with Python as the default answer until a route is proven (rulebook: `docs/architecture/rust-routing.md` and `routing/routes.json` in `nyuchi/nyuchi-api`). Owner direction, 2026-11-13: "Yes to phase 2 move everything over to rust", and 2026-11-14: "start dropping the python routes". What is decided and built:
+
+1. **Two fields per route.** `port` is a claim about the Rust code: `not_started`, then `built` (the route exists and its parity tests run), then `proven` (it matches Python on the same seeded data, against a real `mongod`). `mode` is who answers in production: `python`, `shadow` (Rust is mirrored on a bounded sample and compared, the client still gets Python's answer), then `rust`. A route that is not listed goes to Python.
+2. **Shadow needs a built or proven port; rust needs a proven one;** both need a proof file in the repository. A flip is a one-line PR editing `mode`. **Only the owner flips `mode` away from `python`.** Tranche 4 (anything that issues or checks identity, keys or tokens, or moves money) needs the owner's approval per route.
+3. **Tranches:** 1 hot public reads, 2 other reads, 3 writes, 4 identity, keys, tokens and money.
+4. **`anonymous_only`:** the Rust side answers callers with no credential only; a credentialed request goes straight to Python and is counted.
+5. **Rollback is one of three switches:** `mode` back to `python`, the `ROUTER_KILL_SWITCH` Worker variable, or removing the Worker route. The table is compiled into the Worker, so a table change is a deploy.
+6. **Parity is byte-checked.** Golden files are written by the Python app and the Rust code must reproduce them; the tranche 2 files record the SHA-256 of the exact body bytes. Writes are never replayed in shadow.
+7. **"Proven" means proven on synthetic data on a local database.** Not a live cluster, not under load, not for a credentialed caller. **Nothing is deployed and the router has never run in a Workers runtime** (the rulebook's own status). On 2026-11-17 no route answered from Rust.
+8. **Measure the state, do not quote it:** `python scripts/rust_routes.py --summary` prints the progress table; CI runs `--check`.
+9. **Decided with the port (owner, 2026-11-13, `nyuchi-api#547`):** Rust adapters copy production's effective 30-second `maxTimeMS`; the related-articles missing `await` is fixed in Python first and that route leaves the port; Doris topics stay in Python and the Rust origin does not reach Doris. The shadow period, the Fly app and every `mode` flip are held for the owner.
 
 ## How to add an endpoint
 
@@ -30,4 +46,7 @@ This playbook decides how we build APIs. Sources: the `AGENTS.md` files of `nyuc
 
 ## Open for the owner
 
-- Station registration routes on the Nyuchi API: shape and scopes.
+- Station routes: apply the indexes, release them, and finish the contract on metric names (the console sends km/h, the API also accepts m/s; the standard is m/s) in `nyuchi-api#313` and `#543`.
+- Whether the Mukoko API moves to Rust, and when; today only the Nyuchi API has a port plan.
+- The data-access plan is still marked "Proposed"; confirm it or amend it.
+- The Nyuchi API's older `staging-release` and release-back-sync workflows "predate the org rule" and are left to the owner (see the [Releases playbook](/playbooks/releases/)).

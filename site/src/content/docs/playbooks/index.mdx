@@ -5,14 +5,20 @@ description: "How Nyuchi builds. Decisions are made here once, so they are not a
 
 A playbook holds the decisions for one subject. When a question comes up, the answer is in the playbook or the playbook has a gap. A gap is filled by deciding it once with the owner and writing it down. Then everyone builds the same way.
 
-| Playbook                           | Decides                                                                          |
-| ---------------------------------- | -------------------------------------------------------------------------------- |
-| [Data](/playbooks/data/)           | Domains, standards, the canonical model, events as the record, what is not Mongo |
-| [Platform](/playbooks/platform/)   | Where code runs, Rust and wasmtime, releases, secrets, what must never break     |
-| [API](/playbooks/api/)             | The four gateways, contracts, errors, auth, limits, conventions                  |
-| [Open data](/playbooks/open-data/) | What we publish, in what form, with what privacy guarantee                       |
-| [Analytics](/playbooks/analytics/) | How we measure without surveilling                                               |
-| [Weather](/playbooks/weather/)     | The weather goal and its objectives. It follows the other playbooks              |
+| Playbook                                   | Decides                                                                             |
+| ------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [Data](/playbooks/data/)                   | Domains, standards, the canonical model, events as the record, what is not Mongo    |
+| [Platform](/playbooks/platform/)           | Where code runs, Rust and wasmtime, releases, secrets, what must never break        |
+| [API](/playbooks/api/)                     | The four gateways, contracts, errors, auth, limits, conventions                     |
+| [Open data](/playbooks/open-data/)         | What we publish, in what form, with what privacy guarantee                          |
+| [Analytics](/playbooks/analytics/)         | How we measure without surveilling                                                  |
+| [Releases](/playbooks/releases/)           | Branches, versions, the release app, the merge gate and the rules still in conflict |
+| [Web](/playbooks/web/)                     | Astro, Rust serving, PWA, link previews and discoverability                         |
+| [Identity](/playbooks/identity/)           | WorkOS, one canonical id, staff roles versus plans versus entity capabilities       |
+| [Notifications](/playbooks/notifications/) | What is decided and built about push, and the owner steps left                      |
+| [Agents](/playbooks/agents/)               | How agents work here: issues, hygiene, progress reports, what needs the owner       |
+| [Weather](/playbooks/weather/)             | The weather goal and its objectives. It follows the other playbooks                 |
+| [News](/playbooks/news/)                   | Mukoko News: vehicle not publisher, metering, open data, reads through the API      |
 
 ## Where the structure lives
 
@@ -23,4 +29,6 @@ The playbooks say how we decide. The structure of the data and the standards we 
 1. A decision names its source (an owner message with its date, a repository file, an issue).
 2. "Decided, not built" is said wherever that is the case.
 3. No counts of live things in prose; they go stale. Say how to measure them.
-4. A playbook for a product (weather) follows these and does not restate them.
+4. A playbook for a product (weather, news) follows these and does not restate them.
+5. Each playbook says when it was last reviewed. A review reads the repositories, the open pull requests and the live inventory again, and says what it could not verify.
+6. Where two written rules conflict, the playbook lists both under "Open for the owner" and does not choose.

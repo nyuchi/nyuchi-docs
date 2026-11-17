@@ -174,7 +174,13 @@ export default defineConfig({
             'playbooks/api',
             'playbooks/open-data',
             'playbooks/analytics',
+            'playbooks/releases',
+            'playbooks/web',
+            'playbooks/identity',
+            'playbooks/notifications',
+            'playbooks/agents',
             'playbooks/weather',
+            'playbooks/news',
           ],
         },
         {

@@ -1,0 +1,38 @@
+---
+title: Notifications playbook
+description: "How Nyuchi sends notifications: what is decided, what is built dark, which secrets and owner steps stand between the code and a person's phone, and the privacy rules that apply."
+sidebar:
+  label: Notifications
+---
+
+This playbook is short on purpose. Notifications have one owner direction and a body of design; it records both and keeps them apart. Sources: owner messages on `mukoko-dev/mukoko-weather#579`, `workers/README.md` and `mukoko-weather#583`, the `platform.notifications` and web-push models in `nyuchi/data-infra` (`#134`, `#149`), and the Nyuchi API's alert routes. Reviewed 2026-11-17.
+
+## Decided by the owner
+
+1. **A notification that appears in the app must also reach the device** (owner, 2026-11-14, `#579`): "notifications are not pushing through to a users device yet, I can see them in the app not not being notified." So in-app notifications and device push are one feature with two outputs.
+2. **No surveillance, dignity by default** (the [Analytics playbook](/playbooks/analytics/)). A warning that helps someone act, such as a frost warning the evening before, is the aim; do not use fear.
+3. **Personal data stays under the person's keys** (the [Data playbook](/playbooks/data/)). A push subscription's endpoint and keys are personal data.
+
+## Design, built, not switched on
+
+These are design choices in the weather code (labelled design, not owner decisions) and none has run in a Workers runtime.
+
+- **Send path.** The `jobs` Worker runs an hourly alert tick that does nothing unless `ALERTS_ENABLED` is exactly `true` (it ships `false`). For each place it reads the forecast, decides who to warn, **claims** each send in the delivery log, and only then calls the `push` Worker, which signs and sends one message to one subscription. The `push` Worker is reachable only through a service binding and a shared key, checked in constant time before the body is read; with no key set it answers 503.
+- **At most once.** The claim before the push means one alert is never sent twice for the same person and night. The cost is that a crash between a won claim and its outcome log loses that night's alert; re-leasing needs support from the API.
+- **Gone subscriptions are deactivated** when the push service says they are gone, never when the service refused everything.
+- **Counts only in logs.** Nothing logs an endpoint, a key, a body or a person. Per-person daily caps across ticks need counts the API does not serve yet; today the delivery log's claim is what prevents a repeat.
+- **Web push needs three secrets and two public settings.** The VAPID private key, a shared send key and an alert-sender key (an internal Nyuchi API key with the `notifications` and `notifications:alert-sender` scopes) live in the Cloudflare Secrets Store. The VAPID public key and a contact subject are public settings, and the same public key must be served by the Nyuchi API for browsers to subscribe against. A missing secret fails the deploy loudly, by design (see the [Platform playbook](/playbooks/platform/#edge-and-secrets)).
+
+## What is not done
+
+- Device push has never been switched on. Merging the pull request does not send anything.
+- Owner steps, in order: create the three secrets (the sender key must be issued on the Nyuchi API), set the public key and subject, deploy `push` before `jobs`, set `ALERTS_ENABLED` to `true`, then turn on the web-push feature flag.
+- A real-device test: a frost alert delivered end to end to a test phone is the done-when for the weather objective.
+- The `Topic` header is planned and logged but not sent.
+- No other channel (email, SMS, in-app digests) has a decided design here. Resend carries email in the events app.
+
+## Open for the owner
+
+- Who may switch `ALERTS_ENABLED` on, and the first audience (a test group, then who).
+- The caps per person per day, and quiet hours.
+- Whether the notification centre's in-app records and the push log share one store; the data model has `platform.notifications` and proposed web-push models, not yet applied.
