@@ -24,23 +24,21 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "svelte": "./dist/index.js",
       "import": "./dist/index.js"
     },
     "./plugin": {
       "types": "./dist/plugin.d.ts",
       "import": "./dist/plugin.js"
     },
-    "./SearchModal.svelte": {
-      "types": "./dist/SearchModal.svelte.d.ts",
-      "svelte": "./dist/SearchModal.svelte"
+    "./search-modal": {
+      "types": "./dist/lib/search-modal.d.ts",
+      "import": "./dist/lib/search-modal.js"
     },
     "./Search.astro": "./dist/Search.astro"
   },
-  "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "svelte-package -i src -o dist && publint",
+    "build": "tsc -p tsconfig.build.json && cp src/Search.astro dist/Search.astro && publint",
     "test": "vp test",
     "test:watch": "vp test --watch",
     "check": "vp check --no-fmt",
@@ -48,20 +46,11 @@
     "fmt": "vp fmt"
   },
   "peerDependencies": {
-    "@astrojs/starlight": "^0.39.0 || ^0.41.0",
-    "svelte": "^5.57.1"
+    "@astrojs/starlight": "^0.39.0 || ^0.41.0"
   },
   "devDependencies": {
-    "@sveltejs/kit": "^2.70.3",
-    "@sveltejs/package": "^2.5.8",
-    "@sveltejs/vite-plugin-svelte": "^7.3.0",
-    "@testing-library/jest-dom": "^7.0.1",
-    "@testing-library/svelte": "^5.4.2",
-    "@testing-library/user-event": "^14.6.7",
     "jsdom": "^30.1.0",
     "publint": "^0.3.24",
-    "svelte": "^5.57.1",
-    "svelte-check": "^4.7.6",
     "typescript": "^7.0.2",
     "vite": "^8.3.0",
     "vitest": "^5.0.5"
