@@ -1,0 +1,35 @@
+---
+title: Integrations
+description: "Connect Nyuchi to your other tools with connectors, webhooks, and MCP servers."
+sidebar:
+  label: Contents
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Connect Nyuchi to your other tools with connectors, webhooks, and MCP servers.
+
+## Getting started
+
+<CardGrid>
+  <LinkCard title="Quickstart" href="/integrations/quickstart/" description="Connect your first integration in under 10 minutes." />
+  <LinkCard title="Authentication methods" href="/integrations/authentication/" description="API key, OAuth 2.0, and service account options for connecting integrations." />
+  <LinkCard title="Docs MCP server" href="/integrations/docs-mcp/" description="Read, search, and send feedback to the Nyuchi docs from any MCP-capable agent via docs.nyuchi.com/mcp." />
+  <LinkCard title="Mukoko Events MCP server" href="/integrations/events-mcp/" description="Discover and manage community events across Africa from any MCP-capable agent via events.mukoko.com/mcp." />
+</CardGrid>
+
+## Connectors
+
+<CardGrid>
+  <LinkCard title="CRM connectors" href="/integrations/connectors/crm/" description="Sync contacts, deals, and activity from your CRM." />
+  <LinkCard title="Data warehouse connectors" href="/integrations/connectors/data-warehouse/" description="Stream or batch sync data to your data warehouse." />
+  <LinkCard title="Messaging connectors" href="/integrations/connectors/messaging/" description="Send notifications and alerts to chat tools." />
+</CardGrid>
+
+## Webhooks and events
+
+<CardGrid>
+  <LinkCard title="Configure webhooks" href="/integrations/webhooks/configure/" description="Register an endpoint and select the events to receive." />
+  <LinkCard title="Event types" href="/integrations/webhooks/event-types/" description="Reference of all available webhook events and their payloads." />
+  <LinkCard title="Retry policies" href="/integrations/webhooks/retry-policies/" description="Understand delivery guarantees and configure retry behavior for webhooks." />
+</CardGrid>

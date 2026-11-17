@@ -8,6 +8,9 @@ export default defineConfig({
   site: 'https://docs.nyuchi.com',
   // API documentation consolidated into the top-level API Docs section.
   redirects: {
+    // Single-page sections have no landing of their own.
+    '/console': '/console/overview',
+    '/conventions': '/conventions/overview',
     '/platform/api/overview': '/api/overview',
     '/platform/api/authentication': '/api/authentication',
     '/platform/api/security': '/api/security',
@@ -54,6 +57,7 @@ export default defineConfig({
           label: 'Platform',
           collapsed: true,
           items: [
+            'platform',
             {
               label: 'Getting started',
               items: [
@@ -84,6 +88,7 @@ export default defineConfig({
           label: 'API Docs',
           collapsed: true,
           items: [
+            'api',
             {
               label: 'Getting started',
               items: [
@@ -110,6 +115,7 @@ export default defineConfig({
           label: 'Analytics',
           collapsed: true,
           items: [
+            'analytics',
             {
               label: 'Getting started',
               items: ['analytics/quickstart', 'analytics/connect-data'],
@@ -135,6 +141,7 @@ export default defineConfig({
           label: 'Integrations',
           collapsed: true,
           items: [
+            'integrations',
             {
               label: 'Getting started',
               items: [
@@ -179,6 +186,7 @@ export default defineConfig({
           label: 'Mukoko Weather',
           collapsed: true,
           items: [
+            'mukoko-weather',
             'mukoko-weather/user-guide',
             'mukoko-weather/weather-stations',
           ],
@@ -187,6 +195,7 @@ export default defineConfig({
           label: 'Mukoko Kweli',
           collapsed: true,
           items: [
+            'kweli',
             'kweli/overview',
             'kweli/verification',
             'kweli/cross-app-verification',
@@ -198,7 +207,8 @@ export default defineConfig({
         },
         {
           label: 'Identity',
-          items: ['identity/overview', 'identity/authkit'],
+          collapsed: true,
+          items: ['identity', 'identity/overview', 'identity/authkit'],
         },
         {
           label: 'Console',
