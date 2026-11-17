@@ -5,7 +5,7 @@ sidebar:
   label: Releases
 ---
 
-This playbook decides how work is merged and released. Sources: the org `AGENTS.md` and `CONTRIBUTING.md` as proposed in `nyuchi/nyuchi-docs#118` (not merged when this was written), the repositories' own workflow files, and owner messages as dated below. Reviewed 2026-11-17. "Decided, not built" is said wherever that is the case, and where two sources disagree the conflict is listed under [Open for the owner](#open-for-the-owner), not settled here.
+This playbook decides how work is merged and released. Sources: the org `AGENTS.md` and `CONTRIBUTING.md` as proposed in `nyuchi/nyuchi-docs#118` (not merged when this was written), the repositories' own workflow files, and owner messages as dated below. Reviewed 2026-11-17; the red-or-orange rule and follow-through added the same day. "Decided, not built" is said wherever that is the case, and where two sources disagree the conflict is listed under [Open for the owner](#open-for-the-owner), not settled here.
 
 ## The decisions
 
@@ -14,19 +14,21 @@ This playbook decides how work is merged and released. Sources: the org `AGENTS.
 3. **The release PR is the app's job, not the author's.** `bundu-release[bot]` (the enterprise-owned `bundu-release` GitHub App, whose key lives only in the `org-release` environment) opens the `staging` to default-branch PR and turns auto-merge on, from `auto-release.yml`, on a 15-minute schedule. A repository can opt out with `AUTO_RELEASE=off`. Tagging and the GitHub release are done by the reusable `auto-tag` workflow.
 4. **Owner direction, 2026-11-15, for the weather work:** "We are not releasing a V1 yet so you have full authority to keep on merging for patches, hot fixes and minor bumps. You can automatically deployed you do not need me." Then, once the app existed: "It's just staging to main." So an agent the owner has authorised merges feature and fix PRs into `staging` when the merge gate is met, and never merges or edits a `staging` to default-branch release PR, which the app handles. This is the owner's message to one session, not a repository rule; the org file still says only the owner releases, or an agent the owner has authorised.
 5. **The merge gate.** Merge only when the work is complete, CI is green, it is verified at runtime where that is possible, and a code review has run with its findings resolved.
-6. **Land through the merge queue.** Required checks must trigger on `merge_group:`. Use `gh pr merge --squash --auto`, never `--admin`, never a loop of merge calls; treat a 5xx or "merge already in progress" as wait. Do not require a branch to be up to date.
-7. **Never close a conflicting PR.** Merge the base into the head, keep every feature, then validate and push. Never rewrite history on someone else's branch.
-8. **Nothing reaches the default branch outside a release.** A PR into the default branch comes from `staging`, a `release/*` branch, or `bot/registry-pin`. A commit that did reach the default branch must be forward-ported, then labelled `forward-ported`.
-9. **Every PR names its issue.** `Closes #n`, `Refs #n` or `No issue: <reason>`. Bot PRs are exempt. A `Closes` in a PR into `staging` closes nothing until the release PR repeats it. Big work gets an issue in the repository that owns it (see the [Platform playbook](/playbooks/platform/)).
-10. **Shared workflows are pinned estate-wide at one commit SHA** with a `# vX.Y.Z` comment. Actions are pinned by their full 40-character SHA. Dependabot targets `staging` and waits seven days before proposing a new version (a Semgrep rule requires it).
-11. **Deploys run on every push to the default branch.** No variable decides whether they run, and a missing secret fails the deploy loudly. See the Edge and secrets section of the [Platform playbook](/playbooks/platform/#edge-and-secrets).
-12. **A change is not done until it is released.** For the weather repository, a release also needs a plain-language note in its releases page, written for the person using the app: no PR numbers, no code or model names.
+6. **Nothing merges while anything is red or orange** (owner, 2026-11-17: "A merge should be block if anything is red or orange"). Red is a failure, error, cancellation or timeout; orange is anything still pending, neutral or waiting on action. Skipped counts as green. The rule covers every check and status on the commit, required or not. An agent never enables auto-merge or merges while one is red or orange, and never skips or disables a check to get past it. The `All checks green` workflow enforces it: it waits for every other check and status, then fails on anything not green, and making it the required check makes every check behind it required too. Built in `bundu-labs/marketing` (`#215`, `#214`) and `siafuDB/cell`; making it required on `staging` and the default branch is an owner step, and the other repositories are still to follow.
+7. **Land through the merge queue.** Required checks must trigger on `merge_group:`. Use `gh pr merge --squash --auto`, never `--admin`, never a loop of merge calls; treat a 5xx or "merge already in progress" as wait. Do not require a branch to be up to date.
+8. **Never close a conflicting PR.** Merge the base into the head, keep every feature, then validate and push. Never rewrite history on someone else's branch.
+9. **Nothing reaches the default branch outside a release.** A PR into the default branch comes from `staging`, a `release/*` branch, or `bot/registry-pin`. A commit that did reach the default branch must be forward-ported, then labelled `forward-ported`.
+10. **Every PR names its issue.** `Closes #n`, `Refs #n` or `No issue: <reason>`. Bot PRs are exempt. A `Closes` in a PR into `staging` closes nothing until the release PR repeats it. Big work gets an issue in the repository that owns it (see the [Platform playbook](/playbooks/platform/)).
+11. **Shared workflows are pinned estate-wide at one commit SHA** with a `# vX.Y.Z` comment. Actions are pinned by their full 40-character SHA. Dependabot targets `staging` and waits seven days before proposing a new version (a Semgrep rule requires it).
+12. **Deploys run on every push to the default branch.** No variable decides whether they run, and a missing secret fails the deploy loudly. See the Edge and secrets section of the [Platform playbook](/playbooks/platform/#edge-and-secrets).
+13. **A change is not done until it is released.** For the weather repository, a release also needs a plain-language note in its releases page, written for the person using the app: no PR numbers, no code or model names.
+14. **Follow every change all the way through** (owner, 2026-11-17). As each change lands in `staging` and its checks pass there, release it straight to production; do not wait for several PRs to batch up. `staging` is the checkpoint (does it build and work with the rest of the app); the release is followed by a final check against production. Nothing is left as a draft.
 
 ## How to ship a change
 
 1. Open or update the issue. Branch from `staging`. Open a draft PR into `staging` that names the issue.
 2. Run the repository's own checks locally first (format, lint, typecheck, tests for what you changed). A push that turns CI red costs a cycle.
-3. When the PR is ready and green, enable squash auto-merge and let the queue land it. Watch CI after the merge: a red `staging` blocks the release.
+3. When the PR is ready and every check and status is green (none red or orange, required or not), enable squash auto-merge and let the queue land it. Watch CI after the merge: a red `staging` blocks the release.
 4. Leave the release PR alone. If it is conflicted or red, fix the cause on `staging`; the app re-opens it.
 
 ## Open for the owner
