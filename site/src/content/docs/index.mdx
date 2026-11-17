@@ -1,67 +1,107 @@
 ---
 title: Nyuchi Docs
-description: How things are done at Nyuchi — the product guide for the Nyuchi platform, plus engineering doctrine and the Mzizi tooling we use to build it.
-template: splash
-hero:
-  tagline: How things are done at Nyuchi — product guides, engineering doctrine, and the Mzizi tooling we build with.
-  actions:
-    - text: Platform quickstart
-      link: /platform/quickstart/
-      icon: right-arrow
-    - text: Engineering conventions
-      link: /conventions/overview/
-      variant: minimal
+description: How things are done at Nyuchi — product guides, API reference, engineering playbooks and the products we build.
+tableOfContents: false
+head:
+  - tag: title
+    content: Nyuchi Docs
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { CardGrid, LinkButton, LinkCard } from '@astrojs/starlight/components';
 
-## Product guide
+<div class="home-hero">
+  <p class="home-tagline">
+    How things are done at Nyuchi: product guides, the API, the playbooks we
+    build by, and the products themselves.
+  </p>
+  <button
+    type="button"
+    class="home-search"
+    data-nds-trigger
+    aria-haspopup="dialog"
+    aria-keyshortcuts="Control+K Meta+K"
+  >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M11 19a8 8 0 1 1 5.3-14.02A8 8 0 0 1 11 19zm10 2-4.35-4.35"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+    <span class="home-search-label">Search the docs</span>
+    <kbd>⌘K</kbd>
+  </button>
+  <div class="home-actions">
+    <LinkButton href="/platform/quickstart/" icon="right-arrow">
+      Platform quickstart
+    </LinkButton>
+    <LinkButton href="/api/overview/" variant="secondary">
+      API reference
+    </LinkButton>
+  </div>
+</div>
+
+## Build with Nyuchi
 
 <CardGrid>
   <LinkCard
-    title="Platform"
-    href="/platform/quickstart/"
-    description="Set up your workspace, configure SSO, manage users, and use the public API."
-  />
-  <LinkCard
-    title="Analytics"
-    href="/analytics/quickstart/"
-    description="Connect data sources, build dashboards, and schedule reports."
+    title="API Docs"
+    href="/api/"
+    description="The versioned /v1 gateway: authentication, API keys, and the commerce, pay, logistics, lingo, news and weather namespaces."
   />
   <LinkCard
     title="Integrations"
-    href="/integrations/quickstart/"
-    description="Native connectors, webhooks, the API gateway, and the public Nyuchi API surface."
+    href="/integrations/"
+    description="Connectors, webhooks and MCP servers that connect Nyuchi to your other tools."
   />
-</CardGrid>
-
-## Engineering
-
-<CardGrid>
   <LinkCard
     title="Identity"
-    href="/identity/overview/"
+    href="/identity/"
     description="WorkOS, accounts.mukoko.com, organisations, SSO, and the JWT shape."
   />
   <LinkCard
     title="Console"
     href="/console/overview/"
-    description="The Nyuchi Console at platform.nyuchi.com — mini-apps, API extensions, plans, billing."
+    description="The Nyuchi Console at platform.nyuchi.com: mini-apps, API extensions, plans and billing."
+  />
+</CardGrid>
+
+## Run the platform
+
+<CardGrid>
+  <LinkCard
+    title="Platform"
+    href="/platform/"
+    description="Set up your workspace, configure sign-in, manage users and control access."
   />
   <LinkCard
-    title="Mzizi tools"
-    href="/mzizi-tools/overview/"
-    description="Using mzizi-mcp, mzizi-cli, and mzizi-skills from inside a Nyuchi project."
+    title="Analytics"
+    href="/analytics/"
+    description="Connect data sources, build dashboards, and schedule reports."
+  />
+</CardGrid>
+
+## How we decide
+
+<LinkCard
+  title="Playbooks"
+  href="/playbooks/"
+  description="How Nyuchi builds. Decisions are made here once, so they are not asked again."
+/>
+
+## Products
+
+<CardGrid>
+  <LinkCard
+    title="Mukoko Weather"
+    href="/mukoko-weather/"
+    description="Use Mukoko Weather and feed it live readings from a community weather station."
   />
   <LinkCard
-    title="Deployment"
-    href="/deployment/overview/"
-    description="Cloudflare, Vercel, and Supabase patterns we standardise on."
-  />
-  <LinkCard
-    title="Conventions"
-    href="/conventions/overview/"
-    description="PR doctrine, commit doctrine, repo-naming rules."
+    title="Mukoko Kweli"
+    href="/kweli/"
+    description="The Africa Trust Platform: places, verification and open data."
   />
 </CardGrid>
 

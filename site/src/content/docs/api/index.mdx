@@ -1,0 +1,30 @@
+---
+title: API Docs
+description: "Call the versioned /v1 Nyuchi API from your own code. Start with the overview, then pick the product namespace you need."
+sidebar:
+  label: Contents
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Call the versioned /v1 Nyuchi API from your own code. Start with the overview, then pick the product namespace you need.
+
+## Getting started
+
+<CardGrid>
+  <LinkCard title="API overview" href="/api/overview/" description="The versioned /v1 gateway, product namespaces, and how to call the Nyuchi API from your own code." />
+  <LinkCard title="Authentication" href="/api/authentication/" description="Sign users in with WorkOS AuthKit, exchange the result for a platform JWT, and call the /v1 API on their behalf." />
+  <LinkCard title="API keys" href="/api/api-keys/" description="Create client ID and secret pairings in the console and use them for programmatic access to the /v1 API." />
+  <LinkCard title="Security and rate limits" href="/api/security/" description="Trusted hosts, response headers, per-IP rate limits, and the internal API key gate that protects /v1/admin and /v1/pay." />
+</CardGrid>
+
+## Namespaces
+
+<CardGrid>
+  <LinkCard title="Commerce API" href="/api/commerce/" description="Endpoints for BushTrade products, businesses, offers, inquiries, and scam reports." />
+  <LinkCard title="Pay API" href="/api/pay/" description="Wallet, token, and gateway sub-namespaces for the Nyuchi pay backend." />
+  <LinkCard title="Logistics API" href="/api/logistics/" description="Vehicle, booking, driver, and location endpoints backed by nyuchi_logistics_db." />
+  <LinkCard title="Lingo API" href="/api/lingo/" description="Languages, phrases, study sessions, and learner progress for Mukoko Lingo." />
+  <LinkCard title="News API" href="/api/news/" description="Articles, journalists, organisations, and engagement actions for the Mukoko news surface." />
+  <LinkCard title="Weather API" href="/api/weather/" description="Reserved namespace for the upcoming weather and forecast surface." />
+</CardGrid>
