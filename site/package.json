@@ -5,24 +5,25 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build:deps": "pnpm --filter @nyuchi/nyuchi-docs-search --filter @nyuchi/nyuchi-docs-shell build",
+    "build:deps": "pnpm --filter @nyuchi/nyuchi-docs-search build",
     "generate:internal-paths": "node scripts/generate-internal-paths.mjs",
     "sync:auth-md": "node scripts/sync-auth-md.mjs",
     "build": "pnpm run build:deps && pnpm run generate:internal-paths && pnpm run sync:auth-md && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vp test"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.2",
-    "@bundu/ui": "^0.1.1",
+    "@bundu/ui": ">=0.15.0",
     "astro": "^7.3.3",
     "jose": "^6.2.12",
     "sharp": "^0.35.4",
-    "@nyuchi/nyuchi-docs-search": "workspace:*",
-    "@nyuchi/nyuchi-docs-shell": "workspace:*"
+    "@nyuchi/nyuchi-docs-search": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260920.1",
+    "jsdom": "^30.1.0",
     "wrangler": "^4.135.0"
   }
 }

@@ -1,6 +1,9 @@
-// Renders nothing itself: parses the HTML that `astro build` of ../site wrote
-// and asserts the shell's markup in it (landmarks, the active item, the link
-// lists, the strips). This is the markup a visitor and a crawler actually get.
+// Renders nothing itself: parses the HTML that `astro build` wrote to dist/
+// and asserts the markup of the standard Mzizi shell (@bundu/ui/starlight) in
+// it: landmarks, the active item, the link lists, the strips. This is the
+// markup a visitor and a crawler actually get. Moved here from the retired
+// nyuchi-docs-shell package; the shell's own unit tests live with it in
+// mzizi-dev/packages-npm.
 //
 // It needs `pnpm --filter site build` first. CI runs `pnpm -r build` before
 // `pnpm -r test`. With no build present the suite is skipped, loudly.
@@ -8,11 +11,11 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const dist = resolve(process.cwd(), "../site/dist");
+const dist = resolve(process.cwd(), "dist");
 const built = existsSync(resolve(dist, "platform/quickstart/index.html"));
 if (!built) {
   console.warn(
-    "[nyuchi-docs-shell] site/dist not found: skipping rendered-site tests. Run `pnpm --filter site build` first.",
+    "[site] dist not found: skipping rendered-site tests. Run `pnpm --filter site build` first.",
   );
 }
 

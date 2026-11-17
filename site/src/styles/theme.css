@@ -1,108 +1,13 @@
 /* ─────────────────────────────────────────────────────────────────────────
-   Nyuchi Docs theme.
+   Nyuchi Docs: site-only styles.
 
-   The seven-mineral + seven-heritage palette and the semantic/radius tokens
-   are NOT defined here — they come from ONE central source, the published
-   @bundu/ui package, so the whole ecosystem updates in lockstep when the
-   design system moves. This file only maps that palette onto Starlight's
-   chrome (accent, neutrals, fonts) and adds a few brand shape touches.
-
-   @bundu/ui/styles/tokens.css exposes:
-     --color-{cobalt,tanzanite,malachite,gold,terracotta,sodalite,copper}
-       (+ -container / -on-container), theme-adaptive
-     --heritage-{indigo,savanna,baobab,sunset,river,hematite,kalahari}
-     semantic tokens, radius scale, touch targets
-   under both dark conventions (.dark and [data-theme="dark"]). Starlight is
-   dark-first and always stamps data-theme before paint, so the tokens
-   resolve correctly in both themes.
-
-   Accent: GOLD — Nyuchi's canonical brand→mineral (value; infrastructure &
-   enterprise). This replaces the legacy Mintlify "almond / green" accent so
-   docs.nyuchi.com sits on the same design system as the rest of the ecosystem
-   (bundu.org docs run the copper accent the same way). accent-low/high are
-   derived from the central gold container tokens; only the mid link colour is
-   tuned per-theme for AA legibility (gold's legible form reads as deep honey).
-
-   Do NOT hardcode mineral hex values here — edit the design system / the
-   @bundu/ui token file instead.
+   The theme (tokens, the gold accent, neutrals, fonts, radii, the lowercase
+   wordmark) comes from the standard Mzizi shell in @bundu/ui
+   (`starlightMziziShell({ accent: 'gold' })` in astro.config.mjs), the same
+   one docs.bundu.org uses, so the two sites cannot drift apart. The shell
+   loads its stylesheets before this one. Keep only page content styles here;
+   change the look in @bundu/ui/starlight instead.
    ───────────────────────────────────────────────────────────────────────── */
-
-/* Mzizi typography doctrine — Noto Sans body, Noto Serif display,
-   JetBrains Mono code. Loaded from Google Fonts (no shipped binaries). */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Serif:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-@import "@bundu/ui/styles/tokens.css";
-
-/* ── Dark mode (default) ─────────────────────────────────────────────────── */
-:root {
-  /* Gold accent — low/high derived from the central gold container tokens,
-     mid tuned to legible gold for links on dark (13.7:1 on the N1 base). */
-  --sl-color-accent-low: var(--color-gold-container);
-  --sl-color-accent: #ffd740;
-  --sl-color-accent-high: var(--color-gold-on-container);
-
-  /* Cool, near-neutral dark ramp — aligned to the N1 ambient/foreground scale */
-  --sl-color-white: #fafaf7;
-  --sl-color-gray-1: #ededea;
-  --sl-color-gray-2: #c4c4c1;
-  /* gray-3 carries secondary text (card descriptions): 7.26:1 on the page */
-  --sl-color-gray-3: #a6a6a3;
-  --sl-color-gray-4: #585855;
-  --sl-color-gray-5: #383835;
-  --sl-color-gray-6: #27272a;
-  --sl-color-black: #18181b;
-
-  /* Type system — Noto Sans (body), Noto Serif (display), JetBrains Mono. */
-  --sl-font:
-    'Noto Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --sl-font-mono:
-    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    monospace;
-  --nyuchi-font-serif: 'Noto Serif', Georgia, Cambria, 'Times New Roman', serif;
-}
-
-/* ── Light mode ──────────────────────────────────────────────────────────── */
-:root[data-theme='light'] {
-  /* Only the mid link colour needs a per-theme override — accent-low/high
-     follow the gold container tokens automatically. Deep honey-gold reads
-     7:1+ on the warm cream N1 paper and header (7.30:1 on the header). */
-  --sl-color-accent: #634a00;
-
-  --sl-color-white: #18181b;
-  --sl-color-gray-1: #27272a;
-  --sl-color-gray-2: #383835;
-  --sl-color-gray-3: #4f4f4c;
-  --sl-color-gray-4: #8c8c89;
-  --sl-color-gray-5: #c4c4c1;
-  --sl-color-gray-6: #ededea;
-  --sl-color-gray-7: #f5efe2;
-  --sl-color-black: #fafaf7;
-}
-
-/* ── Type & shape touches ────────────────────────────────────────────────── */
-
-/* Display headings use the Noto Serif brand face. */
-:is(h1, h2, h3),
-.site-title,
-.sl-markdown-content :is(h1, h2, h3) {
-  font-family: var(--nyuchi-font-serif);
-}
-
-/* Softer, design-system radii on the surfaces Starlight rounds. */
-.sl-markdown-content :not(a) > code {
-  border-radius: var(--radius-sm);
-}
-.sl-markdown-content pre,
-.starlight-aside,
-.card {
-  border-radius: var(--radius-md);
-}
-
-/* Wordmarks are always lowercase — an ecosystem brand decision. */
-.site-title {
-  font-variant-caps: normal;
-  text-transform: lowercase;
-}
 
 /* ── Home hero (index.mdx) ───────────────────────────────────────────────
    Bundu floor: 7px gaps, 14px insets, 1.5 body leading, 44px touch targets,

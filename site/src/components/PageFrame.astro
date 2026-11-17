@@ -2,14 +2,14 @@
 /**
  * PageFrame override — the app-core shell. Composes the Mzizi shell frame
  * (Starlight's PageFrame plus the full-width Mzizi footer, from
- * @nyuchi/nyuchi-docs-shell) and adds the fixed 4px VERTICAL seven-mineral
+ * @bundu/ui/starlight) and adds the fixed 4px VERTICAL seven-mineral
  * strip on the left edge, full viewport height, hidden below 480px.
  *
  * The horizontal seven-mineral strips in the sidebar and footer are part of
- * the standard Mzizi shell (issue #133) and come from the shell package; this
+ * the standard Mzizi shell (issue #133) and come from @bundu/ui; this
  * page-edge strip is the site's own and stays.
  */
-import ShellFrame from '@nyuchi/nyuchi-docs-shell/PageFrame.astro';
+import ShellFrame from '@bundu/ui/starlight/PageFrame.astro';
 ---
 
 <div class="mineral-stripe" aria-hidden="true" data-slot="mineral-stripe"></div>
