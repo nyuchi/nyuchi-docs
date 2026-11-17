@@ -23,7 +23,6 @@ export default defineConfig({
     ],
   },
   // No `lint` block here, deliberately. vite-plus 0.3 applies the workspace
-  // root's lint options to every package, which would switch typeCheck on in
-  // nyuchi-docs-search (a Svelte package that keeps it off; see its config).
-  // Type checking is on in each of the other packages' own vite.config.ts.
+  // root's lint options to every package. Type checking is switched on in each
+  // package's own vite.config.ts.
 });

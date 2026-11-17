@@ -1,0 +1,28 @@
+---
+title: Identity playbook
+description: "How people and services are identified at Nyuchi: WorkOS AuthKit, one canonical id, staff roles kept apart from what a reader has paid for, and how one app acts for a person in another."
+sidebar:
+  label: Identity
+---
+
+This playbook decides how we identify people and services. Sources: the org `AGENTS.md` as proposed in `nyuchi/nyuchi-docs#118` (not merged when this was written), the `AGENTS.md` of `nyuchi/data-infra`, and the READMEs and instructions of `mukoko-dev/mukoko-news`, `mukoko-dev/super-app-web`, `mukoko-dev/kweli` and `shamwari-ai/github-app`. Reviewed 2026-11-17.
+
+## The decisions
+
+1. **Identity is WorkOS AuthKit** (org `AGENTS.md`; the older Stytch provider is retired). People sign in on the WorkOS-hosted AuthKit page, which owns Magic Auth, passwords, passkeys and the environment's MFA step-up, and keeps the shared session that makes sign-in continuous across the apps in one WorkOS environment. An app does not build its own sign-in form or its own MFA (owner correction, 2026-07-09, in `mukoko-news`, which superseded an inline-form design).
+2. **One canonical id links every record.** WorkOS `externalId` = MongoDB entity id = ledger `owner_id` (`data-infra` `AGENTS.md`). Never copy a person's record into another domain; refer to them by id (see the [Data playbook](/playbooks/data/)).
+3. **Three different questions, three different mechanisms.** They must never be wired together.
+   - **Is this person platform staff?** Answered from the WorkOS organisation claims, and only inside the platform-team organisation, because permission slugs are environment-wide and an unscoped check leaks access across organisations. This gates the admin surfaces. A cookie's presence is spoofable, so the page-level gate calls the session, not the middleware.
+   - **What has this reader signed up or paid for?** A plan, in the [News playbook](/playbooks/news/). It reads no staff role.
+   - **What may this person do for one entity (a family, a business)?** An entity capability, from the person's active membership, through a closed map from membership role to capability. An unknown role grants nothing; the row's own permission list is never consulted; reserved namespaces (`platform:`, `mukoko:`, `nyuchi:`, `admin:`, `news:` and bare `admin`) are stripped on read; and a capability applies to that one entity and can never produce a platform tier. Founding your own household is not staff access.
+4. **Fail closed.** An auth outage, an unknown plan, an unknown role and an empty membership read all deny. An empty or failed read is "unproven", never "proven absent" and never a grant.
+5. **Gate on the server, not the browser, where something must stay private.** A client-side check is a conversion nudge, not protection (see the News playbook).
+6. **One app acts for a person in another through token exchange.** `super-app-web` reads everything from the Nyuchi API with no database of its own, acting for the person through RFC 8693 token exchange. The API key pair for that is a separate owner step and is not bound yet.
+7. **Service credentials are separate from identity.** Internal `nyk_` keys are a second factor, not an identity, and are stored as digests (see the [API playbook](/playbooks/api/)). Third-party app credentials belong in a secret store.
+8. **Tokens are narrowed twice, and hosts are derived.** For the GitHub App Worker: an allowed-repositories list is the outer bound and a permission subset (never `workflows`) is the inner bound, and an empty list fails closed. The OAuth resource URL is derived from the request host, never hardcoded, and every host the Worker serves must also be registered as an AuthKit resource in WorkOS, or OAuth fails for that host.
+9. **Entity handles come from the Nyuchi API only** (`kweli`), and the canonical entity URL is `kweli.mukoko.com/e/<handle>` (owner decision, `kweli#171`).
+
+## Open for the owner
+
+- **The issuer's domain.** `AGENTS.md` names `accounts.mukoko.com` as the AuthKit issuer; `super-app-web` names `identity.mukoko.com`; the events release notes name `authenticate.nyuchi.com` and `identity.nyuchi.com`. Which is current was not resolved from the repositories.
+- **Whether the staff-role gate and the reader plans ever share a field.** The decision here is that they do not.

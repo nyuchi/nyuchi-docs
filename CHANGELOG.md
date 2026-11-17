@@ -6,11 +6,13 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ### Changed
 
+- **The docs search UI no longer uses Svelte** (phase 1 of #129). `nyuchi-docs-search` is now a `.astro` trigger plus framework-free TypeScript that runs in the browser (`src/lib/search-modal.ts`); `./Search.astro` and `./plugin` keep their paths and the Pagefind and Ask-AI clients are unchanged. `@astrojs/svelte`, `svelte`, `@sveltejs/*` and `svelte-check` are removed, the package builds with plain `tsc`, and type checking is on for it. A Starlight site that consumes the package no longer needs the Svelte integration. The Ask AI error is now shown as an alert, and citations stay with the answer after it finishes. Refs #129.
 - **The docs MCP server (`nyuchi-docs-mcp-worker`, `docs.nyuchi.com/mcp`) runs on the official MCP TypeScript SDK v2** (`@modelcontextprotocol/server` 2.4, `zod` 4) instead of a hand-rolled JSON-RPC dispatcher. It now serves 2026-07-28 clients (`server/discover`, per-request version) as well as the 2025 `initialize` handshake. Tools are renamed `nyuchi_docs_*`, with the old names kept as deprecated aliases, and every tool has a title and annotations. Inputs are validated with bounds; `top_k` is still clamped to 1–10 rather than refused. Clients that send no `Accept` header still get one JSON body. Refs #109.
 - `integrations/docs-mcp` names the Worker that actually serves the endpoint (`nyuchi-docs-mcp`, not `shamwari-docs-ai`) and the new tool names.
 
 ### Security
 
+- **The SvelteKit advisory (GHSA-3r8g-jcqq-3p5j) is gone with the dependency**, not bumped past. `pnpm audit --audit-level=high` is clean.
 - **Dependabot waits seven days before proposing a newly published version** (`cooldown: default-days: 7` on the npm and GitHub Actions entries in `.github/dependabot.yml`), which the org Semgrep rule `dependabot-missing-cooldown` requires. Security updates are not delayed.
 - **`http-cache-semantics` moves to 4.3.0 and the set-aside advisory is gone** (GHSA-ch52-4w7c-c8xp). The advisory was set aside until 2026-11-03 because no patched release existed; 4.3.0 shipped on 2026-10-04. A `pnpm.overrides` entry (`http-cache-semantics@<4.3.0` to `>=4.3.0`) puts both `astro` snapshots on it, the `auditConfig.ignoreGhsas` block and its recheck step in `build.yml` are removed, and the `audit` job passes again.
 - **`pnpm audit --audit-level=high` is clean.** Most of these advisories were already on `staging`; only the `zod` floor relates to the SDK change.

@@ -12,8 +12,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "verbatimModuleSyntax": true,
-    "allowJs": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vitest/globals"]
   },
-  "include": ["src/**/*", "tests/**/*", "*.ts", "*.js"]
+  "include": ["src/**/*.ts", "tests/**/*", "*.ts"]
 }
