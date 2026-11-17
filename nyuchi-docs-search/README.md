@@ -2,7 +2,8 @@
 
 Mintlify-style command-palette search modal (`⌘K` + Pagefind) with an
 **Ask AI** tab that streams answers from the [`shamwari-docs-ai`][worker]
-Cloudflare Worker. Pure Svelte 5, no runtime deps. Designed to drop into any
+Cloudflare Worker. Astro component plus framework-free TypeScript that runs
+in the browser: no UI framework, no runtime deps. Designed to drop into any
 [Astro Starlight][starlight] site.
 
 Used in production by:
@@ -13,9 +14,9 @@ Used in production by:
 ## Install
 
 ```sh
-pnpm add @nyuchi/nyuchi-docs-search svelte @astrojs/svelte
+pnpm add @nyuchi/nyuchi-docs-search
 # or
-npm install @nyuchi/nyuchi-docs-search svelte @astrojs/svelte
+npm install @nyuchi/nyuchi-docs-search
 ```
 
 ## Wire into a Starlight site
@@ -24,12 +25,10 @@ npm install @nyuchi/nyuchi-docs-search svelte @astrojs/svelte
 // astro.config.mjs
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import svelte from '@astrojs/svelte';
 import { starlightDocsSearch } from '@nyuchi/nyuchi-docs-search/plugin';
 
 export default defineConfig({
   integrations: [
-    svelte(),
     starlight({
       title: 'My docs',
       plugins: [
@@ -62,21 +61,28 @@ That's it. Press `⌘K` / `Ctrl+K` to open the modal.
   (managed crawl + chunk + embed + retrieve + generate, routed through the
   shared `shamwari` AI Gateway for observability).
 
-## Manual component usage
+## Manual usage
 
-You can import individual pieces too:
+The modal is plain DOM code, so it also works without the Astro component.
+Create it in the browser with a trigger element:
 
-```svelte
-<script>
-  import { SearchModal, AiChat } from '@nyuchi/nyuchi-docs-search';
-</script>
+```ts
+import { createSearchModal } from '@nyuchi/nyuchi-docs-search';
 
-<SearchModal aiUrl="https://…" source="nyuchi" />
+const modal = createSearchModal({
+  trigger: document.querySelector('#search-button'),
+  aiUrl: 'https://…', // omit to hide the Ask AI tab
+  source: 'nyuchi',
+});
+// modal.open(), modal.close(), modal.toggle(), modal.destroy()
 ```
+
+The Pagefind and Ask-AI clients are exported too (`createPagefindClient`,
+`createAiClient`).
 
 ## Theming
 
-The components pick up Starlight CSS variables by default
+The modal picks up Starlight CSS variables by default
 (`--sl-color-bg`, `--sl-color-gray-*`, …) and a custom `--mzizi-green` accent.
 Override either in your site's `customCss`.
 
