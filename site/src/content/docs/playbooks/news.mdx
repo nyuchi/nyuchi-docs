@@ -1,0 +1,30 @@
+---
+title: News playbook
+description: "The rules for Mukoko News, the aggregator: we are the vehicle and not the publisher, how readers are metered, how open data is defended, and how reads move to the Nyuchi API."
+sidebar:
+  label: News
+---
+
+This playbook is about the news product only, as the [Weather playbook](/playbooks/weather/) is about weather. It follows the other playbooks. Sources: the `CLAUDE.md` of `mukoko-dev/mukoko-news` (which carries the owner's dated decisions and measurements) and `nyuchi/nyuchi-api` `docs/architecture/data-access.md`. Reviewed 2026-11-17. Each rule names its date; "decided, not built" is said wherever that is the case.
+
+## The decisions
+
+1. **We are the vehicle, not the publisher** (owner, 2026-09-14): "We are an aggregator we do not publish news. We are not a publishing house. We provide the vehicle, but we don't publish news. Everything that we have, we don't own." The wording lives in one place in the code (`AGGREGATOR_STATEMENT`) and every legal page, first-run screen and image credit says it the same way.
+2. **Credit says who supplied the picture, never who took it.** The platform does not know the photographer, so a credit reads `Image via <publisher>`. With no masthead and no feed name it prints nothing: "via Unknown" over someone's work is an invented verdict. A test inventories every file that shows a publisher image, so a new surface fails until it carries a credit or a recorded reason not to.
+3. **Acceptance stores a version, not a boolean.** The terms version is the revision date. Bump it only for a material change, because a re-prompt for a typo trains people to dismiss the screen unread.
+4. **Reading and searching are metered, never gated** (owner, 2026-09-11, shape 2026-09-19): "Free = public is 50 articles 5 searches, then the rest is gated but free user tier ... Interactions is gated by auth. Analytics and AI is gated to auth, 5 article insights then tiers by subscription kicks in." Two mechanisms, kept apart: a gate (is this feature reachable at all) and an allowance (how much of it). Anonymous readers get 50 articles and 5 searches on the device; signed-in free readers get unlimited reading and a small number of AI summaries; likes and saves need a sign-in.
+5. **The meters are conversion gates, not confidentiality gates.** They count in the reader's own storage, so a determined reader clears them. That is deliberate, because a server-side wall would serve a crawler the wall and remove the product from search. Nothing behind a meter may be a secret. Interactions are the exception and are gated server-side, failing closed.
+6. **Plans fail closed, and the names are shared.** `anonymous`, `free`, `pro`, `custom`: the last three mirror the cross-app plan vocabulary the sibling apps use, so one subscription means the same thing everywhere. An unknown feature or plan grants nothing. **Nothing returns `pro` or `custom` yet**, because the service that would set the plan does not exist and pricing is not decided. The plan is never read from a field another domain writes freely.
+7. **A wall never states a fact we did not measure.** A search that was not issued does not say "0 results". A failed read does not render as an empty corpus: every figure carries an `ok` flag, and an unreadable page says it could not load. A failure presented as a fact is the one thing this product forbids.
+8. **Open data is defended by caching, not by a login** (owner, 2026-09-11): "Open data behind a login is not correct ... It's public data." A scraper can sign up, and a login stops researchers and answer engines instead. The public dashboard and its export are static or edge-cached, rate limited at the origin, bounded in their inputs, and disallowed to well-behaved crawlers on the export path. If a per-caller field is ever added to those responses, the cache comes off in the same commit. No licence is asserted on the export yet.
+9. **Withdraw a wrong score; do not gate it** (owner, 2026-09-11). The source trust score ranked recent volume and fluency, not reliability, and it called a spam farm "Established". Feed-health fields recorded the platform's own database timeouts as the source's failure. What is published instead is only counts and timestamps, with the country's provenance shown (`declared`, `tld`, `assumed`), and it says it is not a rating of the newsroom.
+10. **Reads move to the Nyuchi API; do not add a direct read.** The gateway is the only read path for apps: Doris answers search and aggregation, MongoDB single records, cached, with a non-2xx and never an empty 200 when it cannot answer. Migrated so far (per the repository's own text): the analytics console, the insights dashboard and coverage claim, topic timelines and the related-articles rail. Each goes through one helper that uses the API only when it is configured, and falls back to the direct read for that call. The fallbacks, and with them the database connection string, are removed after two clean weeks per path.
+11. **The app never touches the pipeline** (owner, 2026-09-25). The pipeline sits behind the databases; the news gateway Worker is the app's backend, and the manual feed refresh goes through it.
+12. **Honest status codes, and a query is bounded.** Every aggregation carries a time limit, so a slow read fails visibly instead of hanging the function. A read that cannot be answered returns "unavailable", never an empty result that a crawler will index.
+
+## Open for the owner
+
+- A licence for the open-data export. The [Open data playbook](/playbooks/open-data/) says CC BY 4.0 by default, and the news export asserts none, because choosing one on publishers' behalf is the owner's call.
+- Pricing, and the service that sets a paid plan.
+- Whether the news app moves from Next.js to Astro, and when (see the [Web playbook](/playbooks/web/)).
+- The byline directory read was built on a reader's request and measured at over ten seconds on a warm cluster; an open pull request moves it to a scheduled build. Resizing the database instance was the other option named.

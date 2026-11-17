@@ -18,9 +18,13 @@ This playbook decides what we publish and how. Sources: the canonical open-data 
 7. **Attribute every source.** Provenance and licence travel with each value. Weather data credits ECMWF, NOAA, DWD, ECCC and Météo-France via Open-Meteo (CC BY 4.0), the Meteorological Services Department of Zimbabwe via WMO WIS2, and so on.
 8. **A source with no stated terms is not ingested on a schedule.** Ask first (SAAOPA is the live case).
 9. **Agriculture is its own domain.** `agriculture` holds crop, yield, production, food-security and farming-rainfall data. Station data goes to `weather`, administrative areas to `places`.
-10. **Reading open data.** AgriConnect is an open-data-only service. It reads Doris, not MongoDB. How MongoDB data reaches Doris follows the news bridge pattern (`data-infra#124`).
+10. **Reading open data.** AgriConnect is an open-data-only service. It reads Doris, not MongoDB. How MongoDB data reaches Doris follows the news bridge pattern (`data-infra#124`). Status on 2026-11-17: Doris runs, its news tables were empty, and the bridge is an unmerged draft that has never run against a real Doris, so no open-data table is fed yet.
+11. **Open data is defended by caching, not by a login** (owner, 2026-09-11, in `mukoko-news`): "Open data behind a login is not correct ... It's public data." A scraper can sign up, and a login stops researchers and answer engines. Serve it from a static or edge-cached response, rate limit the origin path, bound every input, and keep per-caller fields out of it. See the [News playbook](/playbooks/news/).
+12. **The licence must be stated.** Decision 1 says CC BY 4.0 by default, but the news open-data export asserts none yet, because choosing one on publishers' behalf is the owner's call. A published dataset with no licence is not open.
 
 ## Open for the owner
 
 - Whether `opendata` becomes its own domain or its tables move under `platform` (`data-infra` domains list, question on the Doris `open_data` database).
 - A licence statement per source dataset in the agriculture catalogue; some entries still hold free text.
+- The licence for the news export (decision 12).
+- Which station and observation records are released as open data, and with what location coarsening; the StationKit data schema still marks location privacy as `TODO`.

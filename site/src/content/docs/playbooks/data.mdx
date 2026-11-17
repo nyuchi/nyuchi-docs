@@ -18,15 +18,28 @@ So there are only three moves: **adopt** a global standard, **build and publish*
 Each one is already made. The source is named so you can check it.
 
 1. **One domain, one kind of data.** Every store is split by domain, under the same names (`weather`, `places`, `agriculture`, `shamwari`, `identity`, `pay`, and so on). A domain refers to another only by id, never by copying its records. The list is `schemas/domains.yaml`; the doctrine is `docs/domain-isolation.md` in `nyuchi/data-infra` (owner, 2026-10-10: "if a domain changes it doesn't affect the whole platform"). Weather is not the home for geography, prompts, activities or farming, and agriculture is not the home for stations.
-2. **Standards have one home.** `bundu-labs/bundu-standards` holds the register of standards we adopt (`register/register.yaml`) and the standards we publish (BAGS, the Bundu vocabulary). Nothing else keeps a list of them. A copy (a database collection, a page) is generated from the register and compared with it: `register.py check` in CI, `register.py live` against the database. Owner, 2026-10-29: urgent, so nothing drifts again.
+2. **Standards have one home.** `bundu-labs/bundu-standards` holds the register of standards we adopt (`register/register.yaml`) and the standards we publish (BAGS, the Bundu vocabulary). Nothing else keeps a list of them. The register moved out of `data-infra` (`data-infra#139`, `#142`, `#143`) and is pinned there at a released version (`#186`); on 2026-11-11 the owner adopted ten more (H3, IPTC ninjs, IPTC Digital Source Type, Apache Avro, Activity Streams 2.0, SPDX, CAP 1.2, OGC API - Common, SD-JWT VC and the LEI). A copy (a database collection, a page) is generated from the register and compared with it: `register.py check` in CI, `register.py live` against the database. Owner, 2026-10-29: urgent, so nothing drifts again.
 3. **The data structure is one model.** The canonical LinkML model (`schemas/model/*.yaml`, `projections.yaml`) generates every validator, index and context. It moves to the standards repository in phase 2 of `bundu-labs/bundu-standards#33`. A store is never designed by hand next to it.
 4. **We adopt standards, not providers' schemas.** An external feed is converted at the edge into our standard model: CF standard names, one UCUM unit per quantity, WIGOS and ISO identifiers, ISO 8601 times with an IANA zone, provenance and licence on every value. Only the converted data is stored or served, which is what lets us publish and contribute to global models. Owner, 2026-10-29.
 5. **If a published standard exists, use it.** schema.org types with JSON-LD, GeoJSON (RFC 7946), ISO 3166, ISO 4217, RFC 3339, BCP 47 (`en`, `sn`, `nd`), CloudEvents, DCAT, OpenAPI 3.1 (`nyuchi-servers-api` `AGENTS.md`). Never invent a format.
 6. **Platform rules on every record:** a UUID `_id` (UUIDv7 for new ids), `_schemaVersion`, `createdAt`, `updatedAt` (`data-infra#90`). One canonical id links a record across systems: WorkOS `externalId` = MongoDB entity id = ledger `owner_id`.
-7. **Each store has one job** (owner, 2026-10-29). MongoDB is the main document store of the ecosystem and is not being retired. The Nyuchi ledger (self-hosted Postgres) is the relational database. Doris is for search and analytics. Redpanda and Flink support open data and PII stripping. No data has moved off MongoDB. Roles for Cassandra, JanusGraph and CouchDB are not restated here: `nyuchi/data-infra` `README.md` describes them, and some of its older text (a MongoDB Atlas retirement, Redpanda as the system of record in `docs/event-platform.md`) contradicts this decision and awaits the owner's rewrite.
+7. **Each store has one job** (owner, 2026-10-29). MongoDB is the main document store of the ecosystem and is not being retired ("No mongodb atlas is not being retired", owner, 2026-10-29, confirmed 2026-11-11, `data-infra#183`). The Nyuchi ledger (self-hosted Postgres) is the relational database; it is decided and **not deployed** (2026-11-17). Doris is for search and analytics; it is running and its news tables were empty on 2026-11-17. Redpanda and Flink support open data and PII stripping; Redpanda is running and Flink's machines are archived. CouchDB serves each user's own database, which their local database pulls through (owner, 2026-11-01, ADR-0002), and is not retiring. Cassandra and JanusGraph are destroyed, not live (owner, 2026-11-02). No data has moved off MongoDB. The `data-infra` docs were rewritten to say all this (`#168`, `#183`); its `README.md` on `main` still says some stores are "not yet created" while Redpanda and Doris run, which the owner has not yet had rewritten.
 8. **Keys, usage and money are not Mongo data.** API keys and their usage belong to the ledger (`platform.api_keys`, usage events and counters), not to a document store (`docs/ledger-key-contract.md`, `docs/ledger-usage-metering.md`). Secrets belong in a secret store, never in a collection or a repository.
 9. **Personal data stays on the person's device or pod, under their keys** (Ubuntu, bundu.org/philosophy). Nothing derived from people is published unless it is anonymous by construction (see the [Open data playbook](/playbooks/open-data/)).
 10. **Plan first, then the owner's yes, then write.** A re-key, a validator, an index or a move on the shared cluster starts as a plan and a match report. Unmatched records are listed, never guessed. Reads are free; writes wait for the owner. A copy of a fact is allowed only if something compares it with its source.
+
+## What is built, and what is not (2026-11-17)
+
+| Area                                                                                             | State                                                                                        |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Models for weather, places, `placeKnowledge`, agriculture, events, news, money and ids           | Built in the repository and released to `main` in a release that "changes no live database". |
+| Fix scripts for the small additive changes on the live cluster                                   | Written, never run; they need the owner's go (`data-infra#179`, `#181`, `#183`).             |
+| UUIDv7 re-key of the ledger                                                                      | Held, draft (`#108`); decided on 2026-10-13.                                                 |
+| News bridge from MongoDB to Doris                                                                | Draft, held (`#124`); never run against a real Doris.                                        |
+| Postgres ledger                                                                                  | Decided, not deployed.                                                                       |
+| Weather standards (UCUM, SOSA/SSN, SensorThings, WMDR, WIS2, OGC API - Features, SDMX, OCHA COD) | Adopted 2026-10-30; the register is pinned at a released version.                            |
+
+How to check this table has not gone stale: read `data_health` and `data_domains` with the Nyuchi Data tool and the open pull requests of `nyuchi/data-infra`.
 
 ## How to change data
 
@@ -43,6 +56,8 @@ On 2026-10-29 the standards register had 70 entries and the database held 66, wh
 ## Worked examples
 
 ### The weather database audit
+
+> **Update, 2026-11-17.** The `weather.yaml` model is built in `data-infra` (`#90`, shipped through `#181`), as are `places.placeKnowledge` (`#176`, so the draft `#107` is superseded and still open), the agriculture model (`#138`, merged 2026-11-10) and the device domain. **Nothing was run against the live cluster:** the fix scripts are written and "need the owner's go" (`#181`, `#183`), and the UUIDv7 re-key (`#108`) is held. The collection counts below were read on 2026-10-29 and are not current. Re-read the cluster before quoting a count.
 
 Read-only, 2026-10-29. The `weather` database holds 35 collections. No data has been moved. Counts are from the Nyuchi Data tool and the Atlas tool; the five collections marked "not re-read" were counted earlier in this session.
 
@@ -135,7 +150,9 @@ The agriculture links to `knowledge.topics` are blocked: two inserts failed vali
 
 ### Tooling gaps in the data tools
 
-From the same session (brief of 2026-10-29; items marked tested were run, the rest come from the tools' own descriptions):
+> **Update, 2026-11-17.** The Nyuchi Data tool (`nyuchi/fly-mcp`, `data.nyuchi.dev/mcp`) now lists two tools, `search` and `execute` (owner, 2026-11-04). It reads Fly, Postgres, Mongo, Redpanda, Cassandra, Doris, CouchDB, Flink, projectors, monitoring and Cloudflare with structured reads and no SQL passthrough; its only write is starting, stopping or restarting a machine, and that needs `data:admin`. Its domain list now includes `agriculture` and `device`. Whether the five gaps below are closed was not checked, except that Cassandra and JanusGraph are gone, which removes some of the tools that fronted undeployed stores.
+
+From the session of 2026-10-29 (brief of 2026-10-29; items marked tested were run, the rest come from the tools' own descriptions):
 
 1. **No validator or schema contract in the Nyuchi Data tool.** It shows that a collection exists, its counts and indexes, but not its required fields, enums or `validationAction`. The `knowledge.topics` inserts failed twice with only "Document failed validation". Request: a read-only collection-info tool that returns validators, collection options and the declared schema from `data-infra`.
 2. **The Atlas tool is write-capable and has no scoping.** It accepted writes across the cluster (stopped only by a validator), takes optional filters on update and delete, and bundles cluster and database-user administration with data tools. Use a dedicated least-privilege database user per task.

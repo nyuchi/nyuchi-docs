@@ -18,6 +18,13 @@ This playbook decides how we measure. Sources: `docs/event-platform.md` and the 
 7. **Open data is separate.** Anything published to the commons follows the [Open data playbook](/playbooks/open-data/).
 8. **Tracking is planned.** Use the tracking-plan process: model the product, audit current tracking, design the plan, then implement. Do not add events without a plan entry.
 
+## Where the platform's measurement stands (2026-11-17)
+
+- Doris is running with databases for analytics, search and the apps, and its news tables were empty because nothing feeds them yet (the bridge from MongoDB is an unmerged draft). Redpanda is running; the projectors that would feed Doris are not deployed. So platform analytics is designed and not yet producing.
+- The weather app's growth metrics (searches that end on a rendered page, install and push opt-in rates, retention) have no baseline: the events are not all defined. Define the event first, then the dashboard (see the [Weather playbook](/playbooks/weather/)).
+- Mukoko News counts reading and searching on the device, in order to show a wall. As measured on 2026-09-14, its dependency tree carried no analytics package (`mukoko-news`). Its open dashboard is built on the app's own corpus and is cached, not tied to any person.
+- Notification delivery is counted without logging who (see the [Notifications playbook](/playbooks/notifications/)).
+
 ## Open for the owner
 
 - Whether GA4 stays, given decision 1. The location-privacy rules reduce the exposure but do not remove the third party.

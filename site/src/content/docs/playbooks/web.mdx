@@ -1,0 +1,49 @@
+---
+title: Web playbook
+description: "How Nyuchi builds and serves web apps: Astro, a Rust Worker with JavaScript only in the browser, installable and offline-tolerant PWAs, and link previews and discoverability that adjust to every page."
+sidebar:
+  label: Web
+---
+
+This playbook decides how we build the web front end. Sources: owner messages recorded on `mukoko-dev/mukoko-weather#475`, `#293` and `#579`, the weather repository's `workers/README.md` and `astro/` folder, `mukoko-dev/super-app-web`, and the `mukoko-dev/mukoko-news` `CLAUDE.md`. Reviewed 2026-11-17. Built means merged to `staging`; **nothing in the Astro and Rust web track serves production traffic yet**, because DNS and the cutover are owner steps.
+
+## The decisions
+
+1. **Astro is how we build the platform's web.** Owner, 2026-11-04 (`mukoko-weather#475`): "by design we should be building on Astro ... It is not an open decision. It is decided this is how we build our entire platform." Earlier, 2026-10-11 (`#293`): "Astro with TypeScript ... SvelteKit is out completely."
+2. **Rust serves it; JavaScript runs only in the browser.** Owner, 2026-11-14 (`#579`), answering "which runtime serves the weather web build": "Rust serves it, JS only in the browser." The build is Astro static output with no adapter, served by a Rust Worker (workers-rs) through the `ASSETS` binding. There is no Node or Vercel runtime. A CI gate (`check:artefact` in the weather repository) fails the build on any server bundle, adapter or Node import.
+3. **Convert as much as possible to Rust and WebAssembly** (owner, 2026-11-13, `#475`). Decisions live in a pure Rust `core` crate that builds natively and for `wasm32`; the Worker holds only routing, caching and headers (see the [Platform playbook](/playbooks/platform/)).
+4. **The interface loads before the data** (owner, 2026-11-13, `#475`: "take inspiration from coda, Netflix, TikTok, instagram"). A page paints its shell at once and fills in from the API. An empty or broken screen loses a person's trust, so a failed section says so and never takes down the page.
+5. **React islands are a bridge, not a destination.** Confirmed 2026-11-13 (`#475`, decision O-M1): React islands are allowed for a time-boxed period while a surface moves to Astro, with a JavaScript budget enforced in CI (`astro/js-budget.json` in weather).
+6. **Every page and every place carries its own link preview** (owner, 2026-11-15, `#579`: "our og images and url should be dynamic so it adjusts for every page, ... every location can have a og image and title"). Cards are drawn at build time (satori to SVG, sharp to PNG) from the Mzizi "hive" template, one for the site, one per page and one per place, with the mark used byte for byte and text colours checked against APCA. Titles and descriptions are per page. See the Mzizi discoverability skill for the template.
+7. **Security headers and routing are data, not code.** The Worker's route table (`workers/web/routing/routes.json`) and header set (`security-headers.json`) are the one place a route or header is declared. A route that is not migrated answers a 404 problem document, or goes to a legacy origin only where one is configured.
+8. **Honest status codes.** A route that can answer 404 or 5xx must decide that before it streams anything. On Next.js, a `loading.tsx` above such a route turns every `notFound()` and every thrown error into a `200`; keep the existence check in the page and put the Suspense boundary inside it (`mukoko-news`, measured 2026-09-17). The Astro static build does not have this failure, which is one reason for the move.
+9. **Courting search and answer engines is deliberate.** For an aggregator or a weather page, indexed traffic is the asset. Indexed pages are never gated; metering and gating belong to the [News playbook](/playbooks/news/) where a product needs them. Machine-readable surfaces (`llms.txt`, structured data with JSON-LD, `robots.txt`, a sitemap) are part of shipping a page.
+10. **Installable, and back-button fast.** The PWA installs on request (`navigator.install()` with a `beforeinstallprompt` fallback, behind a visible control) and never springs a prompt on load. Pages are `private, no-cache` rather than `no-store` for anonymous requests, so the browser's back-forward cache can restore them (measured on the weather app: Back restored 7 of 8 pages, against 0 of 3 before). A request with a session cookie keeps `no-store`.
+11. **Fonts, marks and tokens come from Mzizi.** Use the registry's tokens and components, the seven-mineral mark unaltered, and the Bundu floor for type, spacing and contrast.
+12. **Retire the old front end on a clock.** Both Vercel projects of the weather app retire after a 30-day window following cutover (confirmed 2026-11-13, decision O-C1). The DNS move to Cloudflare is an owner step.
+
+## What is built, and what is not
+
+| Area                                 | State                                                                                                                                                                                                |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Weather Astro build                  | Built, dark. The layout, `/about` and five static pages (`/terms`, `/privacy`, `/help`, `/releases`, `/status`) are prerendered. Place pages, sign-in and API routes are still Next.js 16 on Vercel. |
+| Rust web Worker                      | Built, dark, never run in a Workers runtime. Not in the deploy workflow. The service worker and the `public/` files are not in the Astro build yet.                                                  |
+| Per-page and per-place link previews | Built. The cache rule for the image path in the Worker is a stated follow-up, and WhatsApp, Slack and X were not tested against it.                                                                  |
+| PWA install and back-forward cache   | Built on the Next.js app. LCP, JavaScript and heap changes were not claimed.                                                                                                                         |
+| Super app                            | `super-app-web` is Astro plus a workers-rs Worker at `app.mukoko.com`, reading everything from the Nyuchi API with no database of its own.                                                           |
+
+A lab measurement on `/about` (2026-11-13, `mukoko-weather#475` comment): JavaScript over the wire about 394 KB on Next.js against about 109 KB on Astro, and heap about 8.4 MB against 2.2 MB. These are lab numbers, not like-for-like, and say nothing about field performance.
+
+## How to add a page
+
+1. Add the Astro page and its route-table entry together; the artefact gate fails if they disagree.
+2. Give it a title, a description, a canonical URL and a link preview. A page without them is not shipped.
+3. State its status codes for missing, forbidden and failed, before it renders.
+4. Check the JavaScript budget, and run the real-browser checks the repository carries.
+5. Test the page without JavaScript for its content, and with the back button.
+
+## Open for the owner
+
+- **The Next.js estate.** `mukoko-news` (Next.js 15), `mukoko-events` (Next.js 16), `kweli` and the legacy `mukoko-home` are Next.js on Vercel. Decision 1 says Astro, and no sequence or deadline for them is recorded.
+- **Decision O-O1 (the OG renderer)** was not decided when this was written.
+- **Cutover for weather:** DNS, the `weather.mukoko.com` host behind Cloudflare (approved as a design on 2026-11-13) and the first deploy of the web Worker.
