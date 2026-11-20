@@ -6,8 +6,9 @@
    are tokens only (Starlight's --sl-color-* and the @bundu/ui --color-*
    minerals); there is no literal colour in this file.
 
-   Bundu floor: 7px gaps, 14px insets, 1.5 body leading, 44px minimum touch
-   targets (48px for sidebar items and footer links), 7:1 text contrast.
+   Bundu floor 1.1.0: 7px gaps, 14px insets, 17px phone page edge (28px from
+   50rem), 1.5 body leading, 45px hit area on touch (24px with a fine pointer),
+   7:1 text contrast.
 
    Starlight's own styles live in cascade layers; this sheet is unlayered, so
    it wins without !important.
@@ -18,11 +19,13 @@
   --mzizi-brand-accent: var(--sl-color-accent);
   /* Icon colour on the accent pill. */
   --mzizi-on-accent: var(--sl-color-black);
-  --mzizi-pad-x: 1.25rem; /* 20px */
+  --mzizi-pad-x: 1.0625rem; /* 17px on phones */
   --mzizi-gap: 0.4375rem; /* 7px */
   --mzizi-inset: 0.875rem; /* 14px */
-  --mzizi-target: 2.75rem; /* 44px */
-  --mzizi-target-lg: 3rem; /* 48px */
+  /* Hit area: 45px on touch, 24px with a fine pointer (the tier below). */
+  --mzizi-target: 2.8125rem; /* 45px */
+  --mzizi-target-fine: 1.5rem; /* 24px */
+  --mzizi-hit: var(--mzizi-target);
   --mzizi-focus: var(--focusRing-width, 2px) solid var(--sl-color-accent);
   --mzizi-focus-offset: var(--focusRing-offset, 2px);
 
@@ -38,6 +41,17 @@
     var(--color-copper) 85.7142% 100%
   );
 }
+@media (min-width: 50rem) {
+  :root {
+    --mzizi-pad-x: 1.75rem; /* 28px, wide */
+  }
+}
+/* The fine-pointer tier of the Bundu floor. */
+@media (pointer: fine) and (hover: hover) and (min-width: 64rem) and (not (any-pointer: coarse)) {
+  :root {
+    --mzizi-hit: var(--mzizi-target-fine);
+  }
+}
 
 .mzizi-strip {
   display: block;
@@ -51,8 +65,8 @@
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 
-/* Starlight's fixed header box: 20px side padding, transparent at the top of
-   the page, bottom border and a blurred background once scrolled. */
+/* Starlight's fixed header box: the page edge (17px, 28px wide), transparent
+   at the top of the page, bottom border and a blurred background once scrolled. */
 .page > header.header {
   padding-block: 0;
   padding-inline: var(--mzizi-pad-x);
@@ -78,16 +92,16 @@
   }
 }
 
-/* The menu button: first control in the header, a quiet 44px icon button.
+/* The menu button: first control in the header, a quiet 45px icon button.
    (Starlight's own toggle is blanked by the plugin.) */
 .mzizi-menu-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  inline-size: var(--mzizi-target);
-  block-size: var(--mzizi-target);
-  /* Optically align the 20px icon with the header's 20px padding. */
+  inline-size: var(--mzizi-hit);
+  block-size: var(--mzizi-hit);
+  /* Optically align the 20px icon with the header's page edge. */
   margin-inline-start: -0.75rem;
   padding: 0;
   border: 0;
@@ -183,7 +197,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--mzizi-gap);
-  min-block-size: var(--mzizi-target);
+  min-block-size: var(--mzizi-hit);
   padding-inline: var(--mzizi-inset);
   border-radius: var(--radius-sm, 7px);
   color: var(--sl-color-gray-2);
@@ -230,7 +244,7 @@
   outline-offset: var(--mzizi-focus-offset);
 }
 
-/* Below 50rem: the brand-accent pill, a capsule of round 44px icon buttons. */
+/* Below 50rem: the brand-accent pill, a capsule of round 45px icon buttons. */
 @media (max-width: 49.99rem) {
   .mzizi-actions {
     padding: 2px;
@@ -238,8 +252,8 @@
     background-color: var(--mzizi-brand-accent);
   }
   .mzizi-actions__item {
-    inline-size: var(--mzizi-target);
-    block-size: var(--mzizi-target);
+    inline-size: var(--mzizi-hit);
+    block-size: var(--mzizi-hit);
     border-radius: 9999px;
     color: var(--mzizi-on-accent);
     background-color: color-mix(
@@ -293,8 +307,8 @@
     color: inherit;
   }
   .mzizi-actions__theme select {
-    inline-size: var(--mzizi-target);
-    block-size: var(--mzizi-target);
+    inline-size: var(--mzizi-hit);
+    block-size: var(--mzizi-hit);
     margin: 0;
     padding: 0;
     color: transparent;
@@ -313,7 +327,7 @@
 @media (min-width: 50rem) {
   .mzizi-actions__search .nds-trigger {
     inline-size: 15rem;
-    min-block-size: var(--mzizi-target);
+    min-block-size: var(--mzizi-hit);
     padding-inline: var(--mzizi-inset);
     gap: var(--mzizi-gap);
     border-radius: 9999px;
@@ -343,8 +357,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-inline-size: var(--mzizi-target);
-    min-block-size: var(--mzizi-target);
+    min-inline-size: var(--mzizi-hit);
+    min-block-size: var(--mzizi-hit);
     margin: 0;
     padding: 0;
     border-radius: 9999px;
@@ -359,7 +373,7 @@
   }
 
   .mzizi-actions__theme select {
-    block-size: var(--mzizi-target);
+    block-size: var(--mzizi-hit);
     border-radius: 9999px;
   }
   .mzizi-actions__theme label {
@@ -405,12 +419,12 @@
   margin-block-start: 2px;
 }
 
-/* Items and group labels: at least 48px high, 14px inset. */
+/* Items and group labels: at least the hit area high, 14px inset. */
 .mzizi-sidebar a,
 .mzizi-sidebar summary {
   display: flex;
   align-items: center;
-  min-block-size: var(--mzizi-target-lg);
+  min-block-size: var(--mzizi-hit);
   padding-block: 0;
   padding-inline: var(--mzizi-inset);
   border-radius: var(--radius-sm, 7px);
@@ -558,7 +572,7 @@
 .mzizi-footer__column a {
   display: flex;
   align-items: center;
-  min-block-size: var(--mzizi-target-lg);
+  min-block-size: var(--mzizi-hit);
   border-radius: var(--radius-sm, 7px);
   color: var(--sl-color-gray-1);
   font-size: var(--sl-text-sm);

@@ -9,17 +9,18 @@ The anatomy follows the Mzizi registry's N7 shell components
 (`mzizi-header`, `mzizi-sidebar`, `mzizi-footer`, served at
 `https://api.mzizi.dev/v1/ui/<name>`), re-implemented in Astro and CSS with the
 site's Mzizi tokens and the Bundu floor (7:1 text contrast, 7px gaps, 14px
-insets, 1.5 body leading, 44px minimum touch targets).
+insets, 17px phone page edge (28px from 50rem), 1.5 body leading, and a 45px
+hit area on touch, 24px with a fine pointer).
 
 This package is private and workspace-only for now. It is not published to npm.
 
 ## What it does
 
-| Part    | What you get                                                                                                                                                                                                                                                                   |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Header  | Sticky, 56px, 20px side padding. Brand on the left, section links on desktop, then one action group: the brand-accent pill (round 44px icon buttons) on small screens, the labelled search field, GitHub icon and theme select on desktop. Blurred and bordered once scrolled. |
-| Sidebar | Seven-mineral strip, logo header (mobile menu), separator, groups. Items are at least 48px high; the active item is a tinted accent background with accent text.                                                                                                               |
-| Footer  | Top border, 3px seven-mineral strip, brand column with the tagline, link columns with 48px targets, a legal line. Full width, a real `contentinfo` landmark.                                                                                                                   |
+| Part    | What you get                                                                                                                                                                                                                                                                                               |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header  | Sticky, 56px, 17px side padding on phones (28px from 50rem). Brand on the left, section links on desktop, then one action group: the brand-accent pill (round 45px icon buttons) on small screens, the labelled search field, GitHub icon and theme select on desktop. Blurred and bordered once scrolled. |
+| Sidebar | Seven-mineral strip, logo header (mobile menu), separator, groups. Items are at least 45px high (24px with a fine pointer); the active item is a tinted accent background with accent text.                                                                                                                |
+| Footer  | Top border, 3px seven-mineral strip, brand column with the tagline, link columns with 45px targets, a legal line. Full width, a real `contentinfo` landmark.                                                                                                                                               |
 
 Reused from Starlight, so behaviour is unchanged: `SiteTitle`, `SocialIcons`,
 `ThemeSelect`, `MobileMenuToggle`, the mobile popover menu in `PageFrame`,

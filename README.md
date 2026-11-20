@@ -162,9 +162,8 @@ while the published package is a single `pnpm publish` away.
 ## Ecosystem
 
 - [docs.bundu.org](https://docs.bundu.org) — Bundu Foundation product docs
-- [mzizi.dev](https://mzizi.dev) — the Mzizi design system, an
-  open-architecture project of the Bundu Foundation, operated and developed
-  by Nyuchi
+- [mzizi.dev](https://mzizi.dev) — Mzizi is a Bundu Foundation project, built
+  by Nyuchi; Nyuchi runs its cyber section
 - [api.nyuchi.com](https://api.nyuchi.com) — the `/v1` gateway these docs
   describe
 

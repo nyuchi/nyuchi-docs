@@ -64,45 +64,46 @@ describe("shell.css: tokens only", () => {
 });
 
 describe("shell.css: the Bundu floor", () => {
-  it("declares 44px, 48px, 7px and 14px as tokens", () => {
+  it("declares 45px and 24px hit areas, 7px, 14px and a 17px page edge as tokens", () => {
     const root = rule(":root");
-    expect(root).toMatch(/--mzizi-target:\s*2\.75rem/);
-    expect(root).toMatch(/--mzizi-target-lg:\s*3rem/);
+    expect(root).toMatch(/--mzizi-target:\s*2\.8125rem/);
+    expect(root).toMatch(/--mzizi-target-fine:\s*1\.5rem/);
+    expect(root).toMatch(/--mzizi-hit:\s*var\(--mzizi-target\)/);
+    expect(root).toMatch(/--mzizi-pad-x:\s*1\.0625rem/);
     expect(root).toMatch(/--mzizi-gap:\s*0\.4375rem/);
     expect(root).toMatch(/--mzizi-inset:\s*0\.875rem/);
-    expect(root).toMatch(/--mzizi-pad-x:\s*1\.25rem/);
   });
 
-  it("gives header controls a 44px target", () => {
+  it("gives header controls the hit area (45px on touch)", () => {
     expect(rule(".mzizi-header__nav a")).toMatch(
-      /min-block-size:\s*var\(--mzizi-target\)/,
+      /min-block-size:\s*var\(--mzizi-hit\)/,
     );
     expect(rule(".mzizi-menu-button")).toMatch(
-      /block-size:\s*var\(--mzizi-target\)/,
+      /block-size:\s*var\(--mzizi-hit\)/,
     );
     expect(rule(".mzizi-menu-button")).toMatch(
-      /inline-size:\s*var\(--mzizi-target\)/,
+      /inline-size:\s*var\(--mzizi-hit\)/,
     );
     expect(rule(".mzizi-actions__item")).toMatch(
-      /block-size:\s*var\(--mzizi-target\)/,
+      /block-size:\s*var\(--mzizi-hit\)/,
     );
     expect(rule(".mzizi-actions__social a")).toMatch(
-      /min-block-size:\s*var\(--mzizi-target\)/,
+      /min-block-size:\s*var\(--mzizi-hit\)/,
     );
     expect(rule(".mzizi-actions__search .nds-trigger")).toMatch(
-      /min-block-size:\s*var\(--mzizi-target\)/,
+      /min-block-size:\s*var\(--mzizi-hit\)/,
     );
   });
 
-  it("gives sidebar items and footer links a 48px target", () => {
+  it("gives sidebar items and footer links the hit area", () => {
     expect(rule(".mzizi-sidebar a")).toMatch(
-      /min-block-size:\s*var\(--mzizi-target-lg\)/,
+      /min-block-size:\s*var\(--mzizi-hit\)/,
     );
     expect(rule(".mzizi-sidebar summary")).toMatch(
-      /min-block-size:\s*var\(--mzizi-target-lg\)/,
+      /min-block-size:\s*var\(--mzizi-hit\)/,
     );
     expect(rule(".mzizi-footer__column a")).toMatch(
-      /min-block-size:\s*var\(--mzizi-target-lg\)/,
+      /min-block-size:\s*var\(--mzizi-hit\)/,
     );
   });
 

@@ -51,7 +51,7 @@
 
 ## Mzizi Tools
 
-- [Overview](https://docs.nyuchi.com/mzizi-tools/overview): The Mzizi consumer tooling — mzizi-mcp, mzizi-cli (the fundi agent), mzizi-skills, auth-by-audience, and the skills authoring flow. The Mzizi design system itself lives at mzizi.dev.
+- [Overview](https://docs.nyuchi.com/mzizi-tools/overview): The Mzizi consumer tooling — mzizi-mcp, mzizi-cli (the fundi agent), mzizi-skills, auth-by-audience, and the skills authoring flow. Mzizi itself lives at mzizi.dev.
 - [The DNA double helix](https://docs.nyuchi.com/mzizi-tools/dna-helix): The architecture Mzizi serves — nodes on an engineering and a meaning backbone, held by cross-cutting rungs (fundi, documentation, discovery). No axes, no outliers, no 3D. Node numbers are labels, not a sequence, and the node set is never capped.
 - [Registry health](https://docs.nyuchi.com/mzizi-tools/registry-health): What the 64 Mzizi registry MCP tools actually return — which are broken, which serve retired data, which to trust.
 - [A2A](https://docs.nyuchi.com/mzizi-tools/a2a): Design (not yet shipped) for mzizi-mcp delegating long-running security, chaos, and accessibility runs to the fundi agent as A2A tasks rather than blocking MCP tool calls.
@@ -63,7 +63,7 @@
 
 ## Ecosystem
 
-- Mzizi design system: https://mzizi.dev
+- Mzizi (a Bundu Foundation project, built by Nyuchi): https://mzizi.dev
 - Bundu Foundation product docs: https://docs.bundu.org
 - Nyuchi Africa: https://www.nyuchi.com
 - Sitemap: https://docs.nyuchi.com/sitemap-index.xml
