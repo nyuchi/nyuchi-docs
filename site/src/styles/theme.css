@@ -10,8 +10,9 @@
    ───────────────────────────────────────────────────────────────────────── */
 
 /* ── Home hero (index.mdx) ───────────────────────────────────────────────
-   Bundu floor: 7px gaps, 14px insets, 1.5 body leading, 44px touch targets,
-   pill shape as in the header icon group. Tokens only. */
+   Bundu floor: 45px hit area on touch, 24px on desktop, field inset 17px,
+   gap between controls 9px, 1.5 body leading, pill shape as in the header
+   icon group. Full table: https://docs.mzizi.dev/foundations/bundu-floor */
 .home-hero {
   display: flex;
   flex-direction: column;
@@ -29,11 +30,11 @@
 .home-search {
   display: inline-flex;
   align-items: center;
-  gap: 0.4375rem; /* 7px */
+  gap: 0.5625rem; /* 9px control gap */
   inline-size: 100%;
   max-inline-size: 28rem;
-  min-block-size: 2.75rem; /* 44px */
-  padding-inline: 0.875rem;
+  min-block-size: 2.8125rem; /* 45px touch floor */
+  padding-inline: 1.0625rem; /* 17px field inset */
   border: 1px solid var(--sl-color-gray-4);
   border-radius: 9999px;
   background: var(--sl-color-black);
@@ -51,7 +52,7 @@
 }
 .home-search kbd {
   font-size: var(--sl-text-xs);
-  padding: 0.125rem 0.4375rem;
+  padding: 0.125rem 0.5625rem; /* 9px pill inset */
   border-radius: 9999px;
   border: 1px solid var(--sl-color-gray-5);
   background: var(--sl-color-gray-6);
@@ -60,10 +61,10 @@
 .home-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4375rem; /* 7px */
+  gap: 0.5625rem; /* 9px between controls */
 }
 .home-actions .sl-link-button {
-  min-block-size: 2.75rem;
+  min-block-size: 2.8125rem; /* 45px touch floor */
   display: inline-flex;
   align-items: center;
 }
