@@ -64,10 +64,10 @@ describe("shell.css: tokens only", () => {
 });
 
 describe("shell.css: the Bundu floor", () => {
-  it("declares 45px and 24px hit areas, 7px, 14px and a 17px page edge as tokens", () => {
+  it("declares a 45px touch hit area, a 28px fine-pointer control, 7px, 14px and a 17px page edge as tokens", () => {
     const root = rule(":root");
     expect(root).toMatch(/--mzizi-target:\s*2\.8125rem/);
-    expect(root).toMatch(/--mzizi-target-fine:\s*1\.5rem/);
+    expect(root).toMatch(/--mzizi-target-fine:\s*1\.75rem/);
     expect(root).toMatch(/--mzizi-hit:\s*var\(--mzizi-target\)/);
     expect(root).toMatch(/--mzizi-pad-x:\s*1\.0625rem/);
     expect(root).toMatch(/--mzizi-gap:\s*0\.4375rem/);

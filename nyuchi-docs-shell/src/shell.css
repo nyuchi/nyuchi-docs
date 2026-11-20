@@ -24,7 +24,7 @@
   --mzizi-inset: 0.875rem; /* 14px */
   /* Hit area: 45px on touch, 24px with a fine pointer (the tier below). */
   --mzizi-target: 2.8125rem; /* 45px */
-  --mzizi-target-fine: 1.5rem; /* 24px */
+  --mzizi-target-fine: 1.75rem; /* 28px drawn; the hit-area floor is 24px */
   --mzizi-hit: var(--mzizi-target);
   --mzizi-focus: var(--focusRing-width, 2px) solid var(--sl-color-accent);
   --mzizi-focus-offset: var(--focusRing-offset, 2px);
