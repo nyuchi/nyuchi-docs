@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { starlightDocsSearch } from '@nyuchi/nyuchi-docs-search/plugin';
-import { starlightMziziShell } from '@nyuchi/nyuchi-docs-shell/plugin';
+import { starlightMziziShell } from '@bundu/ui/starlight';
 
 // https://astro.build/config
 export default defineConfig({
@@ -34,7 +34,8 @@ export default defineConfig({
           aiUrl: import.meta.env.PUBLIC_SHAMWARI_AI_URL,
           source: 'nyuchi',
         }),
-        // The standard Mzizi shell: header, sidebar, footer. The header links
+        // The standard Mzizi shell from @bundu/ui (the same one docs.bundu.org
+        // uses): header, sidebar, footer and the Starlight theme. The header links
         // are the sidebar's top-level sections (a subset: the header is one
         // row); the footer columns are the sections plus the ecosystem links
         // the old footer carried.
@@ -90,8 +91,8 @@ export default defineConfig({
           ],
           tagline: 'I am because we are.',
           legal: '© 2026 Nyuchi Africa (Pvt) Ltd · Part of the Bundu Foundation',
-          // Nyuchi's brand accent is the site's existing Starlight accent (gold).
-          accent: 'var(--sl-color-accent)',
+          // Nyuchi's brand mineral.
+          accent: 'gold',
         }),
       ],
       customCss: ['./src/styles/theme.css'],

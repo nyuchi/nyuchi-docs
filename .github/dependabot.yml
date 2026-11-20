@@ -12,8 +12,13 @@ updates:
       interval: 'weekly'
     # Wait a week before proposing a newly published version: new releases can
     # be malicious or unstable. Security updates are not delayed by this.
+    # Our own packages are exempt: we publish @bundu/* ourselves, and holding
+    # them back only blocks our releases (pnpm refused @bundu/ui 0.15.0 the
+    # day it shipped).
     cooldown:
       default-days: 7
+      exclude:
+        - '@bundu/*'
     open-pull-requests-limit: 10
     ignore:
       # TypeScript 7 is the Corsa/native rewrite: its package entrypoint no
