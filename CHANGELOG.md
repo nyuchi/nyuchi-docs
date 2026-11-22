@@ -6,6 +6,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ### Changed
 
+- **Dependencies on the latest releases** (#156). `astro` 7.4.13, `@astrojs/starlight` 0.43.1, `@bundu/ui` 0.17, `vite-plus` 1.7.0 (with its `vite-plus-core` 8.3.8000 alias), `vitest` 5.1.1, `wrangler` 4.166.0, `jsdom` 31, `jose`, `zod` and the rest of the minor and patch group. `nyuchi-docs-search` accepts Starlight 0.42 and 0.43 as a peer, so its dev install no longer resolves an old Astro. Clears the astro, smol-toml and postcss-selector-parser Dependabot alerts. Supersedes #100 and #116.
+
 - **The shared shell is on the Bundu floor.** `@bundu/ui` moves to `^0.17.0`: icon buttons 45px, sidebar and footer items 49px, a 9px gap between controls, a 21px page edge, and breadcrumb links at least 45px on touch and 28px on a desktop. `nyuchi-docs-mcp` is set to 0.11.0, the next minor the release policy allows after v0.10.1, so the next release can be tagged (Auto tag refused 0.2.0 on main). Refs #151.
 - **Mzizi is named with the owner's wording.** The README, `llms.txt` and the home page call it Mzizi, not "the Mzizi design system", and describe it as a Bundu Foundation project, built by Nyuchi, with Nyuchi running its cyber section. Refs #151.
 - **The site follows the current Bundu floor.** The hit area is 45px on touch and 24px on desktop (replacing the 44px touch floor in the home hero), and the field inset and control gap move to the spacing layers (17px and 9px). `site/src/styles/theme.css` (home hero) and the Kweli design-system and Web playbook pages are updated, and the Web playbook links to the full table at [docs.mzizi.dev/foundations/bundu-floor](https://docs.mzizi.dev/foundations/bundu-floor).
