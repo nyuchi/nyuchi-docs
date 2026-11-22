@@ -22,7 +22,7 @@
     "fmt": "vp fmt"
   },
   "devDependencies": {
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.1"
   },
   "mcpName": "io.github.nyuchi/nyuchi-docs",
   "repository": {
