@@ -6,6 +6,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ### Changed
 
+- **Kweli's brand mineral is Malachite** (owner decision, 2026-11-23), as Mzizi's brand-minerals table and `/v1/brand` give it; the design-system page said Tanzanite. The verification badge's tier colours are a separate scale (Mzizi's trust tokens) and are unchanged.
+
 - **Wordmarks take an initial capital** (owner decision, 2026-11-23): Nyuchi, Mzizi, Mukoko, Bundu, Shamwari, Kweli. The `using-nyuchi-docs` skill no longer says "Lowercase, always", and the weather-stations page and the `mukoko-design` rows on the tools pages write Mukoko with a capital. `@nyuchi/nyuchi-docs-skills` moves to 0.1.2 so the changed skill ships. Code identifiers (package names, repository names, domains, slugs) are unchanged.
 
 - **Nyuchi and Mukoko facts move in from docs.mzizi.dev**, so each lives in the Nyuchi docs. Kweli overview gains Kweli Address (the short code, RFC v0.1, Mukoko Events as first consumer). The Web playbook gains two decisions: "Open in Mukoko" is one https universal link resolved by `super-app-web`, and every discover page is identical across the Mukoko apps (owner, 2026-10-04). The Console overview records that its shell is the ecosystem's dashboard design (owner, 2026-10-04) and that the Mzizi mini-app left it for `app.mzizi.dev`. Identity links the Mzizi authentication pattern at docs.mzizi.dev instead of bundu-docs. Nothing is removed from docs.mzizi.dev in this change.
