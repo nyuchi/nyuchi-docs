@@ -111,4 +111,7 @@ script" is.
 
 ## Wordmarks
 
-Lowercase, always: `nyuchi`, `mzizi`, `mukoko`, `bundu`, `shamwari`, `kweli`.
+An initial capital, always: Nyuchi, Mzizi, Mukoko, Bundu, Shamwari, Kweli (owner decision,
+2026-11-23), in headings, labels and running text alike. Code identifiers keep their own
+spelling: package names, repository names, domains and slugs such as `@nyuchi/nyuchi-docs-mcp`,
+`mukoko-news` and `nyuchi.com` stay lowercase.
