@@ -13,6 +13,11 @@ The Nyuchi Console — published at `platform.nyuchi.com` — is the single tena
 surface where customers manage their org, install mini-apps, configure API
 extensions, choose a plan, and see billing.
 
+## Known today
+
+- **The console shell is the ecosystem's dashboard design.** Owner decision, 2026-10-04: the Nyuchi console shell is **the** dashboard design for the whole Bundu ecosystem. Every admin and operator dashboard, in every organisation, uses the same shell and the same components; only the brand changes, its mineral colour and its mark. The Nyuchi console is the first dashboard built to that standard, with Nyuchi gold as its mineral. The shell and its component contracts are the [Mzizi Dashboard Standard](https://docs.mzizi.dev/patterns/dashboard-standard) on Mzizi.
+- **The Mzizi mini-app left the console.** `@nyuchi/mzizi-console-app`, last at `0.2.0-beta.1`, was a mini-app the console mounted under `/apps/mzizi/*`. It was never published to npm and shipped manually. It was replaced by the standalone Mzizi console at [`app.mzizi.dev`](https://app.mzizi.dev), which Nyuchi also runs; that console is documented in [the Mzizi console](https://docs.mzizi.dev/console) on Mzizi.
+
 ## What needs to land here
 
 - **Mini-apps** — how a mini-app is packaged, the manifest shape, the

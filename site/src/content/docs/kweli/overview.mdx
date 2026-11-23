@@ -15,6 +15,14 @@ _Kweli_ means "truth" in Swahili. The trust score **is** the kweli — it travel
   The canonical term is **place** — the graph's own noun, broad and entity-type-agnostic. "Venue" in some existing copy and component names, like the legacy "bars" routes, is an inherited artifact being refactored away.
 </Aside>
 
+## Kweli Address
+
+Kweli Address is open addressing for informal Africa: any place, home, stall or person gets a short code (`NYU-7K2Q`) that resolves to directions, the entrance and who to call on arrival. An address opens at `kweli.mukoko.com/a/<code>`, for example `https://kweli.mukoko.com/a/NYU-7K2Q`.
+
+- **Specified.** It is specified in the Kweli Address RFC v0.1 ([mukoko-dev/kweli#195](https://github.com/mukoko-dev/kweli/issues/195)).
+- **Mukoko Events is the first consumer**, beside Kweli itself.
+- **The screens come from Mzizi.** The address code, the share card with a QR code, the deliver-to selector, the private-address row and the counted-signal trust meter were added to the Mzizi registry first, before Kweli uses them ([mzizi-registry#543](https://github.com/mzizi-dev/mzizi-registry/issues/543)). Their contracts and builds are documented in [Kweli Address](https://docs.mzizi.dev/patterns/kweli-address) on Mzizi.
+
 ## Data model
 
 The graph lives in MongoDB. Every collection `_id` is a **UUID string** (not an ObjectId); every document carries `_schemaVersion`, `createdAt`, and `updatedAt`. Field names are camelCase and geo data is GeoJSON (`geo: { type: 'Point', coordinates: [lng, lat] }`) with 2dsphere indexes.
