@@ -6,6 +6,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ### Changed
 
+- **Wordmarks take an initial capital** (owner decision, 2026-11-23): Nyuchi, Mzizi, Mukoko, Bundu, Shamwari, Kweli. The `using-nyuchi-docs` skill no longer says "Lowercase, always", and the weather-stations page and the `mukoko-design` rows on the tools pages write Mukoko with a capital. `@nyuchi/nyuchi-docs-skills` moves to 0.1.2 so the changed skill ships. Code identifiers (package names, repository names, domains, slugs) are unchanged.
+
 - **Nyuchi and Mukoko facts move in from docs.mzizi.dev**, so each lives in the Nyuchi docs. Kweli overview gains Kweli Address (the short code, RFC v0.1, Mukoko Events as first consumer). The Web playbook gains two decisions: "Open in Mukoko" is one https universal link resolved by `super-app-web`, and every discover page is identical across the Mukoko apps (owner, 2026-10-04). The Console overview records that its shell is the ecosystem's dashboard design (owner, 2026-10-04) and that the Mzizi mini-app left it for `app.mzizi.dev`. Identity links the Mzizi authentication pattern at docs.mzizi.dev instead of bundu-docs. Nothing is removed from docs.mzizi.dev in this change.
 
 - **Dependencies on the latest releases** (#156). `astro` 7.4.13, `@astrojs/starlight` 0.43.1, `@bundu/ui` 0.17, `vite-plus` 1.7.0 (with its `vite-plus-core` 8.3.8000 alias), `vitest` 5.1.1, `wrangler` 4.166.0, `jsdom` 31, `jose`, `zod` and the rest of the minor and patch group. `nyuchi-docs-search` accepts Starlight 0.42 and 0.43 as a peer, so its dev install no longer resolves an old Astro. Clears the astro, smol-toml and postcss-selector-parser Dependabot alerts. Supersedes #100 and #116.
