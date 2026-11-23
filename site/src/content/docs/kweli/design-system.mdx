@@ -1,11 +1,11 @@
 ---
 title: Design system
-description: How Kweli adopts Mzizi — the Tanzanite brand mineral, the nyuchi-place-card listing row, mineral tokens, compact admin density, and homepage ordering.
+description: How Kweli adopts Mzizi — the Malachite brand mineral, the nyuchi-place-card listing row, mineral tokens, compact admin density, and homepage ordering.
 sidebar:
   label: Design system
 ---
 
-Kweli consumes the **Mzizi** design system. Its brand mineral is **Tanzanite** (the Identity role — the Mukoko signature); color is a role contract, picked by what a surface is responsible for, not by aesthetics.
+Kweli consumes the **Mzizi** design system. Its brand mineral is **Malachite**, as Mzizi's brand-minerals table and `GET https://api.mzizi.dev/v1/brand` give it ([brand minerals](https://docs.mzizi.dev/foundations/tokens#brand-minerals)); color is a role contract, picked by what a surface is responsible for, not by aesthetics.
 
 ## Venue listing card
 
@@ -24,14 +24,13 @@ The venue listing card is the Mzizi `nyuchi-place-card` **row variant**, which e
 Mineral colors are CSS custom properties, themed for both light and dark:
 
 ```css
---color-tanzanite   /* primary — Identity */
---color-cobalt      /* secondary */
+--color-malachite   /* primary — Kweli's brand mineral */
+--color-cobalt      /* links, information and focus; never primary */
 --color-gold        /* accent */
---color-malachite   /* success */
 --color-terracotta  /* destructive */
 ```
 
-Pick the mineral by role. The verification badge tiers map Terracotta → Cobalt → Gold → Tanzanite in ascending trust order.
+Pick the mineral by role. The verification badge tiers are a separate scale, Mzizi's trust tokens: Terracotta → Cobalt → Gold → Tanzanite in ascending trust order, whatever the brand mineral.
 
 ## Admin dashboard density
 
