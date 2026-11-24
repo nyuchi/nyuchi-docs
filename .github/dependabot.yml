@@ -35,8 +35,8 @@ updates:
       # declaring ^7 while overrides force ^6 — an inconsistency that invites
       # someone to "tidy up" the override and break the build for real.
       #
-      # Remove this when svelte2tsx supports the TS 7 API, together with the
-      # override. Not before, and not one without the other.
+      # Until Astro and typescript-eslint support TS 7; remove then. Also not
+      # before svelte2tsx supports the TS 7 API, and not without the override.
       - dependency-name: 'typescript'
         update-types: ['version-update:semver-major']
     groups:
