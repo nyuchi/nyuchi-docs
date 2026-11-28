@@ -4,6 +4,10 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+### Added — Rust port migration status (2026-11-29)
+
+Engineering page **Rust port: migration status**, with `scripts/rust-port-status.mjs`, which regenerates its tables from `nyuchi-api` `routing/routes.json` and the `nyuchi-servers-api` parity audit. The page is a dated snapshot; the script and the steps to refresh it are on the page.
+
 ### Added — Durin design (2026-11-28)
 
 - **Engineering: Durin, the secrets broker.** The design of `bundu-labs/durin`, the platform-neutral broker that serves named secrets to authenticated apps: threat model, caller identity options (what was verified and what was not), per-caller allowlists, the listener, response handling, audit log, availability, disaster recovery, deployment recipes for Fly, Docker or Proxmox and Coolify, the callers of `nyuchi-api.internal` found in code search, and the cutover order for the Nyuchi API with a rollback for each step. Refs #171.
