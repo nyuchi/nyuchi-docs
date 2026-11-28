@@ -4,6 +4,10 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+### Added — Playbook: Port a router to Rust (2026-11-29)
+
+Operations playbook **Port a router to Rust**: claiming a router, the core and origin layers, the Python-recorded golden files and the real-store proof, what to change in `routing/routes.json` (never `mode`), the gates to run and what the pull request says. Distilled from the porting write-ups and `AGENTS.md` in `nyuchi-api` and `nyuchi-servers-api`.
+
 ### Added — Rust port migration status (2026-11-29)
 
 Engineering page **Rust port: migration status**, with `scripts/rust-port-status.mjs`, which regenerates its tables from `nyuchi-api` `routing/routes.json` and the `nyuchi-servers-api` parity audit. The page is a dated snapshot; the script and the steps to refresh it are on the page.
