@@ -259,8 +259,6 @@ export default defineConfig({
                 'playbooks/naming-and-where-things-live',
                 'playbooks/known-sharp-edges',
                 'playbooks/adopting-lint',
-                'playbooks/org-settings',
-                'playbooks/dpia-preassessment',
               ],
             },
           ],
@@ -273,6 +271,8 @@ export default defineConfig({
             'engineering/guide',
             'engineering/contributing',
             'engineering/readme-standard',
+            'engineering/org-settings',
+            'engineering/dpia-preassessment',
           ],
         },
         {

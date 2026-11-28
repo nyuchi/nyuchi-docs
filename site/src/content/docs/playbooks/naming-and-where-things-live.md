@@ -33,6 +33,6 @@ operated by Nyuchi, **not a Nyuchi product**.
 
 **The GitHub API limit is 5,000 an hour across every agent** ([roles and authority](/playbooks/roles-and-authority/)).
 **Where rules live:** [`AGENTS.md`](/engineering/guide/),
-[`CONTRIBUTING.md`](/engineering/contributing/), [[org settings](/playbooks/org-settings/)](/playbooks/org-settings/),
+[`CONTRIBUTING.md`](/engineering/contributing/), [[org settings](/engineering/org-settings/)](/engineering/org-settings/),
 [`README-STANDARD.md`](/engineering/readme-standard/), and the
 [Mzizi playbook](https://github.com/mzizi-dev/mzizi-docs/blob/main/playbook.mdx).

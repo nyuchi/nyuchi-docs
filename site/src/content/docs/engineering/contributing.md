@@ -94,7 +94,7 @@ package or module name (`feat(ui): …`, `fix(ntl/transport): …`).
 
 Every commit merged to `main` on every repo **must be signed and
 verified by GitHub**. This is policy, not a ruleset: the org ruleset
-(see [[org settings](/playbooks/org-settings/)](/playbooks/org-settings/))
+(see [[org settings](/engineering/org-settings/)](/engineering/org-settings/))
 has no `required_signatures` rule, so reviewers check it.
 
 Either **GPG** or **SSH** signing is accepted. Configure once:
@@ -203,7 +203,7 @@ the rest is policy:
 - [x] Up to date with the base branch.
 
 Required approving reviews are **0** during the solo-developer
-phase (see [[org settings](/playbooks/org-settings/)](/playbooks/org-settings/)).
+phase (see [[org settings](/engineering/org-settings/)](/engineering/org-settings/)).
 That rises to 1 when a second engineer with merge rights joins.
 
 ### Merge strategy
@@ -327,7 +327,7 @@ When you contribute:
 
 Changes to the organisation's governance documents — NA-01
 Constitution, NA-02 Open Source, NA-03 Engineering Working Agreement,
-or [org settings](/playbooks/org-settings/) — follow the same PR process as code but require
+or [org settings](/engineering/org-settings/) — follow the same PR process as code but require
 additional steps:
 
 1. **Open a Governance Amendment issue** using the

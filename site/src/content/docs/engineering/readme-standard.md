@@ -245,7 +245,7 @@ gh pr merge --rebase --auto
 ```
 
 **Squash or rebase.** The branch standard in
-[[org settings](/playbooks/org-settings/)](/playbooks/org-settings/) allows both, with linear history and
+[[org settings](/engineering/org-settings/)](/engineering/org-settings/) allows both, with linear history and
 no merge commits. On 2 October 2026 most repos still had squash switched off
 in their own settings, so `--rebase` is the method that works everywhere until
 the standard is rolled out. Auto-merge is enabled. Never use `--admin`.
