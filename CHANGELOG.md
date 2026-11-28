@@ -4,6 +4,10 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+### Added — Durin design (2026-11-28)
+
+- **Engineering: Durin, the secrets broker.** The design of `bundu-labs/durin`, the platform-neutral broker that serves named secrets to authenticated apps: threat model, caller identity options (what was verified and what was not), per-caller allowlists, the listener, response handling, audit log, availability, disaster recovery, deployment recipes for Fly, Docker or Proxmox and Coolify, the callers of `nyuchi-api.internal` found in code search, and the cutover order for the Nyuchi API with a rollback for each step. Refs #171.
+
 ### Added — engineering and operations docs move in from nyuchi/.github (2026-11-28)
 
 Owner ruling: `nyuchi/.github` does not control how Nyuchi is run, developed or built; those docs live here. Procedures go in the one Playbooks section; standards and reference go in a new Engineering section. Refs #169.

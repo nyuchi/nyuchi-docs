@@ -11,6 +11,12 @@ Engineering is where we publish how the platform is built and why: the architect
 - **Problems we are solving.** The problem, what was tried, what was decided and what is still open.
 - **Standards and reference.** The rules every repository follows, and the intended state of our settings.
 
+## Architecture
+
+| Page                                             | What it is                                                                                                                             |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| [Durin: the secrets broker](/engineering/durin/) | The platform-neutral broker that serves named secrets to authenticated apps, and the cutover that moves the Nyuchi API off its secrets |
+
 ## Standards and reference
 
 | Page                                                    | What it is                                                                                                      |
