@@ -4,6 +4,10 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+### Changed — staging wording removed (2026-11-28)
+
+The release workflow comments, AGENTS.md and CONTRIBUTING.md no longer describe a `staging` branch; the repo is trunk-based. No behaviour changes.
+
 ### Changed
 
 - **Releases are trunk only** (owner, 2026-11-23: "Main is the only target"). The releases playbook no longer describes `staging`: every PR goes into the default branch, the PR titles pick the bump when the release app tags the new tip, and a green PR held up by a slow queue may be merged. No repository checked that day has a `staging` branch.

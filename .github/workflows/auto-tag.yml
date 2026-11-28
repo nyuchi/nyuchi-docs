@@ -10,7 +10,7 @@ name: Auto tag
 #
 # The logic is nyuchi/.github's reusable-auto-tag.yml. Versioning policy
 # (nyuchi/.github#80): a release to main is the next MINOR above the highest
-# tag, staging merges included (staging-version.yml tags those as patches), so
+# tag, so
 # bump nyuchi-docs-mcp/package.json to that minor before releasing. A major is
 # only ever manual: run this workflow with bump: major.
 
