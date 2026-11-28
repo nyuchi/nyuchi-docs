@@ -272,6 +272,7 @@ export default defineConfig({
             'engineering/contributing',
             'engineering/readme-standard',
             'engineering/org-settings',
+            'engineering/durin',
             'engineering/dpia-preassessment',
           ],
         },
