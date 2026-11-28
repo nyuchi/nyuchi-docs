@@ -13,12 +13,12 @@ Engineering is where we publish how the platform is built and why: the architect
 
 ## Standards and reference
 
-| Page                                                       | What it is                                                                                          |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [Engineering guide](/engineering/guide/)                   | Mission, conventions, agent behaviour, security rules, versioning and branches. The org `AGENTS.md` points here |
-| [Contributing](/engineering/contributing/)                 | Commits, signing, DCO, branches, pull requests, dependencies and licensing                          |
-| [README standard](/engineering/readme-standard/)           | How every repository opens                                                                          |
-| [Org settings and rulesets](/engineering/org-settings/)    | Intended state of GitHub org and repository settings, rulesets, supply chain, all checks green      |
-| [DPIA pre-assessment](/engineering/dpia-preassessment/)    | The security and privacy template a release copies when it handles personal data                    |
+| Page                                                    | What it is                                                                                                      |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| [Engineering guide](/engineering/guide/)                | Mission, conventions, agent behaviour, security rules, versioning and branches. The org `AGENTS.md` points here |
+| [Contributing](/engineering/contributing/)              | Commits, signing, DCO, branches, pull requests, dependencies and licensing                                      |
+| [README standard](/engineering/readme-standard/)        | How every repository opens                                                                                      |
+| [Org settings and rulesets](/engineering/org-settings/) | Intended state of GitHub org and repository settings, rulesets, supply chain, all checks green                  |
+| [DPIA pre-assessment](/engineering/dpia-preassessment/) | The security and privacy template a release copies when it handles personal data                                |
 
 GitHub's own community files (`SECURITY.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`, the PR and issue templates) stay in [`nyuchi/.github`](https://github.com/nyuchi/.github), with the reusable workflows and the scripts and settings that implement them.
