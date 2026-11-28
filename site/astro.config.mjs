@@ -274,6 +274,8 @@ export default defineConfig({
             'engineering/readme-standard',
             'engineering/org-settings',
             'engineering/durin',
+            'engineering/rust-port-status',
+            'engineering/rust-architecture',
             'engineering/dpia-preassessment',
           ],
         },

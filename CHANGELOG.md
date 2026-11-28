@@ -8,6 +8,14 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 Operations playbook **Port a router to Rust**: claiming a router, the core and origin layers, the Python-recorded golden files and the real-store proof, what to change in `routing/routes.json` (never `mode`), the gates to run and what the pull request says. Distilled from the porting write-ups and `AGENTS.md` in `nyuchi-api` and `nyuchi-servers-api`.
 
+### Added — Rust port migration status (2026-11-29)
+
+Engineering page **Rust port: migration status**, with `scripts/rust-port-status.mjs`, which regenerates its tables from `nyuchi-api` `routing/routes.json` and the `nyuchi-servers-api` parity audit. The page is a dated snapshot; the script and the steps to refresh it are on the page.
+
+### Added — the Rust port, in Engineering (2026-11-29)
+
+Owner order: engineering docs for the Rust port are published here. New Engineering page, **The four gateways and the Rust architecture**: the four gateways, the core, origin and edge layout of `nyuchi-servers-api` and the Nyuchi API rebuild, the deny-by-default access policy, authorization from the WorkOS `permissions` claim, and shadow and cutover per `docs/architecture/rust-routing.md` in `nyuchi-api`. Written from the repositories as merged on 2026-11-29; what is built and what is not is stated on the page.
+
 ### Added — Durin design (2026-11-28)
 
 - **Engineering: Durin, the secrets broker.** The design of `bundu-labs/durin`, the platform-neutral broker that serves named secrets to authenticated apps: threat model, caller identity options (what was verified and what was not), per-caller allowlists, the listener, response handling, audit log, availability, disaster recovery, deployment recipes for Fly, Docker or Proxmox and Coolify, the callers of `nyuchi-api.internal` found in code search, and the cutover order for the Nyuchi API with a rollback for each step. Refs #171.
