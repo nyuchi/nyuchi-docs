@@ -259,6 +259,7 @@ export default defineConfig({
                 'playbooks/naming-and-where-things-live',
                 'playbooks/known-sharp-edges',
                 'playbooks/adopting-lint',
+                'playbooks/port-a-router-to-rust',
               ],
             },
           ],

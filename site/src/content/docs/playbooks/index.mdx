@@ -26,18 +26,19 @@ Procedures, not narrative: how the orchestrator, its sub agents and any human ru
 
 No secret, token value, personal datum, private hostname or IP belongs in these pages or in any PR, issue or chat. Name a secret, never show it.
 
-| Playbook                                                                           | Decides                                                                      |
-| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [Roles and authority](/playbooks/roles-and-authority/)                             | Who does what, classifier denials, sandbox and rate limit, sub agent briefs  |
-| [Trunk-based estate rules](/playbooks/trunk-rules/)                                | `main` only, no `staging`, merge queue and merge rules                       |
-| [Release procedure](/playbooks/release-procedure/)                                 | How tagging works, npm, crates.io, Homebrew and clean-directory verification |
-| [Making a repo public](/playbooks/making-a-repo-public/)                           | The checks before a private repo goes public                                 |
-| [Security triage](/playbooks/security-triage/)                                     | Code-scanning and secret-scanning alerts, never weakening a check            |
-| [Incident response](/playbooks/incident-response/)                                 | What to do when something is down or exposed                                 |
-| [Dependency policy](/playbooks/dependency-policy/)                                 | Minimum versions, caps, Dependabot                                           |
-| [Naming, identity and where things live](/playbooks/naming-and-where-things-live/) | Names, identities, secrets and where each thing is kept                      |
-| [Known sharp edges](/playbooks/known-sharp-edges/)                                 | Traps that have already cost time                                            |
-| [Adopting lint](/playbooks/adopting-lint/)                                         | Turning on the org lint gate in a repository                                 |
+| Playbook                                                                           | Decides                                                                                                            |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| [Roles and authority](/playbooks/roles-and-authority/)                             | Who does what, classifier denials, sandbox and rate limit, sub agent briefs                                        |
+| [Trunk-based estate rules](/playbooks/trunk-rules/)                                | `main` only, no `staging`, merge queue and merge rules                                                             |
+| [Release procedure](/playbooks/release-procedure/)                                 | How tagging works, npm, crates.io, Homebrew and clean-directory verification                                       |
+| [Making a repo public](/playbooks/making-a-repo-public/)                           | The checks before a private repo goes public                                                                       |
+| [Security triage](/playbooks/security-triage/)                                     | Code-scanning and secret-scanning alerts, never weakening a check                                                  |
+| [Incident response](/playbooks/incident-response/)                                 | What to do when something is down or exposed                                                                       |
+| [Dependency policy](/playbooks/dependency-policy/)                                 | Minimum versions, caps, Dependabot                                                                                 |
+| [Naming, identity and where things live](/playbooks/naming-and-where-things-live/) | Names, identities, secrets and where each thing is kept                                                            |
+| [Known sharp edges](/playbooks/known-sharp-edges/)                                 | Traps that have already cost time                                                                                  |
+| [Adopting lint](/playbooks/adopting-lint/)                                         | Turning on the org lint gate in a repository                                                                       |
+| [Port a router to Rust](/playbooks/port-a-router-to-rust/)                         | How an agent ports one Nyuchi API router to Rust, proves it against Python, and leaves the route flip to the owner |
 
 Playbooks are how engineering is done with agents. Standards and reference documents (the [Engineering guide](/engineering/guide/), [Contributing](/engineering/contributing/), the [README standard](/engineering/readme-standard/), [Org settings and rulesets](/engineering/org-settings/)) are in [Engineering](/engineering/).
 

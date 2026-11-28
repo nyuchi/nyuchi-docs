@@ -4,6 +4,10 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+### Added — Playbook: Port a router to Rust (2026-11-29)
+
+Operations playbook **Port a router to Rust**: claiming a router, the core and origin layers, the Python-recorded golden files and the real-store proof, what to change in `routing/routes.json` (never `mode`), the gates to run and what the pull request says. Distilled from the porting write-ups and `AGENTS.md` in `nyuchi-api` and `nyuchi-servers-api`.
+
 ### Added — Durin design (2026-11-28)
 
 - **Engineering: Durin, the secrets broker.** The design of `bundu-labs/durin`, the platform-neutral broker that serves named secrets to authenticated apps: threat model, caller identity options (what was verified and what was not), per-caller allowlists, the listener, response handling, audit log, availability, disaster recovery, deployment recipes for Fly, Docker or Proxmox and Coolify, the callers of `nyuchi-api.internal` found in code search, and the cutover order for the Nyuchi API with a rollback for each step. Refs #171.
