@@ -197,6 +197,7 @@ describe.skipIf(!built)("rendered shell: /platform/quickstart/", () => {
       "Analytics",
       "Integrations",
       "Playbooks",
+      "Engineering",
     ]);
     expect(texts(columns[1].querySelectorAll("a"))).toEqual([
       "Mukoko Weather",
