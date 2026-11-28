@@ -17,9 +17,6 @@ Engineering is where we publish how the platform is built and why: the architect
 | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Durin: the secrets broker](/engineering/durin/)                               | The platform-neutral broker that serves named secrets to authenticated apps, and the cutover that moves the Nyuchi API off its secrets                |
 | [Rust port: migration status](/engineering/rust-port-status/)                  | Where the 522 Python routes stand in the Rust rebuild, as a dated snapshot generated from the route table and the parity audit                        |
-| Page                                                                           | What it is                                                                                                                                            |
-| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Durin: the secrets broker](/engineering/durin/)                               | The platform-neutral broker that serves named secrets to authenticated apps, and the cutover that moves the Nyuchi API off its secrets                |
 | [The four gateways and the Rust architecture](/engineering/rust-architecture/) | The four gateways, the core, origin and edge layout, deny-by-default access, WorkOS permissions-claim authorization, and the shadow and cutover rules |
 
 ## Standards and reference
