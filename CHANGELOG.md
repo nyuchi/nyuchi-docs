@@ -4,6 +4,14 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+### Added — engineering and operations docs move in from nyuchi/.github (2026-11-28)
+
+Owner ruling: `nyuchi/.github` does not control how Nyuchi is run, developed or built; those docs live here. All playbooks go in the Playbooks section, reference documents in a new Engineering section. Refs #169.
+
+- **Playbooks:** the operations playbook, split into one page per procedure (roles and authority, trunk-based rules, release procedure, making a repo public, security triage, incident response, dependency policy, naming and where things live, known sharp edges), plus Adopting lint, Org settings and rulesets (with the all-checks-green procedure) and the DPIA pre-assessment template. The Playbooks index lists them and says how to add a playbook.
+- **Engineering:** the engineering guide (the org `AGENTS.md`), Contributing and the README standard.
+- The staging-era promotion flow in `nyuchi/.github/settings/README.md` is not carried over: no repo has a `staging` branch.
+
 ### Changed — staging wording removed (2026-11-28)
 
 The release workflow comments, AGENTS.md and CONTRIBUTING.md no longer describe a `staging` branch; the repo is trunk-based. No behaviour changes.

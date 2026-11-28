@@ -56,6 +56,7 @@ export default defineConfig({
                 { label: 'Analytics', href: '/analytics/' },
                 { label: 'Integrations', href: '/integrations/' },
                 { label: 'Playbooks', href: '/playbooks/' },
+                { label: 'Engineering', href: '/engineering/' },
               ],
             },
             {
@@ -245,6 +246,33 @@ export default defineConfig({
             'playbooks/agents',
             'playbooks/weather',
             'playbooks/news',
+            {
+              label: 'Operations',
+              items: [
+                'playbooks/roles-and-authority',
+                'playbooks/trunk-rules',
+                'playbooks/release-procedure',
+                'playbooks/making-a-repo-public',
+                'playbooks/security-triage',
+                'playbooks/incident-response',
+                'playbooks/dependency-policy',
+                'playbooks/naming-and-where-things-live',
+                'playbooks/known-sharp-edges',
+                'playbooks/adopting-lint',
+                'playbooks/org-settings',
+                'playbooks/dpia-preassessment',
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Engineering',
+          collapsed: true,
+          items: [
+            'engineering',
+            'engineering/guide',
+            'engineering/contributing',
+            'engineering/readme-standard',
           ],
         },
         {

@@ -20,6 +20,40 @@ A playbook holds the decisions for one subject. When a question comes up, the an
 | [Weather](/playbooks/weather/)             | The weather goal and its objectives. It follows the other playbooks                 |
 | [News](/playbooks/news/)                   | Mukoko News: vehicle not publisher, metering, open data, reads through the API      |
 
+## Operations playbooks
+
+Procedures, not narrative: how the orchestrator, its sub agents and any human run the Nyuchi, Bundu and Mzizi estate. Written 2026-11-28 from procedures established the hard way. Every command was checked against a real repo; where a procedure depends on a repo-specific file, the file is named. Where a page here and a repo's own `AGENTS.md` disagree, the repo wins. Rules that live elsewhere are linked, not copied: the [Engineering guide](/engineering/guide/), [Contributing](/engineering/contributing/) and, for the Mzizi build loops (authoring, change, progress, freshness), the [Mzizi playbook](https://github.com/mzizi-dev/mzizi-docs/blob/main/playbook.mdx).
+
+No secret, token value, personal datum, private hostname or IP belongs in these pages or in any PR, issue or chat. Name a secret, never show it.
+
+| Playbook                                                                           | Decides                                                                          |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [Roles and authority](/playbooks/roles-and-authority/)                             | Who does what, classifier denials, sandbox and rate limit, sub agent briefs      |
+| [Trunk-based estate rules](/playbooks/trunk-rules/)                                | `main` only, no `staging`, merge queue and merge rules                           |
+| [Release procedure](/playbooks/release-procedure/)                                 | How tagging works, npm, crates.io, Homebrew and clean-directory verification     |
+| [Making a repo public](/playbooks/making-a-repo-public/)                           | The checks before a private repo goes public                                     |
+| [Security triage](/playbooks/security-triage/)                                     | Code-scanning and secret-scanning alerts, never weakening a check                |
+| [Incident response](/playbooks/incident-response/)                                 | What to do when something is down or exposed                                     |
+| [Dependency policy](/playbooks/dependency-policy/)                                 | Minimum versions, caps, Dependabot                                               |
+| [Naming, identity and where things live](/playbooks/naming-and-where-things-live/) | Names, identities, secrets and where each thing is kept                          |
+| [Known sharp edges](/playbooks/known-sharp-edges/)                                 | Traps that have already cost time                                                |
+| [Adopting lint](/playbooks/adopting-lint/)                                         | Turning on the org lint gate in a repository                                     |
+| [Org settings and rulesets](/playbooks/org-settings/)                              | Intended state of GitHub org and repository settings, rulesets, all checks green |
+| [DPIA pre-assessment](/playbooks/dpia-preassessment/)                              | The template a release copies when it handles personal data                      |
+
+Reference documents that are not playbooks (the [Engineering guide](/engineering/guide/), [Contributing](/engineering/contributing/) and the [README standard](/engineering/readme-standard/)) are in [Engineering](/engineering/).
+
+## Adding a playbook
+
+All playbooks live in this section, one page per subject or procedure. To add one:
+
+1. Create `site/src/content/docs/playbooks/<slug>.md` (or `.mdx`) with `title`, `description` and, if the label should be shorter, `sidebar.label`.
+2. Add the slug to the Playbooks group in `site/astro.config.mjs`.
+3. Add a row to the right table on this page.
+4. Add a `## [Unreleased]` entry to `CHANGELOG.md`.
+
+Do not start a new top-level section for a playbook.
+
 ## Where the structure lives
 
 The playbooks say how we decide. The structure of the data and the standards we adopt and publish live in [`bundu-labs/bundu-standards`](https://github.com/bundu-labs/bundu-standards): `register/` for standards we adopt, `standards/` for the ones we publish. The canonical model moves there too. A playbook links to a standard by its register id and never restates it.
